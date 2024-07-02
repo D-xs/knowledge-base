@@ -744,3 +744,377 @@ n *= 2;
 |     %=     | 取模 (余数)后赋值 | a = 5; a %= 2  |    1     |
 |    **=     |     幂后赋值      | a = 5; a **= 2 |    25    |
 
+
+
+#### 3.5 自增、自减运算符
+
+> 对一个数进行**加一、减一**是最常见的数学运算符之一。应用于变量上的操作符
+>
+> **++** 和 **--**
+
+- 将一个变量进行**自加1**或**自减1**的操作
+
+  ```js
+  var currentIndex = 5
+  
+  // 方法一:
+  // currentIndex = currentIndex + 1
+  
+  // 方法二:
+  // currentIndex += 1
+  
+  // 方法三: 自增
+  currentIndex++
+  console.log(currentIndex)
+  
+  // 自减
+  // currentIndex -= 1
+  currentIndex--
+  console.log(currentIndex)
+  ```
+
+
+
+##### ++ 和 -- 的位置
+
+> ++和--运算符可以在变量前面，也可以在变量后面。
+
+
+
+相同点：都是将变量进行自加一或者自减1。
+
+不同点：当自增自减表达式在**其他表达式中参与运算时**，**前置形式**返回**变量自增或自减后的值**，**后置形式**返回**原始值**。
+
+```js
+var currentIndex = 5
+// 自己自增或者自减是没有区别
+// ++currentIndex
+// console.log(currentIndex) // 6
+// --currentIndex
+// console.log(currentIndex) // 5
+
+// 自增和自减表达式本身又在其他的表达式中, 那就有区别
+// var result1 = 100 + currentIndex++ // 100 + 5
+// console.log(currentIndex)	// 6
+// console.log("result1:" + result1)	// 105
+
+var result2 = 100 + ++currentIndex // 100 + 6
+console.log(currentIndex) // 6
+console.log("result2:" + result2) // 106
+```
+
+
+
+#### 3.6 比较运算符
+
+> 用来比较大小的运算符
+
+- 比较运算符的结果都是Boolean类型的
+
+  | **运算符** | **运算规则** | **范例**  | **结果** |
+  | :--------: | :----------: | :-------: | :------: |
+  |     ==     |     相等     | 1 == '1'  |   true   |
+  |    ===     |   严格相等   | 1 === '1' |  false   |
+  |     !=     |    不相等    | 3 != '3'  |  false   |
+  |    !==     |  严格不相等  | 3 !== '3' |   true   |
+  |     >      |     大于     |   4 > 3   |   true   |
+  |     <      |     小于     |   4 < 3   |  false   |
+  |     >=     |   大于等于   |  4 >= 3   |   true   |
+  |     <=     |   小于等于   |  4 <= 3   |  false   |
+
+
+
+注意：严格相等和严格不相等运算时，当两边的值的类型不一致时，直接返回false；普通相等和不相等运算时，当两边类型不一致时，首先会将两侧的值先转化为数字，再做比较。
+
+```js
+var num1 = 20
+var num2 = 30
+
+// 1.比较运算符
+var isResult = num1 > num2
+console.log(isResult)
+
+// 2.==判断
+console.log(num1 == num2) // false
+console.log(num1 != num2) // true
+
+// 需求: 获取到比较大的那个值
+// var result = 0
+// if (num1 > num2) {
+//   result = num1
+// } else {
+//   result = num2
+// }
+
+
+
+var foo1 = 0
+var foo2 = ""
+
+// ==运算符, 在类型不相同的情况下, 会将运算元先转成Number的值, 再进行比较(隐式转换)
+// null比较特殊: null在进行比较的时候, 应该是会被当成一个对象和原生类型进行比较的
+console.log(Number(foo1))
+console.log(Number(foo2))
+console.log(foo1 == foo2)
+
+// ===运算符, 在类型不相同的情况, 直接返回false
+console.log(foo1 === foo2)
+```
+
+
+
+#### 3.7 运算符的优先级
+
+> 当一个表达式中有多个运算符时，不同运算符的优先级不一样；**运算符的优先级**决定了表达式中运算执行的先后顺序。优先级高的运算符会作为优先级低的运算符的操作数。[MDN](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Operators/Operator_precedence)
+
+```js
+var num = 5
+var result = 2 + 3 * ++num // 2 + 3 * 6
+console.log(result) // 20
+```
+
+
+
+ps：想要优先运算：添加 **（）**运算符，优先级最高
+
+
+
+
+
+### 4. 分支语句
+
+> 在程序开发中，程序有三种不同的执行方式：顺序、分支、循环
+
+- 顺序：**从上向下**，顺序执行代码
+- 分支：根据**条件判断**，决定执行代码的**分支**
+- 循环：让 **特定代码** **重复** 执行
+
+```js
+// 1.顺序执行
+var num1 = 10
+var num2 = 20
+
+var result = num1 + num2
+var result2 = num1 * num2
+
+// 2.分支语句
+var isLogin = true
+if (isLogin) {
+    console.log("访问购物车")
+    console.log("访问个人中心")
+} else { 
+    console.log("跳转到登录页面")
+}
+
+// 3.循环语句
+var i = 0;
+while (i < 10) {
+    console.log("执行循环语句")
+    i++
+}
+```
+
+
+
+#### 4.1 代码块
+
+> **代码块**是多行执行代码的集合，通过一个**花括号{}**放到了一起。
+>
+> 在开发中，一行代码很难完成某一个特定的功能，我们就会将这些代码放到一个**代码块**中
+>
+> **在JavaScript中，我们可以通过流程控制语句来决定如何执行一个代码块：**
+>
+> - 通常会通过一些关键字来告知js引擎代码要如何被执行;
+> - 比如**分支语句**、**循环语句**对应的关键字等；
+
+```js
+// 一个代码块
+{
+    var num1 = 10;
+    var num2 = 20;
+    var result = num1 + num2;
+}
+
+// 一个对象
+var info = {
+    name: "why",
+    age: 18
+}
+```
+
+
+
+#### 4.2 分支结构
+
+> - 分支结构的代码就是让我们**根据条件**来决定**代码的执行**
+> - 分支结构的语句被称为**判断结构**或者**选择结构**
+> - 几乎**所有的编程语言都有分支结构**（C、C++、OC、JavaScript等等）
+> - **JavaScript中常见的分支结构有**：**if**分支结构、**switch**分支结构
+
+
+
+- if分支结构
+
+  - 单分支结构
+
+    > if(...) 语句计算括号里的条件表达式，如果计算结果是 true，就会执行对应的代码块。
+
+    ```js
+    // 如果条件成立，那么执行代码块
+    // if(条件判断) {
+    //    // 执行代码块
+    // }
+    
+    
+    // 案例一: 如果小明考试超过90分, 就可以去游乐场
+    // 1.定义一个变量来保存小明的分数
+    var score = 99
+    
+    // 2.如果分数超过90分, 去游乐场
+    if (score > 90) {
+        console.log("去游乐场玩~")
+    }
+    
+    
+    // 案例二: 苹果单价5元/斤, 如果购买的数量超过5斤, 那么立减8元
+    // 1.定义一些变量保存数据
+    var price = 5
+    var weight = 7
+    var totalPrice = price * weight
+    
+    // 2.根据购买的重量, 决定是否 -8
+    if (weight > 5) {
+        totalPrice -= 8
+    }
+    
+    console.log("总价格:", totalPrice)
+    
+    
+    // 案例三: 播放列表中 currentIndex
+    // ["鼓楼", "理想", "阿刁"]
+    var currentIndex = 2
+    
+    // 对currentIndex++完操作之后
+    currentIndex++
+    if (currentIndex === 3) {
+        currentIndex = 0
+    }
+    
+    
+    
+    // 补充一: 如果if语句对应的代码块, 只有一行代码, 那么{}可以省略
+    // 案例二: 苹果单价5元/斤, 如果购买的数量超过5斤, 那么立减8元
+    // 定义一些变量保存数据
+    var price = 5
+    var weight = 7
+    var totalPrice = price * weight
+    
+    // 2.根据购买的重量, 决定是否 -8
+    if (weight > 5) totalPrice -= 8
+    
+    console.log("总价格:", totalPrice)
+    
+    // 补充二: if (…) 语句会计算圆括号内的表达式，并将计算结果转换为布尔型（Boolean）
+    // 转换规则和Boolean函数的规则一致；
+    // 数字 0、空字符串 “”、null、undefined 和 NaN 都会被转换成 false。
+    // 其他值被转换为 true，所以它们被称为“真值（truthy）”；
+    var num = 123 // true
+    if (num) {
+        console.log("num判断的代码执行")
+    }
+    ```
+
+    ps: **如果if语句对应的代码块, 只有一行代码, 那么{}可以省略**
+
+  
+
+  - 多分支结构
+
+    > if..else.. 
+    >
+    > if 语句有时会包含一个可选的 “else” 块
+    >
+    > 如果判断条件不成立，就会执行它内部的代码
+
+    ```js
+    var score = 80
+    // 条件成立, 专属的代码块
+    // 条件不成立, 专属的代码块
+    // if (score > 90) {
+    //   console.log("去游乐场玩~")
+    // } else {
+    //   console.log("哈哈哈哈")
+    // }
+    
+    // 案例一: 小明超过90分去游乐场, 否则去上补习班
+    if (score > 90) {
+        console.log("去游乐场玩~")
+    } else {
+        console.log("去上补习班~")
+    }
+    
+    // 案例二: 有两个数字, 进行比较, 获取较大的数字
+    var num1 = 12*6 + 7*8 + 7**4
+    var num2 = 67*5 + 24**2
+    console.log(num1, num2)
+    
+    var result = 0
+    if (num1 > num2) {  
+        result = num1
+    } else {
+        result = num2
+    }
+    console.log(result)
+    ```
+
+    
+
+    >if..else if..else..
+    >有时我们需要判断多个条件；我们可以通过使用 else if 子句实现；
+
+    ```js
+    // 案例: score评级
+    // 1.获取用户输入的分数
+    var score = prompt("请输入您的分数:")
+    score = Number(score)
+    
+    // 2.判断等级
+    // 使用if else的方式来实现
+    // if (score > 90) {
+    //   alert("您的评级是优秀!")
+    // } else {
+    //   if (score > 80) {
+    //     alert("您的评级是良好!")
+    //   } else {
+    //   }
+    // }
+    
+    // edge case
+    // if (score > 100 || score < 0) {
+    //   alert("您输入的分数超过了正常范围")
+    // } 
+    
+    if (score > 90) {
+        alert("您的评级是优秀!")
+    } else if (score > 80) {
+        alert("您的评级是良好!")
+    } else if (score >= 60) {
+        alert("您的评级是合格!")
+    } else {
+        alert("不及格!!!")
+    }
+    ```
+
+  
+
+- 条件运算符（也叫三元运算符）
+
+  > **条件（三元）运算符**是 JavaScript 唯一使用三个操作数的运算符：一个条件后跟一个问号（`?`），如果条件为[真值](https://developer.mozilla.org/zh-CN/docs/Glossary/Truthy)，则执行冒号（`:`）前的表达式；若条件为[假值](https://developer.mozilla.org/zh-CN/docs/Glossary/Falsy)，则执行最后的表达式。该运算符经常当作 [`if...else`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Statements/if...else) 语句的简捷形式来使用
+  >
+  > 
+  >
+  > 语法：condition ? exprIfTrue : exprIfFalse
+  >
+  > - [`condition`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Operators/Conditional_operator#condition)
+  >   - 
+
