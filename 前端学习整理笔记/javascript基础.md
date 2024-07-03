@@ -644,7 +644,7 @@ console.log(Boolean("0")) // true
 
 
 
-#### 3.1 运算元
+### 3.1 运算元
 
 >运算元就是运算符应用的对象，如果一个运算符有**n个运算元**，那么这个运算符称为**n元运算符**。
 
@@ -654,7 +654,7 @@ console.log(Boolean("0")) // true
 
 
 
-#### 3.2 算数运算符
+### 3.2 算数运算符
 
 > 算术运算符用在数学表达式中, 它的使用方式和数学中也是一致的。 
 >
@@ -689,7 +689,7 @@ console.log(Boolean("0")) // true
 
   
 
-#### 3.3 赋值运算符
+### 3.3 赋值运算符
 
 > **=** 被称之为赋值（ assignments ）运算符。
 
@@ -716,7 +716,7 @@ console.log(Boolean("0")) // true
 
 
 
-#### 3.4 原地修改（Modify-in-place）
+### 3.4 原地修改（Modify-in-place）
 
 > 我们经常需要对一个变量做运算，并将新的结果存储在同一个变量中。
 
@@ -746,7 +746,7 @@ n *= 2;
 
 
 
-#### 3.5 自增、自减运算符
+### 3.5 自增、自减运算符
 
 > 对一个数进行**加一、减一**是最常见的数学运算符之一。应用于变量上的操作符
 >
@@ -805,7 +805,7 @@ console.log("result2:" + result2) // 106
 
 
 
-#### 3.6 比较运算符
+### 3.6 比较运算符
 
 > 用来比较大小的运算符
 
@@ -863,7 +863,178 @@ console.log(foo1 === foo2)
 
 
 
-#### 3.7 运算符的优先级
+### 3.7 逻辑运算符
+
+> 逻辑运算符主要有三个，都是用来做逻辑运算，它可以将**多个表达式或者值放到一起**来获取到一个**最终的结果**；
+>
+> &&（与）、||（或）、！（非）
+
+
+
+| **运算符** | **运算规则** |    **范例**     | **结果** |
+| :--------: | :----------: | :-------------: | :------: |
+|     &&     | 与：同时为真 |  false && true  |  false   |
+|    \|\|    | 或：一个为真 | false \|\| true |   true   |
+|     !      |   非：取反   |     !false      |   true   |
+
+```js
+
+var chineseScore = 88
+var mathScore = 99
+
+// 1.逻辑与: &&, 并且
+// 条件1 && 条件2 && 条件3.....
+// 所有的条件都为true的时候, 最终结果才为true
+// 案例: 小明语文考试90分以上, 并且数学考试90分以上, 才能去游乐场
+if (chineseScore > 90 && mathScore > 90) {
+    console.log("去游乐场玩~")
+}
+
+// 2.逻辑或: ||, 或者
+// 条件1 || 条件2 || 条件3....
+// 只要有一个条件为true, 最终结果就为true
+// 案例: 如果有一门成绩大于90, 那么可以吃打1小时游戏
+if (chineseScore > 90 || mathScore > 90) {
+    console.log("打1个小时游戏~")
+}
+
+// 3.逻辑非: !, 取反
+var isLogin = true
+if (!isLogin) {
+    console.log("跳转到登录页面")
+    console.log("进行登录~")
+}
+
+console.log("正常的访问页面")
+```
+
+
+
+- **逻辑与（&&）的本质**
+
+  1. 拿到第一个运算元, 将运算元转成Boolean类型
+
+  2. 对运算元的Boolean类型进行判断
+
+     - 如果false, 返回运算元(原始值)
+     - 如果true, 查找下一个继续来运算
+     - 以此类推
+
+  3. 如果查找了所有的都为true, 那么返回最后一个运算元(原始值)
+
+     ```js
+     // 本质推导一: 逻辑与, 称之为短路与
+     var chineseScore = 80
+     var mathScore = 99
+     if (chineseScore > 90 && mathScore > 90) {}
+     
+     // 本质推导二: 对一些对象中的方法进行有值判断
+     var obj = {
+         name: "why",
+         friend: {
+             name: "kobe",
+             eating: function() {
+                 console.log("eat something")
+             }
+         }
+     }
+     
+     // 调用eating函数
+     // obj.friend.eating()
+     obj && obj.friend && obj.friend.eating && obj.friend.eating()
+     ```
+
+- **逻辑或（||）的本质**
+
+  1. 先将运算元转成Boolean类型
+
+  2. 对转成的boolean类型进行判断
+
+     - 如果为true, 直接将结果(原始值)返回
+     - 如果为false, 进行第二个运算元的判断
+     - 以此类推
+
+  3. 如果找到最后, 也没有找到为真值的运算元, 那么返回最后一个运算元
+
+     ```js
+     // 本质推导一: 之前的多条件是如何进行判断的
+     var chineseScore = 95
+     var mathScore = 99
+     // chineseScore > 90为true, 那么后续的条件都不会进行判断
+     if (chineseScore > 90 || mathScore > 90) {}
+     
+     // 本质推导二: 获取第一个有值的结果
+     var info = "abc"
+     var obj = {name: "why"}
+     var message = info || obj || "我是默认值"
+     console.log(message.length)
+     ```
+
+- 逻辑非（！）的补充
+
+  - 逻辑非运算符接受一个参数，并按如下运算：
+    1. 将操作数转化为布尔类型：true/false；
+    2. 返回相反的值；
+  - 两个非运算**!!** 有时候用来将某个值转化为布尔类型：
+    - 第一个非运算将该值转化为布尔类型并取反，第二个非运算再次取反。
+    - 最后我们就得到了一个任意值到布尔值的转化。
+
+
+
+### 3.8 条件运算符（也叫三元运算符）
+
+> **条件（三元）运算符**是 JavaScript 唯一使用三个操作数的运算符：一个条件后跟一个问号（`?`），如果条件为[真值](https://developer.mozilla.org/zh-CN/docs/Glossary/Truthy)，则执行冒号（`:`）前的表达式；若条件为[假值](https://developer.mozilla.org/zh-CN/docs/Glossary/Falsy)，则执行最后的表达式。该运算符经常当作 [`if...else`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Statements/if...else) 语句的简捷形式来使用
+>
+> 
+>
+> 语法：condition ? exprIfTrue : exprIfFalse
+>
+> - [`condition`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Operators/Conditional_operator#condition)
+>   - 计算结果用作条件的表达式。
+> - [`exprIfTrue`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Operators/Conditional_operator#expriftrue)
+>   - 如果 `condition` 的计算结果为[真值](https://developer.mozilla.org/zh-CN/docs/Glossary/Truthy)（等于或可以转换为 `true` 的值），则执行该表达式。
+> - [`exprIfFalse`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Operators/Conditional_operator#expriffalse)
+>   - 如果 `condition` 为[假值](https://developer.mozilla.org/zh-CN/docs/Glossary/Falsy)（等于或可以转换为 `false` 的值）时执行的表达式。
+>
+> 
+>
+> 描述：除了 `false`，可能的假值表达式还有：`null`、`NaN`、`0`、空字符串（`""`）和 `undefined`。如果 `condition` 是其中任何一个，那么条件表达式的结果就是 `exprIfFalse` 表达式执行的结果。
+
+
+
+```js
+// 案例一: 比较两个数字
+var num1 = 12*6 + 7*8 + 7**4
+var num2 = 67*5 + 24**2
+
+// 三元运算符
+var result = num1 > num2 ? num1: num2
+console.log(result)
+
+// 案例二: 给变量赋值一个默认值(了解)
+var info = {
+    name: "why"
+}
+var obj = info ? info: {}
+console.log(obj)
+
+// 案例三: 让用户输入一个年龄, 判断是否成年人
+var age = prompt("请输入您的年龄:")
+age = Number(age)
+// if (age >= 18) {
+//   alert("成年人")
+// } else {
+//   alert("未成年人")
+// }
+var message = age >= 18 ? "成年人": "未成年人"
+alert(message)
+```
+
+
+
+
+
+### 3.9 运算符的优先级
 
 > 当一个表达式中有多个运算符时，不同运算符的优先级不一样；**运算符的优先级**决定了表达式中运算执行的先后顺序。优先级高的运算符会作为优先级低的运算符的操作数。[MDN](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Operators/Operator_precedence)
 
@@ -875,13 +1046,11 @@ console.log(result) // 20
 
 
 
-ps：想要优先运算：添加 **（）**运算符，优先级最高
+ps：想要优先运算：添加 **（）**分组运算符，优先级最高
 
 
 
-
-
-### 4. 分支语句
+## 4. 分支语句
 
 > 在程序开发中，程序有三种不同的执行方式：顺序、分支、循环
 
@@ -916,7 +1085,7 @@ while (i < 10) {
 
 
 
-#### 4.1 代码块
+### 4.1 代码块
 
 > **代码块**是多行执行代码的集合，通过一个**花括号{}**放到了一起。
 >
@@ -944,7 +1113,7 @@ var info = {
 
 
 
-#### 4.2 分支结构
+### 4.2 分支结构
 
 > - 分支结构的代码就是让我们**根据条件**来决定**代码的执行**
 > - 分支结构的语句被称为**判断结构**或者**选择结构**
@@ -1105,16 +1274,89 @@ var info = {
     }
     ```
 
+- switch分支结构
+
+  > 它是通过判断表达式的结果（或者变量）是否**等于**（这里使用 === 进行比较的）case语句的常量，来执行相应的分支体的；
+  >
+  > 与if语句不同的是，switch语句只能做值的相等判断（使用全等运算符 ===），而if语句可以做值的范围判断；
+  >
+  > switch 语句有至少一个 case 代码块和一个可选的 default 代码块。
+
+  ```js
+  // 语法
+  // switch (表达式/变量) {
+  //   case 常量1:
+  //     // 语句
+  // }
   
+  
+  // 案例:
+  // 上一首的按钮: 0
+  // 播放/暂停的按钮: 1
+  // 下一首的按钮: 2
+  // var btnIndex = 100
+  // if (btnIndex === 0) {
+  //   console.log("点击了上一首")
+  // } else if (btnIndex === 1) {
+  //   console.log("点击了播放/暂停")
+  // } else if (btnIndex === 2) {
+  //   console.log("点击了下一首")
+  // } else {
+  //   console.log("当前按钮的索引有问题~")
+  // }
+  
+  var btnIndex = 0
+  switch (btnIndex) {
+      case 0:
+          console.log("点击了上一首")
+          break
+      case 1:
+          console.log("点击了播放/暂停")
+          // 默认情况下是有case穿透
+          break
+      case 2:
+          console.log("点击了下一首停")
+          break
+      default:
+          console.log("当前按钮的索引有问题~")
+          break
+  }
+  
+  ```
 
-- 条件运算符（也叫三元运算符）
+  - **case穿透问题：**（不会对后续的case **表达式**进行求值）
 
-  > **条件（三元）运算符**是 JavaScript 唯一使用三个操作数的运算符：一个条件后跟一个问号（`?`），如果条件为[真值](https://developer.mozilla.org/zh-CN/docs/Glossary/Truthy)，则执行冒号（`:`）前的表达式；若条件为[假值](https://developer.mozilla.org/zh-CN/docs/Glossary/Falsy)，则执行最后的表达式。该运算符经常当作 [`if...else`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Statements/if...else) 语句的简捷形式来使用
-  >
-  > 
-  >
-  > 语法：condition ? exprIfTrue : exprIfFalse
-  >
-  > - [`condition`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Operators/Conditional_operator#condition)
-  >   - 
+    ```js
+    switch (undefined) {
+      case console.log(1):
+      case console.log(2):
+    }
+    // 仅输出 1
+    ```
 
+    -  一条case语句结束后，会自动执行下一个case的语句；
+    - 这种现象被称之为case穿透；
+
+  - **break关键字**
+
+    - 通过在每个case的代码块后添加break关键字来**解决case穿透**这个问题；
+
+  - **这里的相等是严格相等（===）。**
+
+
+
+
+
+## 5. 循环语句
+
+> **循环** 是一种重复运行同一代码的方法。
+>
+> 如果是对某一个列表进行循环操作，我们通常也会称之为 遍历（traversal）或者迭代（iteration）；
+
+
+
+js中的三种循环方式
+
+- while循环；
+- do...while循环；
+- for循环；
