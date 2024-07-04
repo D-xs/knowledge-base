@@ -1360,3 +1360,189 @@ js中的三种循环方式
 - while循环；
 - do...while循环；
 - for循环；
+
+
+
+### 5.1 while循环
+
+```js
+while(循环条件) {
+    // 循环代码块
+}
+
+// 死循环
+while (true) {
+    console.log("Hello World")
+    console.log("Hello Coderwhy")
+}
+
+
+// 1.练习一: 打印10次Hello World
+// var count = 0
+// while (count < 10) {
+//   console.log("Hello World:", count)
+//   count++ // 10
+// }
+
+// 2.练习二: 打印0~99的数字
+// var count = 0
+// while (count < 100) {
+//   console.log(count)
+//   count++
+// }
+
+// 3.练习三: 计算0~99的数字和
+// var count = 0
+// var totalCount = 0
+// while (count < 100) {
+//   totalCount += count
+//   count++
+// }
+// console.log("totalCount:", totalCount)
+
+// 4.练习四: 计算0~99的奇数和
+// 如何判断一个数字是奇数还是偶数
+// var num = 120
+// if (num % 2 !== 0) { // 奇数
+//   console.log("num是一个奇数")
+// }
+// var count = 0
+// var totalCount = 0
+// while (count < 100) {
+//   if (count % 2 !== 0) {
+//     totalCount += count
+//   }
+//   count++
+// }
+
+// console.log("所有的奇数和:", totalCount)
+
+
+// 5.练习五: 计算0~99的偶数和
+var count = 0
+var totalCount = 0
+while (count < 100) {
+    if (count % 2 === 0) {
+        totalCount += count
+    }
+    count++
+}
+
+console.log("所有的偶数和:", totalCount)
+
+// 算法优化
+var count = 0
+var totalCount = 0
+while (count < 100) {
+    totalCount += count
+    count += 2
+}
+
+console.log("所有的偶数和:", totalCount)
+```
+
+
+
+### 5.2 do...while循环
+
+> do..while循环和while循环非常像，二者经常可以相互替代**(不常用)**
+>
+> 但是do..while的特点是不管条件成不成立，do循环体都会先执行一次；
+
+
+
+```js
+do {
+    // 循环代码块
+} while(循环条件);
+
+// 练习一: 打印10次Hello World
+var count = 0
+do {
+    console.log("Hello World")
+    count++
+} while (count < 10);
+
+// 练习二: 计算0~99的数字和
+var count = 0
+var totalCount = 0
+do {
+    totalCount += count
+    count++
+} while (count < 100);
+console.log("totalCount:", totalCount)
+```
+
+
+
+### 5.3  for 循环
+
+> for 循环更加复杂，但它是**最常使用的循环形式**。
+
+```js
+for(begin; condition; step) {
+    // 循环代码块
+}
+
+for(let i = 0; i < 3; i++) {
+    alert(i)
+}
+```
+
+
+
+|       语句段       |   例子    |                   执行过程                    |
+| :----------------: | :-------: | :-------------------------------------------: |
+|       begin        | let i = 0 |              进入循环时执行一次               |
+|     condition      |   i < 3   | 在每次循环迭代之前检查，如果为false，停止循环 |
+| body（循环代码块） | alert(i)  |             条件为真时，重复运行              |
+|        step        |    i++    |            在每次循环体迭代后执行             |
+
+**说明： begin 执行一次，然后进行迭代：每次检查 condition 后，执行 body 和 step**
+
+```js
+/*
+  * 1.首先, 会先执行var count = 0;
+  * 2.根据条件执行代码
+    * count < 3
+    * alert(count) // 0 1 2
+    * count++
+*/
+for (var count = 0; count < 3; count++) {
+    alert(count)
+}
+
+// 1.打印10次Hello World
+// for (var i = 0; i < 10; i++) {
+//   console.log("Hello World")
+// }
+
+// 2.打印0~99的数字
+for (var i = 0; i < 100; i++) {
+    console.log(i)
+}
+
+// 3.0~99的数字和
+var totalCount = 0
+for (var i = 0; i < 100; i++) {
+    totalCount += i
+}
+console.log("totalCount:", totalCount)
+
+// 4.0~99的奇数和
+var totalCount = 0
+for (var i = 0; i < 100; i++) {
+    if (i % 2 !== 0) {
+        totalCount += i
+    }
+}
+console.log("totalCount:", totalCount)
+
+// 算法优化
+var totalCount = 0
+for (var i = 1; i < 100; i+=2) {
+    totalCount += i
+}
+console.log("totalCount:", totalCount)
+```
+
