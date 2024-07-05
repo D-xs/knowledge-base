@@ -1546,3 +1546,560 @@ for (var i = 1; i < 100; i+=2) {
 console.log("totalCount:", totalCount)
 ```
 
+
+
+### 5.4 循环的嵌套
+
+> 循环中的循环体里面继续嵌套循环
+
+```js
+//	案例一：在屏幕上显示包含很多❤的矩形
+
+// 在屏幕上显示一个❤
+// document.write("❤")
+
+// 案例一: 
+for (var i = 0; i < 9; i++) {
+    document.write("<div>")
+
+    for (var m = 0; m < 10; m++) {
+        document.write("❤ ")
+    }
+
+    document.write("</div>")
+}
+// ❤ ❤ ❤ ❤ ❤ ❤ ❤ ❤ ❤ ❤
+// ❤ ❤ ❤ ❤ ❤ ❤ ❤ ❤ ❤ ❤
+// ❤ ❤ ❤ ❤ ❤ ❤ ❤ ❤ ❤ ❤
+// ❤ ❤ ❤ ❤ ❤ ❤ ❤ ❤ ❤ ❤
+// ❤ ❤ ❤ ❤ ❤ ❤ ❤ ❤ ❤ ❤
+// ❤ ❤ ❤ ❤ ❤ ❤ ❤ ❤ ❤ ❤
+// ❤ ❤ ❤ ❤ ❤ ❤ ❤ ❤ ❤ ❤
+// ❤ ❤ ❤ ❤ ❤ ❤ ❤ ❤ ❤ ❤
+// ❤ ❤ ❤ ❤ ❤ ❤ ❤ ❤ ❤ ❤
+
+//	案例二：在屏幕上显示一个三角的❤图像
+
+for (var i = 0; i < 6; i++) {
+    document.write("<div>")
+
+    for (var m = 0; m < i+1; m++) {
+        document.write("❤ ")
+    }
+
+    document.write("</div>")
+}
+// ❤
+// ❤ ❤
+// ❤ ❤ ❤
+// ❤ ❤ ❤ ❤
+// ❤ ❤ ❤ ❤ ❤
+// ❤ ❤ ❤ ❤ ❤ ❤
+// ❤ ❤ ❤ ❤ ❤ ❤ ❤
+// ❤ ❤ ❤ ❤ ❤ ❤ ❤ ❤
+// ❤ ❤ ❤ ❤ ❤ ❤ ❤ ❤ ❤
+
+//	案例三：在屏幕上显示一个九九乘法表
+
+for (var i = 0; i < 9; i++) {
+    document.write("<div>")
+
+    for (var m = 0; m < i+1; m++) {
+        var a = m + 1
+        var b = i + 1
+        var result = (m+1)*(i+1)
+        // document.write(`${a}*${b}=${result} `)
+        document.write(a + "*" + b + "=" + result + " ")
+    }
+
+    document.write("</div>")
+}
+```
+
+
+
+### 5.5 循环控制
+
+> 在执行循环体的过程中，我们可能需要根据不同的条件来控制循环体的终止（break）或是跳到下一次循环（continue）。
+
+
+
+- **break:** 直接跳出循环, 循环结束
+  - break 某一条件满足时，退出循环，不再执行后续重复的代码
+- **continue：**跳过本次循环次, 执行下一次循环体
+  - continue 指令是 break 的“轻量版”。
+  - continue 某一条件满足时，不执行后续重复的代码
+
+```js
+var names = ["abc", "cba", "nba", "mba", "bba", "aaa", "bbb"]
+
+// 循环遍历数组
+// break关键字的使用
+// 需求: 遇到nba时, 不再执行后续的迭代
+// for (var i = 0; i < 4; i++) {
+//   console.log(names[i])
+//   if (names[i] === "nba") {
+//     break
+//   }
+// }
+
+// continue关键字的使用: 立刻结束本次循环, 执行下一次循环(step)
+// 需求: 不打印nba和cba
+for (var i = 0; i < 7; i++) {
+    if (names[i] === "nba" || names[i] === "cba") {
+        continue
+    }
+    console.log(names[i])
+}
+```
+
+
+
+## 6. 函数
+
+> 函数由称为**函数体**的**一系列语句组成**。
+>
+> 在 JavaScript 中，函数是**头等 (\**first-class\**)对象，因为它们可以像任何其他对象**一样具有属性和方法。它们与其他对象的区别在于函数可以被调用。简而言之，它们是[`Function`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Function)对象。
+>
+> **函数**其实就是**某段代码的封装**，这段代码帮助我们完成某一个功能；
+>
+> 默认情况下JavaScript引擎或者浏览器会给我们**提供一些已经实现好的函数；**
+>
+> 我们也可以**编写属于自己的函数；**
+
+
+
+### 6.1 函数的使用步骤
+
+> 1. 定义函数（也称声明函数）
+> 2. 使用函数
+
+
+
+#### 1. 定义函数
+
+> 定义函数有多种方法：函数声明、函数表达式...
+>
+> 声明函数的过程是对某些功能的封装过程；
+
+
+
+- **函数声明**
+
+  ```js
+  function name([param[, param[, ... param]]]) { statements }
+  ```
+
+  `name`
+
+  函数名
+
+  > 函数名的命名规则和前面变量名的命名规则是相同的；
+  >
+  > 函数名尽量是见名知意
+  >
+  > 函数定义完成后，不会执行
+
+  
+
+  `param`
+
+  传递给函数的参数的名称
+
+  > 这里定义的参数为函数的形参，是用来接受该函数调用时传过来的实参，形参在函数体内当做变量来使用。
+  >
+  > **形参（参数 parameter）**：**定义** 函数时，小括号中的参数，是用来接收参数用的，在函数内部 **作为变量使用**
+  >
+  > **实参（参数 argument）**：**调用** 函数时，小括号中的参数，是用来把数据传递到 **函数内部** 用的
+
+  
+
+  `statements`
+
+  组成函数体的声明语句
+
+  > 当函数被调用时，函数体里面声明的语句会依次执行。
+
+  ```js
+  // 声明一个函数
+  // 制作好一个工具, 但是这个工具默认情况下是没有被使用
+  function sayHello() {
+      console.log("Hello!")
+      console.log("how do you do!")
+  }
+  
+  // 调用一个函数
+  sayHello()
+  // 函数可以在任何你想要使用的时候, 进行调用
+  sayHello()
+  
+  // 练习一: 定义一个函数, 打印自己的个人信息
+  function printInfo() {
+      console.log("my name is why")
+      console.log("age is 18")
+      console.log("height is 1.88")
+  }
+  
+  printInfo()
+  printInfo()
+  
+  // 练习二: 定义一个函数, 在内部计算10和20的和
+  function sum() {
+      var num1 = 10
+      var num2 = 20
+      var result = num1 + num2
+      console.log("result:", result)
+  }
+  sum()
+  
+  // name/age/height称之为函数的参数(形参, 形式参数, parmaters)
+  function printInfo(name, age, height) {
+      console.log(`my name is ${name}`)
+      console.log(`age is ${age}`)
+      console.log(`height is ${height}`)
+  }
+  
+  // why/18/1.88称之为函数的参数(实参, 实际参数, arguments)
+  printInfo("why", 18, 1.88)
+  printInfo("kobe", 30, 1.98)
+  
+  // 另外一个案例也做一个重构
+  function sum(num1, num2) {
+      var result = num1 + num2
+      console.log("result:", result)
+  }
+  
+  sum(20, 30)
+  sum(123, 321)
+  
+  
+  // 练习一: 和某人打招呼
+  function sayHello(name) {
+      console.log(`Hello ${name}`)
+  }
+  
+  sayHello("Kobe")
+  sayHello("James")
+  sayHello("Curry")
+  
+  // 练习二: 给某人唱生日歌
+  function singBirthdaySong(name) {
+      console.log("happy birthday to you")
+      console.log("happy birthday to you")
+      console.log(`happy birthday to ${name}`)
+      console.log("happy birthday to you")
+  }
+  
+  singBirthdaySong("Kobe")
+  singBirthdaySong("Why")
+  ```
+
+
+
+- **函数表达式**
+
+​	
+
+
+
+#### 2. 使用函数
+
+> 通过**函数()**的形式来调用函数
+>
+> 函数调用时，可以传参，也可以不传；不传参数时，若该函数定义时，有形参定义，那么调用时，对应形参的值为**undefined**
+
+
+
+
+
+#### 3. 函数返回值
+
+> 当函数执行时，可以通过**return**关键字来返回结果
+>
+> 程序在函数执行时，一旦遇到**return** 关键字会立即**终止当前函数**
+>
+> 如果**没有使用return**关键字，函数默认返回**undefined**
+>
+> 如果使用return关键字，但是后面没有任何值，也返回**undefined**
+
+```js
+// var result = prompt("请输入一个数字:")
+// 1.理解函数的返回值
+// function sayHello(name) {
+//   console.log(`Hi ${name}`)
+// }
+
+// var foo = sayHello("Kobe")
+// console.log("foo:", foo)
+
+// 2.返回值的注意事项
+// 注意事项一: 所有的函数, 如果没有写返回值, 那么默认返回undefined
+// function foo() {
+//   console.log("foo函数被执行~")
+// }
+
+// var result = foo()
+// console.log("foo的返回值:", result)
+
+// 注意事项二: 我们也可以明确的写上return
+// 写上return关键字, 但是后面什么内容都没有的时候, 也是返回undefined
+// function bar() {
+//   console.log("bar函数被执行~")
+//   return
+// }
+// var result = bar()
+// console.log("bar的返回值:", result)
+
+// 注意事项三: 如果在函数执行到return关键字时, 函数会立即停止执行, 退出函数
+// function baz() {
+//   console.log("Hello Baz")
+//   return
+//   console.log("Hello World")
+//   console.log("Hello Why")
+// }
+
+// baz()
+```
+
+
+
+#### 4. arguments对象
+
+> **`arguments`** 是一个对应于传递给函数的参数的类数组对象。（有length属性，但不是数组）
+>
+> `arguments`对象是所有（非箭头）函数中都可用的**局部变量**。你可以使用`arguments`对象在函数中引用函数的参数。此对象包含传递给函数的每个参数，第一个参数在索引 0 处。
+
+```js
+// 1.arguments的认识
+function foo(name, age) {
+    console.log("传入的参数", name, age)
+
+    // 在函数中都存在一个变量, 叫arguments
+    console.log(arguments)
+    // arguments是一个对象
+    console.log(typeof arguments)
+    // 对象内部包含了所有传入的参数
+    // console.log(arguments[0])
+    // console.log(arguments[1])
+    // console.log(arguments[2])
+    // console.log(arguments[3])
+
+    // 对arguments来进行遍历
+    for (var i = 0; i < arguments.length; i++) {
+        console.log(arguments[i])
+    }
+}
+
+foo("why", 18, 1.88, "广州市")
+
+
+// 2.arguments的案例
+function sum() {
+    var total = 0
+    for (var i = 0; i < arguments.length; i++) {
+        var num = arguments[i]
+        total += num
+    }
+    return total
+}
+
+console.log(sum(10, 20))
+console.log(sum(10, 20, 30))
+console.log(sum(10, 20, 30, 40))
+```
+
+
+
+#### 5. 递归调用
+
+> 一种函数调用自身的操作。递归被用于处理包含有更小的子问题的一类问题。一个递归函数可以接受两个输入参数：一个最终状态（终止递归）或一个递归状态（继续递归）。
+>
+> 必须要有终止条件，否则会报错。
+
+```js
+// 下述代码定义了一个函数，其返回运行这段代码的 JavaScript 运行时的最大可用堆栈大小。
+const getMaxCallStackSize = (i) => {
+    try {
+        return getMaxCallStackSize(++i);
+    } catch {
+        return i;
+    }
+};
+
+console.log(getMaxCallStackSize(0)); // google: 10449  edge: 10454 firefox: 1513
+
+
+// 什么是斐波那契数列
+// 数列: 1 1 2 3 5 8 13 21 34 55  ... x
+// 位置: 1 2 3 4 5 6 7  8  9  10  ... n
+
+// 1.斐波那契的递归实现
+function fibonacci(n) {
+    if (n === 1 || n === 2) return 1
+    return fibonacci(n-1) + fibonacci(n-2)
+}
+
+
+// 2.斐波那契的for循环实现
+function fibonacci(n) {
+    // 特殊的情况(前两个数字)
+    if (n === 1 || n === 2) return 1
+
+    // for循环的实现
+    var n1 = 1
+    var n2 = 1
+    var result = 0
+    for (var i = 3; i <= n; i++) {
+        result = n1 + n2
+        n1 = n2
+        n2 = result
+    }
+    return result
+}
+
+console.log(fibonacci(5))
+console.log(fibonacci(10))
+console.log(fibonacci(20))
+```
+
+
+
+## 7. 作用域
+
+> 作用域表示定义了变量的可见范围。
+>
+> 作用域（Scope）：定义了变量的可见性和可访问性的代码区域。
+>
+> 全局作用域（Global Scope）：整个程序中都可以访问的最外层作用域。
+>
+> 函数作用域（Function Scope）：在函数内部定义的作用域，只在该函数内部可见。
+>
+> 块级作用域（Block Scope）：在代码块（如if语句、for循环）内部定义的作用域。
+>
+> 词法作用域（Lexical Scope）：也称为静态作用域，指的是作用域是由代码中函数声明的位置来决定的，而不是由函数调用的位置决定。
+
+
+
+```js
+// 1.作用域的理解:message在哪一个范围内可以被使用, 称之为message的作用域(scope)
+// 全局变量: 全局作用域
+var message = "Hello World"
+if (true) {
+    console.log(message)
+}
+function foo() {
+    console.log("在foo中访问", message)
+}
+foo()
+
+// 2.ES5之前是没有块级作用域(var定义的变量是没有块级作用域)
+{
+    var count = 100
+    console.log("在代码块中访问count:", count)
+}
+console.log("在代码块外面访问count:", count)
+// for循环的代码块也是没有自己的作用域
+for (var i = 0; i < 3; i++) {
+    var foo = "foo"
+    }
+console.log("for循环外面访问foo:", foo)
+console.log("for循环外面访问i:", i) // 3
+
+// 3.ES5之前函数代码块是会形成自己的作用域
+// 意味着在函数内部定义的变量外面是访问不到的
+function test() {
+    var bar = "bar"
+    }
+
+test()
+// console.log("test函数外面访问bar:", bar)
+
+// 函数有自己的作用域: 函数内部定义的变量只有函数内部能访问到
+function sayHello() {
+    var nickname = "kobe"
+    console.log("sayHello函数的内部:", nickname)
+
+    function hi() {
+        console.log("hi function~")
+        console.log("在hi函数中访问nickname:", nickname)
+    }
+    hi()
+}
+sayHello()
+// console.log("sayHello外面访问nickname:", nickname)
+```
+
+
+
+```js
+// 1.全局变量(global variable): 在全局(script元素中)定义一个变量, 那么这个变量是可以在定义之后的任何范围内被访问到的, 那么这个变量就称之为是一个全局变量.
+var message = "Hello World"
+
+// 在函数中访问message
+function sayHello() {
+    // 外部变量(outer variable): 在函数内部去访问函数之外的变量, 访问的变量称之为外部变量
+    console.log("sayHello中访问message:", message)
+
+    // 2.局部变量(local variable): 在函数内部定义的变量, 只有在函数内部才能进行访问, 称之为局部变量
+    var nickname = "coderwhy"
+
+    function hi() {
+        console.log("hi function~")
+        // message也是一个外部变量
+        console.log("hi中访问message:", message)
+        // nickname也是一个外部变量
+        console.log("hi中访问nickname:", nickname)
+    }
+    hi()
+}
+
+
+
+
+sayHello()
+```
+
+
+
+```js
+// 变量的访问顺序
+
+// var message = "Hello World"
+
+function sayHello() {
+    // var message = "Hello Coderwhy"
+
+    function hi() {
+        // var message = "Hi Kobe"
+        console.log(message)
+    }
+    hi()
+}
+
+sayHello()
+```
+
+
+
+**外部变量和局部变量的概念：**
+
+- 定义在函数内部的变量，被称之为**局部变量**（Local Variables）。
+- 定义在函数外部的变量，被称之为**外部变量**（Outer Variables）。
+
+
+
+**全局变量：**
+
+- 在函数之外声明的变量（在script中声明的），称之为全局变量。
+- 全局变量**在任何函数中都是可见的**。
+- 通过**var声明的全局变量会在window对象**上添加一个属性（了解）；
+
+
+
+ps：
+
+- 查找变量
+  - 通过作用域链进行查找；若找不到，js引擎报错。
+- 查找对象的属性
+  - 通过对象的原型链进行查找；若找不到，返回**undefined**
+- 上述规则都是**就近原则**
