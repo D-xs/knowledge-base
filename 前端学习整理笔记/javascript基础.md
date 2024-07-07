@@ -1798,7 +1798,63 @@ for (var i = 0; i < 7; i++) {
 
 - **函数表达式**
 
-​	
+  ```js
+  let function_expression = function [name]([param1[, param2[, ..., paramN]]]) {
+     statements
+  };
+  ```
+
+  `name`
+
+  函数名称。可被省略，此种情况下的函数是匿名函数（*anonymous*）。**函数名称**只是**函数体中的一个本地变量**。
+
+  
+
+  `paramN`
+
+  被传递给函数的一个参数名称。一个函数至多拥有 255 个参数。
+
+  
+
+  `statements`
+
+  构成函数体的语句。
+
+  
+
+  ```js
+  // 函数的声明(声明语句)
+  foo()
+  function foo() {
+    console.log("foo函数被执行了~")
+  }
+  
+  // 函数的表达式
+  // console.log(message) // undefined
+  // var message = "why"
+  
+  // console.log(bar)
+  bar()
+  var bar = function() {
+    console.log("bar函数被执行了~")
+  }
+  ```
+
+  
+
+- 函数声明和函数表达式的**异同**
+
+  - 相同点
+    - 都是定义一个函数。
+    - 都是一个对象，只不过这个对象可以调用。
+
+  - 不同点
+    - 语法不同
+      - **函数声明：**在主代码流中声明为**单独的语句**的函数。
+      - **函数表达式：**在一个表达式中或另一个语法结构中创建的函数。
+
+
+
 
 
 
