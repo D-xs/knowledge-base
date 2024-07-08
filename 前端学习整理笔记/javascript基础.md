@@ -1847,11 +1847,16 @@ for (var i = 0; i < 7; i++) {
   - 相同点
     - 都是定义一个函数。
     - 都是一个对象，只不过这个对象可以调用。
-
   - 不同点
-    - 语法不同
-      - **函数声明：**在主代码流中声明为**单独的语句**的函数。
-      - **函数表达式：**在一个表达式中或另一个语法结构中创建的函数。
+    - **语法不同**
+      - 函数声明：在主代码流中声明为**单独的语句**的函数。
+      - 函数表达式：在一个表达式中或另一个语法结构中创建的函数。
+    - **创建时机不同**
+      - 函数声明：在函数声明定义函数之前便可被调用。
+        - 这是js引擎内部算法的原因
+        - 当js引擎**准备**运行脚本时，首先会在脚本中**寻找全局函数声明，并创建这些函数**；
+        - 在函数内部使用函数声明的函数，也可以在声明之前调用
+      - 函数表达式：函数表达式是在代码**执行到达时**被创建，并且**仅从那一刻起可用**
 
 
 
@@ -2020,6 +2025,743 @@ console.log(fibonacci(20))
 
 
 
+
+
+### 6.2 js中的函数是一等公民
+
+> js中的函数是一等公民（头等函数）。
+>
+> 一种编程语言要称其函数为头等函数,通常需要满足以下几个条件:
+>
+> 1. 函数可以赋值给变量
+> 2. 函数可以作为参数传递给其他函数
+> 3. 函数可以作为其他函数的返回值
+> 4. 函数可以存储在数据结构中
+> 5. 函数可以在运行时创建
+>
+> JavaScript满足所有这些条件,因此其函数被称为头等函数。这种特性使得JavaScript在函数式编程范式中非常强大,能够实现高阶函数、闭包等高级概念,增加了语言的表达能力和灵活性。
+
+```js
+// 1. 函数可以赋值给变量:
+const greet = function(name) {
+  console.log(`Hello, ${name}!`);
+};
+
+// 2. 函数可以作为参数传递给其他函数
+function executeFunction(fn, param) {
+  fn(param);
+}
+
+executeFunction(greet, "Alice");
+
+// 3. 函数可以作为其他函数的返回值
+function createMultiplier(factor) {
+  return function(number) {
+    return number * factor;
+  };
+}
+
+const double = createMultiplier(2);
+console.log(double(5)); // 输出: 10
+
+// 4. 函数可以存储在数据结构中
+const functionArray = [
+  function(x) { return x * 2; },
+  function(x) { return x + 3; }
+];
+
+// 5. 函数可以在运行时创建
+const dynamicFunction = new Function("a", "b", "return a + b");
+```
+
+
+
+### 6.3 函数式编程
+
+> ***使用函数来作为头等公民使用函数, 这种编程方式(范式)称为函数式编程.***
+>
+> 函数式编程是一种编程范式，它将计算过程视为数学函数的求值，并避免改变状态和可变数据。在JavaScript中，函数式编程的核心概念包括：
+>
+> 1. 纯函数：给定相同的输入，总是返回相同的输出，且没有副作用。 
+> 2. 不可变性：一旦创建，数据就不应被修改。 
+> 3. 函数组合：将多个简单函数组合成复杂函数。
+> 4. 高阶函数：接受函数作为参数或返回函数的函数。 
+> 5. 声明式编程：描述要做什么，而不是如何做。
+
+
+
+1. 纯函数
+
+   > 纯函数总是为相同的输入返回相同的输出,并且没有副作用。
+
+   ```js
+   // 纯函数
+   function add(a, b) {
+     return a + b;
+   }
+   
+   // 非纯函数 (有副作用)
+   let total = 0;
+   function addToTotal(value) {
+     total += value;
+     return total;
+   }
+   ```
+
+2. 不可变性
+
+   > 不可变性意味着创建后的数据不应被修改。在JavaScript中,我们可以使用const声明和扩展运算符来实现不可变性。
+
+   ```js
+   const originalArray = [1, 2, 3];
+   
+   // 不改变原数组,而是创建新数组
+   const newArray = [...originalArray, 4];
+   
+   console.log(originalArray); // [1, 2, 3]
+   console.log(newArray);      // [1, 2, 3, 4]
+   ```
+
+3. 函数组合
+
+   > 函数组合是将多个简单函数组合成一个更复杂的函数。
+
+   ```js
+   const compose = (f, g) => x => f(g(x));
+   
+   const addOne = x => x + 1;
+   const double = x => x * 2;
+   
+   const addOneThenDouble = compose(double, addOne);
+   
+   console.log(addOneThenDouble(3)); // 8
+   ```
+
+4. 高阶函数
+
+   > 高阶函数是那些接受函数作为参数或返回函数的函数。
+
+   ```js
+   // 接受函数作为参数
+   function applyOperation(x, y, operation) {
+     return operation(x, y);
+   }
+   
+   const result = applyOperation(5, 3, (a, b) => a + b);
+   console.log(result); // 8
+   
+   // 返回函数
+   function multiplier(factor) {
+     return function(number) {
+       return number * factor;
+     }
+   }
+   
+   const double = multiplier(2);
+   console.log(double(4)); // 8
+   ```
+
+5. 声明式编程
+
+   > 声明式编程关注的是描述我们想要的结果,而不是如何得到结果的具体步骤。
+
+   ```js
+   // 命令式 (how)
+   const numbers = [1, 2, 3, 4, 5];
+   let sum = 0;
+   for (let i = 0; i < numbers.length; i++) {
+     sum += numbers[i];
+   }
+   
+   // 声明式 (what)
+   const sum = numbers.reduce((acc, curr) => acc + curr, 0);
+   ```
+
+6. 柯里化
+
+   > 柯里化是将一个接受多个参数的函数转换为一系列使用一个参数的函数。
+
+   ```js
+   // 普通函数
+   function add(x, y, z) {
+     return x + y + z;
+   }
+   
+   // 柯里化后的函数
+   const curriedAdd = x => y => z => x + y + z;
+   
+   console.log(add(1, 2, 3));          // 6
+   console.log(curriedAdd(1)(2)(3));   // 6
+   ```
+
+   **应用场景：**
+
+   > 1. 事件处理和参数预设
+   > 2. 表单验证
+   > 3. API请求封装
+   > 4. 样式组件的属性设置
+   > 5. 条件渲染优化
+
+   ```js
+   // 1. 柯里化可以帮助我们创建可重用的事件处理器，同时预设一些参数。
+   const handleClick = (message) => (event) => {
+       console.log(message, event.target.id);
+   };
+   
+   // 使用
+   document.getElementById('button1').addEventListener('click', handleClick('Button 1 clicked:'));
+   document.getElementById('button2').addEventListener('click', handleClick('Button 2 clicked:'));
+   
+   
+   // 2. 柯里化可以用来创建可复用的验证函数
+   const validate = (regex) => (message) => (value) => {
+       if (!regex.test(value)) {
+           return message;
+       }
+   };
+   
+   const validateEmail = validate(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)('Invalid email address');
+   const validatePhone = validate(/^\d{10}$/)('Invalid phone number');
+   
+   // 使用
+   function validateForm(email, phone) {
+       const emailError = validateEmail(email);
+       const phoneError = validatePhone(phone);
+   
+       if (emailError) console.log(emailError);
+       if (phoneError) console.log(phoneError);
+   }
+   
+   validateForm('test@example.com', '1234567890');
+   
+   
+   // 3. 柯里化可以用来创建更灵活的API请求函数
+   const apiRequest = (baseUrl) => (endpoint) => (method) => (data) => {
+       return fetch(`${baseUrl}${endpoint}`, {
+           method,
+           headers: {
+               'Content-Type': 'application/json',
+           },
+           body: JSON.stringify(data),
+       }).then(response => response.json());
+   };
+   
+   const myApi = apiRequest('https://api.example.com');
+   const getUsersApi = myApi('/users');
+   const createUser = getUsersApi('POST');
+   const updateUser = getUsersApi('PUT');
+   
+   // 使用
+   createUser({ name: 'John Doe', email: 'john@example.com' })
+       .then(response => console.log(response));
+   
+   updateUser({ id: 1, name: 'Jane Doe' })
+       .then(response => console.log(response));
+   
+   
+   // 4. 在使用CSS-in-JS库（如styled-components）时，柯里化可以用来创建可复用的样式设置函数
+   import styled from 'styled-components';
+   
+   const setFlex = (direction) => (justify) => (align) => `
+     display: flex;
+     flex-direction: ${direction};
+     justify-content: ${justify};
+     align-items: ${align};
+   `;
+   
+   const Container = styled.div`
+     ${setFlex('column')('center')('flex-start')}
+     width: 100%;
+     height: 100vh;
+   `;
+   
+   const Row = styled.div`
+     ${setFlex('row')('space-between')('center')}
+     width: 100%;
+     padding: 20px;
+   `;
+   
+   // 使用
+   function App() {
+       return (
+           <Container>
+           <Row>
+           <p>Item 1</p>
+           <p>Item 2</p>
+           </Row>
+           </Container>
+       );
+   }
+   
+   
+   // 5. 柯里化可以用来创建更灵活的条件渲染函数
+   const when = (predicate) => (whenTrue) => (whenFalse) => (value) =>
+   predicate(value) ? whenTrue(value) : whenFalse(value);
+   
+   const isNotEmpty = (x) => x !== '';
+   const isLongEnough = (x) => x.length >= 5;
+   
+   const renderInput = when(isNotEmpty)(
+       when(isLongEnough)
+       ((x) => <p style={{color: 'green'}}>{x} is valid</p>)
+   ((x) => <p style={{color: 'orange'}}>{x} is too short</p>)
+   )
+   (() => <p style={{color: 'red'}}>Please enter a value</p>);
+   
+   // 使用
+   function Form() {
+       const [value, setValue] = useState('');
+   
+       return (
+           <div>
+           <input value={value} onChange={(e) => setValue(e.target.value)} />
+   {renderInput(value)}
+   </div>
+   );
+   }
+   ```
+
+   
+
+   
+
+
+
+#### 1. 好处
+
+- 可预测性：纯函数和不可变数据使得代码行为更加可预测。
+- 可测试性：纯函数易于单元测试。
+- 并发：不可变数据和无副作用的函数使并发编程更安全。
+- 模块化：通过函数组合，可以构建复杂的逻辑。
+- 可读性：声明式代码通常更容易理解。
+- 可维护性：函数式代码通常更容易维护和重构。
+
+
+
+#### 2. 如何学习
+
+
+
+##### 1. 理解基础概念
+
+- 学习纯函数、不可变性、高阶函数等核心概念。
+- 理解闭包、柯里化、组合等函数式技术。
+
+
+
+##### 2. 实践常用方法
+
+- 熟练使用 `map`, `filter`, `reduce` 等数组方法。
+- 学习 `Promise` 和异步编程的函数式方法。
+
+
+
+##### 3. 学习函数式库
+
+- 尝试使用 Lodash、Ramda 等函数式工具库。
+- 了解 RxJS 等响应式编程库。
+
+
+
+##### 4. 编码练习
+
+- 重构现有代码，应用函数式原则
+- 解决编程问题时尝试使用函数式方法
+
+
+
+##### 5. 深入学习资源
+
+- 阅读《JavaScript函数式编程指南》等书籍
+- 观看在线课程和视频教程
+- 参与开源项目，学习实际应用
+
+
+
+##### 6. 渐进式采用
+
+- 在小型项目中逐步引入函数式概念
+- 逐步增加函数式编程在日常工作中的应用
+
+
+
+> 学习函数式编程是一个gradual的过程。建议您从基础概念开始，逐步在实际项目中应用，并不断深化理解。随着实践的增加，您会发现函数式编程能够帮助您写出更加简洁、可维护的代码。
+
+
+
+#### 3. 应用场景（后台管理系统）
+
+```js
+// 1. 数据处理和转换
+// 后台管理系统经常需要处理和转换大量数据。使用函数式编程的方法可以使这些操作更加清晰和可组合。
+
+// 假设我们有一个用户列表，需要进行筛选、转换和排序
+const users = [
+    { id: 1, name: 'Alice', age: 30, role: 'admin' },
+    { id: 2, name: 'Bob', age: 25, role: 'user' },
+    { id: 3, name: 'Charlie', age: 35, role: 'user' },
+    // ...更多用户
+];
+
+// 使用函数式方法处理数据
+const processUsers = (users) => {
+    return users
+        .filter(user => user.age >= 18)
+        .map(user => ({
+        ...user,
+        displayName: `${user.name} (${user.role})`
+    }))
+        .sort((a, b) => a.age - b.age);
+};
+
+const processedUsers = processUsers(users);
+
+
+// 2. 表单验证
+// 表单验证是后台管理系统的常见需求。使用函数式编程可以创建可组合的验证函数。
+
+// 创建可组合的验证函数
+const required = field => value => 
+value ? null : `${field} is required`;
+
+const minLength = (field, min) => value => 
+value && value.length >= min ? null : `${field} must be at least ${min} characters`;
+
+const isEmail = field => value => 
+/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) ? null : `${field} must be a valid email`;
+
+// 组合验证函数
+const validateUser = (user) => {
+    const nameValidation = [required('Name'), minLength('Name', 2)];
+    const emailValidation = [required('Email'), isEmail('Email')];
+
+    return {
+        name: nameValidation.map(validate => validate(user.name)).filter(Boolean),
+        email: emailValidation.map(validate => validate(user.email)).filter(Boolean)
+    };
+};
+
+// 使用
+const user = { name: 'A', email: 'invalid-email' };
+const errors = validateUser(user);
+console.log(errors);
+
+
+// 3. 状态管理
+// 使用函数式编程的原则可以简化状态管理，特别是在使用 Redux 这样的库时。
+
+// Action creators
+const setUsers = users => ({ type: 'SET_USERS', payload: users });
+const addUser = user => ({ type: 'ADD_USER', payload: user });
+const updateUser = user => ({ type: 'UPDATE_USER', payload: user });
+const deleteUser = userId => ({ type: 'DELETE_USER', payload: userId });
+
+// Reducer
+const initialState = { users: [] };
+
+const userReducer = (state = initialState, action) => {
+    switch (action.type) {
+        case 'SET_USERS':
+            return { ...state, users: action.payload };
+        case 'ADD_USER':
+            return { ...state, users: [...state.users, action.payload] };
+        case 'UPDATE_USER':
+            return {
+                ...state,
+                users: state.users.map(user => 
+                                       user.id === action.payload.id ? action.payload : user
+                                      )
+            };
+        case 'DELETE_USER':
+            return {
+                ...state,
+                users: state.users.filter(user => user.id !== action.payload)
+            };
+        default:
+            return state;
+    }
+};
+
+
+// 4. API 请求封装
+// 使用函数式编程可以创建更加灵活和可组合的 API 请求函数。
+
+const apiRequest = method => endpoint => data => 
+fetch(`https://api.example.com${endpoint}`, {
+    method,
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+}).then(response => response.json());
+
+const get = apiRequest('GET');
+const post = apiRequest('POST');
+const put = apiRequest('PUT');
+const del = apiRequest('DELETE');
+
+// 使用
+const getUsers = get('/users');
+const createUser = post('/users');
+const updateUser = put('/users');
+const deleteUser = del('/users');
+
+// 示例
+getUsers().then(users => console.log(users));
+createUser({ name: 'New User', email: 'new@example.com' })
+    .then(newUser => console.log(newUser));
+
+
+// 5. 权限控制
+// 函数式编程可以用于创建灵活的权限控制系统。
+
+const hasPermission = (requiredPermission) => (user) => 
+user.permissions.includes(requiredPermission);
+
+const withPermission = (permission) => (Component) => (props) => {
+    if (hasPermission(permission)(props.user)) {
+        return <Component {...props} />;
+    } else {
+        return <div>You don't have permission to view this content.</div>;
+    }
+};
+
+// 使用
+const AdminPanel = withPermission('ADMIN')(({ user }) => (
+    <div>Welcome, Admin {user.name}!</div>
+                                          ));
+
+// 渲染
+// const user = { name: 'Alice', permissions: ['USER', 'ADMIN'] };
+// <AdminPanel user={user} />
+
+
+// 6. 日志和错误处理
+// 使用函数式编程可以创建可组合的日志和错误处理函数。
+
+const logError = (error) => {
+    console.error('An error occurred:', error);
+    // 可以在这里添加更多的错误处理逻辑，比如发送到错误追踪服务
+};
+
+const withErrorHandling = (fn) => (...args) => {
+    try {
+        return fn(...args);
+    } catch (error) {
+        logError(error);
+        throw error;
+    }
+};
+
+// 使用
+const riskyOperation = withErrorHandling(() => {
+    // 一些可能抛出错误的操作
+    throw new Error('Something went wrong');
+});
+
+try {
+    riskyOperation();
+} catch (error) {
+    console.log('Error caught in the UI layer');
+}
+```
+
+
+
+### 6.4 IIFE（立即调用函数表达式）
+
+> 是一个在定义后立即被调用的JavaScript函数。
+
+
+
+#### 语法
+
+```js
+
+(function() {
+    // 函数体
+})();
+
+// 或者
+
+(() => {
+    // 函数体
+})();
+
+```
+
+
+
+#### 应用场景
+
+```js
+// 1. 创建私有作用域
+const counter = (function() {
+    let count = 0;
+    return {
+        increment: function() {
+            count++;
+            return count;
+        },
+        decrement: function() {
+            count--;
+            return count;
+        },
+        getCount: function() {
+            return count;
+        }
+    };
+})();
+
+console.log(counter.getCount()); // 0
+console.log(counter.increment()); // 1
+console.log(counter.increment()); // 2
+console.log(counter.decrement()); // 1
+
+
+// 2. 避免全局命名空间污染
+(function($) {
+    // 这里的 $ 是 jQuery，不会与其他库冲突
+    $(document).ready(function() {
+        // ...
+    });
+})(jQuery);
+
+
+// 3. 模块化代码
+const myModule = (function() {
+    const privateVariable = 'Hello World';
+    function privateMethod() {
+        console.log(privateVariable);
+    }
+
+    return {
+        publicMethod: function() {
+            privateMethod();
+        }
+    };
+})();
+
+myModule.publicMethod(); // 输出: Hello World
+
+
+// 4. 业务逻辑应用
+// var btnEls = document.querySelectorAll(".btn")
+// for (var i = 0; i < btnEls.length; i++) {
+//   var btn = btnEls[i];
+//   btn.onclick = function() {
+//     console.log(`按钮${i+1}发生了点击`)
+//   }
+// }
+
+// 使用立即执行函数
+var btnEls = document.querySelectorAll(".btn")
+for (var i = 0; i < btnEls.length; i++) {
+    var btn = btnEls[i];
+    (function(m) {
+        btn.onclick = function() {
+            console.log(`按钮${m+1}发生了点击`)
+        }
+    })(i)
+}
+
+console.log(i)
+```
+
+
+
+### 6.5 回调函数
+
+> 回调函数是作为参数传递给另一个函数，并在某个事件发生或某个任务完成后被调用的函数。
+
+
+
+#### 语法
+
+```js
+function doSomething(callback) {
+    // 做一些事情
+    callback();
+}
+
+doSomething(function() {
+    console.log('回调函数被调用');
+});
+```
+
+
+
+#### 应用场景
+
+```js
+// 1. 异步操作
+function fetchData(callback) {
+    setTimeout(() => {
+        const data = { id: 1, name: 'John' };
+        callback(data);
+    }, 1000);
+}
+
+fetchData((data) => {
+    console.log('Data received:', data);
+});
+
+
+// 2. 事件处理
+document.getElementById('myButton').addEventListener('click', function() {
+    console.log('Button clicked!');
+});
+
+
+// 3. 高阶函数
+const numbers = [1, 2, 3, 4, 5];
+
+const doubledNumbers = numbers.map(function(num) {
+    return num * 2;
+});
+
+console.log(doubledNumbers); // [2, 4, 6, 8, 10]
+
+
+// 4. 错误处理
+function divideNumbers(a, b, callback) {
+    if (b === 0) {
+        callback(new Error('Cannot divide by zero'));
+        return;
+    }
+    callback(null, a / b);
+}
+
+divideNumbers(10, 2, (error, result) => {
+    if (error) {
+        console.error('Error:', error.message);
+    } else {
+        console.log('Result:', result);
+    }
+});
+
+
+// 5. 迭代器和生成器
+function* numberGenerator() {
+    yield 1;
+    yield 2;
+    yield 3;
+}
+
+const gen = numberGenerator();
+
+function handleNext(result) {
+    if (!result.done) {
+        console.log(result.value);
+        gen.next().then(handleNext);
+    }
+}
+
+gen.next().then(handleNext);
+```
+
+
+
+
+
 ## 7. 作用域
 
 > 作用域表示定义了变量的可见范围。
@@ -2159,3 +2901,483 @@ ps：
 - 查找对象的属性
   - 通过对象的原型链进行查找；若找不到，返回**undefined**
 - 上述规则都是**就近原则**
+
+
+
+
+
+## 8. 对象
+
+> 对象是包含相关数据和/或功能的集合。它们通常由多个变量和函数组成，这些变量和函数称为对象的属性和方法。
+
+
+
+### 1. 创建对象
+
+- 对象字面量
+
+  ```js
+  
+  //	两个术语: 函数/方法
+  //		函数(function): 如果在JavaScript代码中通过function默认定义一个结构, 称之为是函数.
+  //		方法(method): 如果将一个函数放到对象中, 作为对象的一个属性, 那么将这个函数称之为方法.
+  
+  // key: 字符串类型也可以是symbol类型, 但是在定义对象的属性名时, 大部分情况下引号都是可以省略的
+  var person = {
+      // key: value
+      name: "why",
+      age: 18,
+      height: 1.88,
+      "my friend": {
+          name: "kobe",
+          age: 30
+      },
+      run: function() {
+          console.log("running")
+      },
+      eat: function() {
+          console.log("eat foods")
+      },
+      study: function() {
+          console.log("studying")
+      }
+  }
+  ```
+
+- 构造函数
+
+  ```js
+  function Person(name, age) {
+      this.name = name;
+      this.age = age;
+      this.greet = function() {
+          console.log("Hello!");
+      };
+  }
+  
+  const john = new Person("John", 30);
+  ```
+
+- Object.create() 方法
+
+  ```js
+  const personProto = {
+      greet: function() {
+          console.log("Hello!");
+      }
+  };
+  
+  const person = Object.create(personProto);
+  person.name = "John";
+  person.age = 30;
+  ```
+
+  
+
+### 2. 操作对象
+
+
+
+#### 1. 访问对象属性
+
+- 点符号
+
+  ```js
+  console.log(person.name); // "John"
+  ```
+
+- 括号符号
+
+  ```js
+  console.log(person["age"]); // 30
+  
+  // 方括号 + 变量方式访问
+  const myAge = "age";
+  console.log(person[myAge]); // 30
+  ```
+
+
+
+#### 2. 修改对象属性
+
+```js
+person.age = 31;
+person["name"] = "John Doe";
+```
+
+
+
+#### 3. 添加新属性
+
+```js
+person.job = "Developer";
+```
+
+
+
+#### 4. 删除属性
+
+```js
+delete person.job;
+```
+
+
+
+#### 5. 方法
+
+> 当函数作为对象的属性值时，就说这个函数是这个对象的方法。
+>
+> **方法是作为对象属性的函数。**
+
+```js
+const person = {
+    name: "John",
+    greet: function() {
+        console.log(`Hello, my name is ${this.name}`);
+    }
+};
+
+person.greet(); // 输出: "Hello, my name is John"
+```
+
+
+
+#### 6. getter和setter
+
+```js
+const person = {
+    firstName: "John",
+    lastName: "Doe",
+    get fullName() {
+        return `${this.firstName} ${this.lastName}`;
+    },
+    set fullName(name) {
+        const parts = name.split(' ');
+        this.firstName = parts[0];
+        this.lastName = parts[1];
+    }
+};
+
+console.log(person.fullName); // "John Doe"
+person.fullName = "Jane Smith";
+console.log(person.firstName); // "Jane"
+```
+
+
+
+#### 7. Object.keys(), Object.values(), Object.entries()
+
+```js
+const person = { name: "John", age: 30 };
+
+console.log(Object.keys(person)); // ["name", "age"]
+console.log(Object.values(person)); // ["John", 30]
+console.log(Object.entries(person)); // [["name", "John"], ["age", 30]]
+```
+
+
+
+#### 8. 对象解构
+
+```js
+const { name, age } = person;
+console.log(name); // "John"
+console.log(age);  // 30
+```
+
+
+
+#### 9. 展开运算符
+
+```js
+const person1 = { name: "John", age: 30 };
+const person2 = { ...person1, job: "Developer" };
+console.log(person2); // { name: "John", age: 30, job: "Developer" }
+```
+
+
+
+
+
+### 3. 遍历对象
+
+```js
+// 下述案例所要用到的对象
+const person = {
+    name: "John",
+    age: 30,
+    job: "Developer",
+    city: "New York"
+};
+```
+
+
+
+#### 1. for...in循环
+
+> `for...in` 循环遍历对象的所有可枚举属性，包括原型链上的属性。
+
+```js
+for (let key in person) {
+  if (person.hasOwnProperty(key)) {
+    console.log(key + ": " + person[key]);
+  }
+}
+
+// 注意：使用 hasOwnProperty() 方法可以确保只遍历对象自身的属性，而不是原型链上的属性。
+```
+
+
+
+#### 2. Object.keys()
+
+> `Object.keys()` 返回一个由对象的自身可枚举属性组成的数组。
+
+```js
+Object.keys(person).forEach(key => {
+  console.log(key + ": " + person[key]);
+});
+```
+
+
+
+#### 3. Object.values()
+
+> `Object.values()` 返回一个由对象的自身可枚举属性值组成的数组。
+
+```js
+Object.values(person).forEach(value => {
+  console.log(value);
+});
+```
+
+
+
+#### 4. Object.entries()
+
+> `Object.entries()` 返回一个由对象的自身可枚举属性的键值对数组组成的数组。
+
+```js
+Object.entries(person).forEach(([key, value]) => {
+  console.log(key + ": " + value);
+});
+```
+
+
+
+#### 5. Object.getOwnPropertyNames()
+
+> `Object.getOwnPropertyNames()` 返回一个由对象的所有自身属性的名称组成的数组，包括不可枚举属性。
+
+```js
+Object.getOwnPropertyNames(person).forEach(key => {
+  console.log(key + ": " + person[key]);
+});
+```
+
+
+
+#### 6. Reflect.ownKeys()
+
+> `Reflect.ownKeys()` 返回一个由对象的所有自身属性的键组成的数组，包括符号属性和不可枚举属性。
+
+```js
+Reflect.ownKeys(person).forEach(key => {
+  console.log(key + ": " + person[key]);
+});
+```
+
+
+
+#### 7. Object.getOwnPropertyDescriptors()
+
+> 这个方法返回对象的所有自身属性描述符。虽然它不是直接用于遍历，但可以用来获取所有属性，包括 getter 和 setter。
+
+```js
+const descriptors = Object.getOwnPropertyDescriptors(person);
+for (let key in descriptors) {
+  console.log(key + ": " + person[key]);
+}
+```
+
+
+
+#### 8. 比较和建议
+
+**for...in**: 最古老的方法，但需要注意处理原型链属性。
+
+**Object.keys()**: 常用且简洁，只遍历自身可枚举属性。
+
+**Object.values()**: 当只需要值而不需要键时很有用。
+
+**Object.entries()**: 同时需要键和值时很方便，特别是在需要对对象进行转换时。
+
+**Object.getOwnPropertyNames()**: 需要包括不可枚举属性时使用。
+
+**Reflect.ownKeys()**: 最全面，包括符号属性，但使用较少。
+
+**Object.getOwnPropertyDescriptors()**: 需要属性的完整描述符时使用。
+
+
+
+**性能考虑**
+
+> 在大多数情况下，这些方法的性能差异不大。但如果处理大型对象或需要频繁遍历，可以考虑使用 `for...in` 或 `Object.keys()` 来获得更好的性能。
+
+
+
+**实际应用示例**
+
+- 创建对象的浅拷贝
+
+  ```js
+  function shallowCopy(obj) {
+    const copy = {};
+    Object.keys(obj).forEach(key => {
+      copy[key] = obj[key];
+    });
+    return copy;
+  }
+  
+  const personCopy = shallowCopy(person);
+  console.log(personCopy);
+  ```
+
+- 过滤对象属性
+
+  ```js
+  function filterObject(obj, predicate) {
+    return Object.entries(obj).reduce((acc, [key, value]) => {
+      if (predicate(value, key)) {
+        acc[key] = value;
+      }
+      return acc;
+    }, {});
+  }
+  
+  const adult = filterObject(person, (value, key) => key === 'age' ? value >= 18 : true);
+  console.log(adult);
+  ```
+
+
+
+
+
+#### 9. 可枚举属性
+
+> 对象自身的可枚举属性是指（同时满足以下两个条件）：
+>
+> 1. 直接定义在对象上的属性（不是从原型链继承的）
+> 2. 其内部 `enumerable` 标志设置为 `true` 的属性
+>
+> 这些属性在使用某些方法（如 `for...in` 循环或 `Object.keys()`）时会被包括在内。
+
+
+
+**属性特性**
+
+每个对象属性都有一些特性（也称为属性描述符），包括：
+
+- `value`: 属性的值
+- `writable`: 是否可以修改属性的值
+- `enumerable`: 是否可枚举
+- `configurable`: 是否可以删除该属性或修改其特性
+
+
+
+**可枚举 vs 不可枚举**
+
+1. **可枚举属性**：
+
+   - 在 `for...in` 循环中会被遍历
+
+   - 会被 `Object.keys()` 方法返回
+
+   - 会被 `JSON.stringify()` 序列化
+
+2. **不可枚举属性**：
+
+   - 不会在 `for...in` 循环中被遍历
+
+   - 不会被 `Object.keys()` 方法返回
+
+   - 不会被 `JSON.stringify()` 序列化（除非显式指定）
+
+
+
+**示例**
+
+```js
+const person = {
+    name: "John",
+    age: 30
+};
+
+// 添加一个不可枚举属性
+Object.defineProperty(person, 'ssn', {
+    value: '123-45-6789',
+    enumerable: false
+});
+
+console.log(Object.keys(person)); // ['name', 'age']
+console.log(person.ssn); // '123-45-6789'
+
+for (let key in person) {
+    console.log(key); // 只输出 'name' 和 'age'
+}
+
+console.log(JSON.stringify(person)); // {"name":"John","age":30}
+
+// 在这个例子中，name 和 age 是可枚举属性，而 ssn 是不可枚举属性。
+```
+
+
+
+
+
+**检查属性是否可枚举**
+
+> 可以使用 `propertyIsEnumerable()` 方法来检查一个属性是否可枚举
+
+```js
+console.log(person.propertyIsEnumerable('name')); // true
+console.log(person.propertyIsEnumerable('ssn'));  // false
+```
+
+
+
+**获取所有属性（包括不可枚举属性）**
+
+> 获取对象的所有属性，包括不可枚举的，可以使用 `Object.getOwnPropertyNames()`
+
+```js
+console.log(Object.getOwnPropertyNames(person)); // ['name', 'age', 'ssn']
+```
+
+
+
+**实际应用**
+
+1. **隐藏内部实现细节**： 不可枚举属性通常用于存储不希望被外部轻易访问或修改的内部数据。
+2. **避免意外遍历**： 在某些情况下，你可能不希望某些属性在遍历对象时被包括进来，使用不可枚举属性可以避免这种情况。
+3. **与 API 设计相关**： 在设计库或框架时，可以使用不可枚举属性来存储内部状态或元数据，而不影响公共接口。
+
+
+
+**创建不可枚举属性**
+
+```js
+// 创建属性时设置其为不可枚举
+const obj = {};
+Object.defineProperty(obj, 'hiddenProp', {
+  value: 'I am hidden',
+  enumerable: false
+});
+
+// 修改现有属性的可枚举性
+Object.defineProperty(person, 'age', {
+  value: person.age,
+  enumerable: false
+});
+```
+
