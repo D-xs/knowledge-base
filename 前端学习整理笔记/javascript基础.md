@@ -2762,6 +2762,123 @@ gen.next().then(handleNext);
 
 
 
+### 6.6 js中的参数传递
+
+> 在JavaScript中，参数传递的方式取决于传递的数据类型。
+
+1. 基本数据类型：值传递
+   - 包括 number, string, boolean, null, undefined, Symbol
+   - 函数接收的是值的拷贝
+   - 在函数内部对参数的修改不会影响外部变量
+2. 对象类型：共享传递
+   - 包括普通对象、数组、函数等
+   - 函数接收的是对象引用的拷贝
+   - 可以通过引用修改对象的属性，这会影响到原始对象
+   - 但是，重新赋值函数内部对应形参对象不会影响原始对象
+3. 数组的参数传递（按共享传递的特例）：
+   - 数组作为特殊的对象，遵循对象的传递规则。
+   - 可以修改数组内容（如push、pop等），会影响原始数组。
+   - 重新赋值整个数组不会影响原始数组。
+
+```js
+// 1. 基本类型：值传递
+function changeNumber(num) {
+    num = 100;
+    console.log("Inside function:", num);
+}
+
+let x = 10;
+changeNumber(x);
+console.log("Outside function:", x);
+// 输出:
+// Inside function: 100
+// Outside function: 10
+
+// 2. 对象：按共享传递
+function changeObject(obj) {
+    // 修改属性：会影响原对象
+    obj.name = "Changed";
+    console.log("Inside function (after modifying):", obj);
+
+    // 重新赋值：不影响原对象
+    obj = { name: "New Object" };
+    console.log("Inside function (after reassigning):", obj);
+}
+
+let person = { name: "Original" };
+changeObject(person);
+console.log("Outside function:", person);
+// 输出:
+// Inside function (after modifying): { name: "Changed" }
+// Inside function (after reassigning): { name: "New Object" }
+// Outside function: { name: "Changed" }
+
+// 3. 数组：按共享传递（特殊的对象）
+function changeArray(arr) {
+    // 修改数组：会影响原数组
+    arr.push(4);
+    console.log("Inside function (after push):", arr);
+
+    // 重新赋值：不影响原数组
+    arr = [5, 6, 7];
+    console.log("Inside function (after reassigning):", arr);
+}
+
+let numbers = [1, 2, 3];
+changeArray(numbers);
+console.log("Outside function:", numbers);
+// 输出:
+// Inside function (after push): [1, 2, 3, 4]
+// Inside function (after reassigning): [5, 6, 7]
+// Outside function: [1, 2, 3, 4]
+```
+
+
+
+#### 按共享传递
+
+> 1. **对象的引用被传递**： 当你将一个对象传递给函数时，实际上传递的是该对象的引用（内存地址）。
+>
+> 2. **可以修改对象的内容**： 在函数内部，你可以通过这个引用修改对象的属性，这些修改会反映到原始对象上。
+>
+> 3. **不能改变引用本身**： 虽然你可以修改对象的内容，但是你不能改变引用本身指向的对象。如果你在函数内部给参数赋予一个新的对象，这只会改变局部变量，而不会影响原始引用。
+
+```js
+// 示例1：修改对象属性
+function modifyObject(obj) {
+    obj.property = "modified";
+}
+
+let myObj = { property: "original" };
+modifyObject(myObj);
+console.log(myObj.property); // 输出: "modified"
+
+// 示例2：重新赋值整个对象
+function reassignObject(obj) {
+    obj = { property: "new object" };
+}
+
+let anotherObj = { property: "original" };
+reassignObject(anotherObj);
+console.log(anotherObj.property); // 输出: "original"
+
+// 示例3：数组操作
+function modifyArray(arr) {
+    arr.push(4);         // 修改原数组
+    arr = [5, 6, 7];     // 创建新数组并赋值给局部变量arr
+}
+
+let myArray = [1, 2, 3];
+modifyArray(myArray);
+console.log(myArray); // 输出: [1, 2, 3, 4]
+```
+
+
+
+
+
+
+
 ## 7. 作用域
 
 > 作用域表示定义了变量的可见范围。
