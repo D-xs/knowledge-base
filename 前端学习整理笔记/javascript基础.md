@@ -2877,7 +2877,84 @@ console.log(myArray); // 输出: [1, 2, 3, 4]
 
 ### 6.7 函数中的this指向
 
-> 
+> 在 JavaScript 中，`this` 是一个特殊的关键字，它在函数内部使用，指向当前函数执行的上下文对象。`this` 是函数执行时自动创建的一个内部对象，它代表函数运行时的上下文。简单来说，`this` 指向的是"谁在调用当前函数"。
+
+
+
+`this` 的值取决于函数的调用方式，主要有以下几种情况：
+
+- 默认绑定
+
+  > 在普通函数调用（函数直接调用）中，`this` 指向全局对象（非严格模式）或 `undefined`（严格模式）。
+
+  ```js
+  function showThis() {
+      console.log(this);
+  }
+  showThis(); // 在浏览器中输出 window 对象，或在严格模式下输出 undefined
+  ```
+
+- 隐式绑定
+
+  > 当函数作为对象的方法调用时，`this` 指向调用该方法的对象。
+
+  ```js
+  const obj = {
+      name: 'MyObject',
+      showThis: function() {
+          console.log(this.name);
+      }
+  };
+  obj.showThis(); // 输出 "MyObject"
+  ```
+
+- 显式绑定
+
+  > 使用 `call()`、`apply()` 或 `bind()` 方法可以明确指定 `this` 的值
+
+  ```js
+  function greet() {
+      console.log(`Hello, ${this.name}`);
+  }
+  const user = { name: 'Alice' };
+  greet.call(user); // 输出 "Hello, Alice"
+  ```
+
+- new 绑定
+
+  > 当函数用作构造函数时，`this` 指向新创建的对象实例。
+
+  ```js
+  function Person(name) {
+      this.name = name;
+  }
+  const person = new Person('Bob');
+  console.log(person.name); // 输出 "Bob"
+  ```
+
+- 箭头函数中的 `this`
+
+  > 箭头函数不创建自己的 `this` 上下文，而是继承外围作用域的 `this` 值
+
+  ```js
+  const obj = {
+      name: 'MyObject',
+      regularFunc: function() {
+          setTimeout(function() {
+              console.log(this.name); // undefined，因为 this 指向全局对象
+          }, 100);
+      },
+      arrowFunc: function() {
+          setTimeout(() => {
+              console.log(this.name); // "MyObject"，因为箭头函数继承了外部的 this
+          }, 100);
+      }
+  };
+  ```
+
+
+
+
 
 
 
@@ -3028,12 +3105,20 @@ ps：
 ## 8. 对象
 
 > 对象是包含相关数据和/或功能的集合。它们通常由多个变量和函数组成，这些变量和函数称为对象的属性和方法。
+>
+> 对象是存在堆内存中的，对象中的非引用属性，存在该对象的内存空间中，如果是引用类型的属性，其值是存在堆内存中的另外一块单独的内存中。依次类推
+
+![image-20240711152424328](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240711152424328.png)
 
 
 
 ### 1. 创建对象
 
 - 对象字面量
+
+  > 这是最简单和最常用的方法
+  >
+  > 优点：简洁，适合创建单个对象。
 
   ```js
   
@@ -3065,19 +3150,28 @@ ps：
 
 - 构造函数
 
+  > 使用构造函数可以创建多个具有相同结构的对象
+  >
+  > 优点：可以创建多个类似的对象，支持初始化。
+
   ```js
   function Person(name, age) {
       this.name = name;
       this.age = age;
       this.greet = function() {
-          console.log("Hello!");
+          console.log(`Hello, I'm ${this.name}`);
       };
   }
   
-  const john = new Person("John", 30);
+  const person1 = new Person("Bob", 25);
+  const person2 = new Person("Charlie", 35);
   ```
 
 - Object.create() 方法
+
+  > 基于现有对象创建新对象
+  >
+  > 优点：可以直接指定对象的原型。
 
   ```js
   const personProto = {
@@ -3091,7 +3185,122 @@ ps：
   person.age = 30;
   ```
 
+- 类（ES6+）
+
+  > ES6引入了类语法，使对象创建更接近传统的面向对象语言
+  >
+  > 优点：语法清晰，支持继承，方法在原型上共享。
+
+  ```js
+  class Person {
+      constructor(name, age) {
+          this.name = name;
+          this.age = age;
+      }
   
+      greet() {
+          console.log(`Hello, I'm ${this.name}`);
+      }
+  }
+  
+  const person = new Person("Eve", 28);
+  ```
+
+- 工厂函数
+
+  > 工厂函数是返回对象的函数
+  >
+  > 优点：可以封装复杂的创建逻辑，不使用 `new` 关键字。
+
+  ```js
+  function createPerson(name, age) {
+      return {
+          name,
+          age,
+          greet() {
+              console.log(`Hello, I'm ${this.name}`);
+          }
+      };
+  }
+  
+  const person = createPerson("Frank", 33);
+  ```
+
+- 单例模式
+
+  >只需要一个对象实例时
+  >
+  >优点：确保只有一个实例，全局访问点。
+
+  ```js
+  const Singleton = (function() {
+      let instance;
+  
+      function createInstance() {
+          return {
+              name: "Singleton",
+              method() {
+                  console.log("Method called");
+              }
+          };
+      }
+  
+      return {
+          getInstance: function() {
+              if (!instance) {
+                  instance = createInstance();
+              }
+              return instance;
+          }
+      };
+  })();
+  
+  const object1 = Singleton.getInstance();
+  const object2 = Singleton.getInstance();
+  console.log(object1 === object2); // true
+  ```
+
+- Object.assign()
+
+  > 用于合并多个对象的属性
+  >
+  > 优点：可以快速组合多个对象的属性。
+
+  ```js
+  const baseObject = { a: 1, b: 2 };
+  const newObject = Object.assign({}, baseObject, { c: 3 });
+  console.log(newObject); // { a: 1, b: 2, c: 3 }
+  ```
+
+- 展开运算符（ES6+）
+
+  > 类似于 `Object.assign()`，但语法更简洁
+  >
+  > 语法简洁，易读
+
+  ```js
+  const baseObject = { a: 1, b: 2 };
+  const newObject = { ...baseObject, c: 3 };
+  console.log(newObject); // { a: 1, b: 2, c: 3 }
+  ```
+
+
+
+**每种方法都有其适用场景**
+
+- 对象字面量适合简单对象。
+
+- 构造函数和类适合创建多个类似对象。
+
+- `Object.create()` 适合需要特定原型的对象。
+
+- 工厂函数适合需要封装创建逻辑的场景。
+
+- 单例模式适合整个应用只需一个实例的对象。
+
+- `Object.assign()` 和展开运算符适合对象合并和浅拷贝。
+
+
 
 ### 2. 操作对象
 
@@ -3500,3 +3709,814 @@ Object.defineProperty(person, 'age', {
 });
 ```
 
+
+
+
+
+### 4. 全局对象
+
+> 浏览器中存在一个全局对象object -> window
+>
+> 1. 查找变量时, 最终会找到window头上
+> 2. 将一些浏览器全局提供给我们的变量/函数/对象, 放在window对象上面
+> 3. 使用var定义的变量会被默认添加到window上面，当做window对象的属性，通过函数声明的方式创建的函数会被当做window对象的方法。
+
+```js
+console.log(window)
+
+// 使用var定义变量
+var message = "Hello World"
+
+function foo() {
+    // 自己的作用域
+    // abc()
+    // alert("Hello World")
+    console.log(window.console === console)
+
+    // 创建一个对象
+    // var obj = new Object()
+    console.log(window.Object === Object)
+
+    // DOM
+    console.log(document)
+
+    // window.message
+    console.log(window.message)
+}
+foo()
+```
+
+
+
+
+
+## 9. 包装类
+
+> JavaScript中的基本类型（也称为原始类型）包括：字符串（String）、数字（Number）、布尔值（Boolean）、Undefined、Null、Symbol（ES6引入）和BigInt（ES2020引入）。其中，**String、Number、Boolean、Symbol和BigInt**都有对应的包装类。
+
+
+
+### 工作原理
+
+> 当你在基本类型值上调用方法时，JavaScript会临时创建一个对应的包装对象，让你能够访问这些方法。操作完成后，这个临时对象会被丢弃。
+
+```js
+let str = "Hello";
+console.log(str.toUpperCase()); // "HELLO"
+
+// 内部大致相当于：
+// let temp = new String(str);
+// console.log(temp.toUpperCase());
+// temp = null;
+```
+
+
+
+#### 1. string包装类
+
+> String对象是对字符串的包装。
+
+常用方法和属性
+
+- 访问和检索
+
+  - `charAt(index)`: 返回指定位置的字符
+
+  - `charCodeAt(index)`: 返回指定位置字符的Unicode编码
+
+  - `codePointAt(pos)`: 返回使用UTF-16编码的给定位置的值
+
+  - `indexOf(searchValue[, fromIndex])`: 返回指定值首次出现的位置
+
+  - `lastIndexOf(searchValue[, fromIndex])`: 返回指定值最后出现的位置
+
+    ```js
+    let str = "Hello, World!";
+    
+    // charAt(index) - 返回指定位置的字符
+    console.log(str.charAt(7)); // 'W'
+    
+    // charCodeAt(index) - 返回指定位置字符的Unicode值
+    console.log(str.charCodeAt(0)); // 72 ('H'的Unicode值)
+    
+    // codePointAt(pos) - 返回使用UTF-16编码的给定位置的值
+    console.log(str.codePointAt(0)); // 72 (对于基本拉丁字符，与charCodeAt相同)
+    
+    // indexOf(searchValue[, fromIndex]) - 返回指定值首次出现的位置
+    console.log(str.indexOf('o')); // 4
+    console.log(str.indexOf('o', 5)); // 7 (从索引5开始搜索)
+    
+    // lastIndexOf(searchValue[, fromIndex]) - 返回指定值最后出现的位置
+    console.log(str.lastIndexOf('o')); // 7
+    console.log(str.lastIndexOf('o', 5)); // 4 (从索引5开始向后搜索)
+    ```
+
+    
+
+- 查找和匹配
+
+  - `includes(searchString[, position])`: 判断是否包含指定字符串
+  - `startsWith(searchString[, position])`: 判断是否以指定字符串开头
+  - `endsWith(searchString[, length])`: 判断是否以指定字符串结尾
+  - `match(regexp)`: 与正则表达式进行匹配
+  - `matchAll(regexp)`: 返回所有匹配的迭代器
+  - `search(regexp)`: 搜索匹配正则表达式的子串
+
+    ```js
+    let str = "Hello, World!";
+    
+    // includes(searchString[, position]) - 判断是否包含指定字符串
+    console.log(str.includes('World')); // true
+    console.log(str.includes('World', 8)); // false (从索引8开始搜索)
+    
+    // startsWith(searchString[, position]) - 判断是否以指定字符串开头
+    console.log(str.startsWith('Hello')); // true
+    console.log(str.startsWith('World', 7)); // true (从索引7开始考虑'World'作为开头)
+    
+    // endsWith(searchString[, length]) - 判断是否以指定字符串结尾
+    console.log(str.endsWith('World!')); // true
+    console.log(str.endsWith('Hello', 5)); // true (只考虑前5个字符)
+    
+    // match(regexp) - 与正则表达式进行匹配
+    console.log(str.match(/o/g)); // ['o', 'o']
+    
+    // matchAll(regexp) - 返回所有匹配的迭代器
+    let matches = [...str.matchAll(/o/g)];
+    console.log(matches.map(m => m.index)); // [4, 7]
+    
+    // search(regexp) - 搜索匹配正则表达式的子串
+    console.log(str.search(/World/)); // 7
+    ```
+
+    
+
+- 提取和分割
+
+  - `slice(beginIndex[, endIndex])`: 提取字符串的一部分
+  - `substring(indexStart[, indexEnd])`: 返回指定两个下标之间的字符
+  - `substr(start[, length])`: 从指定位置开始提取指定长度的字符串（已废弃）
+  - `split([separator[, limit]])`: 将字符串分割为数组
+
+    ```js
+    let str = "Hello, World!";
+    
+    // slice(beginIndex[, endIndex]) - 提取字符串的一部分
+    console.log(str.slice(7)); // "World!"
+    console.log(str.slice(0, 5)); // "Hello"
+    
+    // substring(indexStart[, indexEnd]) - 返回指定两个下标之间的字符
+    console.log(str.substring(7)); // "World!"
+    console.log(str.substring(0, 5)); // "Hello"
+    
+    // split([separator[, limit]]) - 将字符串分割为数组
+    console.log(str.split(', ')); // ["Hello", "World!"]
+    console.log(str.split('', 5)); // ["H", "e", "l", "l", "o"]
+    ```
+
+    
+
+- 修改和替换
+
+  - `replace(searchFor, replaceWith)`: 替换匹配的子串
+  - `replaceAll(searchFor, replaceWith)`: 替换所有匹配的子串
+  - `toLowerCase()`: 转换为小写
+  - `toUpperCase()`: 转换为大写
+  - `toLocaleLowerCase([locale, ...locales])`: 根据区域设置转换为小写
+  - `toLocaleUpperCase([locale, ...locales])`: 根据区域设置转换为大写
+  - `trim()`: 删除两端空白字符
+  - `trimStart()` / `trimLeft()`: 删除开头空白字符
+  - `trimEnd()` / `trimRight()`: 删除结尾空白字符
+  - `padStart(targetLength [, padString])`: 在开头填充字符串
+  - `padEnd(targetLength [, padString])`: 在结尾填充字符串
+  - `repeat(count)`: 重复字符串指定次数
+
+    ```js
+    let str = "Hello, World!";
+    
+    // replace(searchFor, replaceWith) - 替换匹配的子串
+    console.log(str.replace('World', 'JavaScript')); // "Hello, JavaScript!"
+    
+    // replaceAll(searchFor, replaceWith) - 替换所有匹配的子串
+    console.log("Hello World, World!".replaceAll('World', 'JavaScript')); // "Hello JavaScript, JavaScript!"
+    
+    // toLowerCase() - 转换为小写
+    console.log(str.toLowerCase()); // "hello, world!"
+    
+    // toUpperCase() - 转换为大写
+    console.log(str.toUpperCase()); // "HELLO, WORLD!"
+    
+    // toLocaleLowerCase([locale, ...locales]) - 根据区域设置转换为小写
+    console.log(str.toLocaleLowerCase('tr')); // "hello, world!" (土耳其语区域)
+    
+    // toLocaleUpperCase([locale, ...locales]) - 根据区域设置转换为大写
+    console.log(str.toLocaleUpperCase('tr')); // "HELLO, WORLD!" (土耳其语区域)
+    
+    // trim() - 删除两端空白字符
+    console.log("  Hello, World!  ".trim()); // "Hello, World!"
+    
+    // trimStart() / trimLeft() - 删除开头空白字符
+    console.log("  Hello, World!  ".trimStart()); // "Hello, World!  "
+    
+    // trimEnd() / trimRight() - 删除结尾空白字符
+    console.log("  Hello, World!  ".trimEnd()); // "  Hello, World!"
+    
+    // padStart(targetLength [, padString]) - 在开头填充字符串
+    console.log('5'.padStart(3, '0')); // "005"
+    
+    // padEnd(targetLength [, padString]) - 在结尾填充字符串
+    console.log('5'.padEnd(3, '0')); // "500"
+    
+    // repeat(count) - 重复字符串指定次数
+    console.log('Ha'.repeat(3)); // "HaHaHa"
+    ```
+
+    
+
+- 连接和合并
+
+  - `concat(str1, str2, ...)`: 连接两个或多个字符串
+
+    ```js
+    // concat(str1, str2, ...) - 连接两个或多个字符串
+    let str1 = "Hello";
+    let str2 = "World";
+    console.log(str1.concat(", ", str2, "!")); // "Hello, World!"
+    ```
+
+    
+
+- 比较和排序
+
+  - `localeCompare(compareString[, locales[, options]])`: 比较字符串
+
+    ```js
+    // localeCompare(compareString[, locales[, options]]) - 比较字符串
+    console.log('a'.localeCompare('b')); // -1
+    console.log('b'.localeCompare('a')); // 1
+    console.log('a'.localeCompare('a')); // 0
+    ```
+
+    
+
+- 转换和规范化
+
+  - `toString()`: 返回字符串对象的字符串形式
+  - `valueOf()`: 返回字符串对象的原始值
+  - `normalize([form])`: 将字符串正规化为指定的Unicode形式
+
+    ```js
+    // toString() - 返回字符串对象的字符串形式
+    let strObj = new String("Hello");
+    console.log(strObj.toString()); // "Hello"
+    
+    // valueOf() - 返回字符串对象的原始值
+    console.log(strObj.valueOf()); // "Hello"
+    
+    // normalize([form]) - 将字符串正规化为指定的Unicode形式
+    let str = '\u0041\u006d\u00e9\u006c\u0069\u0065';
+    console.log(str.normalize('NFC')); // "Amélie"
+    ```
+
+    
+
+- 静态方法（String构造函数的方法）
+
+  - `String.fromCharCode(num1[, ...[, numN]])`: 从UTF-16代码单元创建字符串
+  - `String.fromCodePoint(num1[, ...[, numN]])`: 从代码点创建字符串
+  - `String.raw(callSite, ...substitutions)`: 获取模板字符串的原始字符串
+
+    ```js
+    // String.fromCharCode(num1[, ...[, numN]]) - 从UTF-16代码单元创建字符串
+    console.log(String.fromCharCode(72, 101, 108, 108, 111)); // "Hello"
+    
+    // String.fromCodePoint(num1[, ...[, numN]]) - 从代码点创建字符串
+    console.log(String.fromCodePoint(72, 101, 108, 108, 111)); // "Hello"
+    
+    // String.raw(callSite, ...substitutions) - 获取模板字符串的原始字符串
+    console.log(String.raw`Hello\nWorld`); // "Hello\nWorld" (反斜杠不被解释)
+    ```
+
+    
+
+- 属性
+
+  - `length`: 返回字符串的长度
+  
+    ```js
+    // length - 返回字符串的长度
+    let str = "Hello, World!";
+    console.log(str.length); // 13
+    ```
+  
+    
+
+
+
+#### 2. Number 包装类
+
+> Number对象是对数字的包装。
+
+常用方法和属性
+
+- `toFixed(digits)`: 格式化为指定小数位数的字符串
+- `toPrecision(precision)`: 格式化为指定精度的字符串
+- `toString(radix)`: 转换为字符串，可指定基数
+- `parseInt(string, radix)`: 将字符串解析为整数（静态方法）
+- `parseFloat(string)`: 将字符串解析为浮点数（静态方法）
+- `isNaN(value)`: 检查是否为NaN（静态方法）
+- `isFinite(value)`: 检查是否为有限数（静态方法）
+
+```js
+// Number 类型的方法和属性
+
+// 1. 数值转换方法
+let num = 123.456;
+
+// toString() - 将数字转换为字符串
+console.log(num.toString()); // "123.456"
+console.log(num.toString(2)); // "1111011.0111010010111100011010101" (2进制)
+
+// toFixed() - 格式化小数位数
+console.log(num.toFixed(2)); // "123.46"
+
+// toPrecision() - 格式化数字的精度
+console.log(num.toPrecision(4)); // "123.5"
+
+// toExponential() - 转换为指数表示法
+console.log(num.toExponential(2)); // "1.23e+2"
+
+// 2. 数值检查方法
+// isFinite() - 检查是否为有限数
+console.log(Number.isFinite(num)); // true
+console.log(Number.isFinite(Infinity)); // false
+
+// isInteger() - 检查是否为整数
+console.log(Number.isInteger(123)); // true
+console.log(Number.isInteger(123.45)); // false
+
+// isNaN() - 检查是否为NaN
+console.log(Number.isNaN(NaN)); // true
+console.log(Number.isNaN(123)); // false
+
+// 3. 数学常量
+console.log(Number.EPSILON); // 最小精度
+console.log(Number.MAX_SAFE_INTEGER); // JavaScript 中最大的安全整数
+console.log(Number.MIN_SAFE_INTEGER); // JavaScript 中最小的安全整数
+console.log(Number.MAX_VALUE); // 可表示的最大正数
+console.log(Number.MIN_VALUE); // 可表示的最小正数
+console.log(Number.POSITIVE_INFINITY); // 正无穷大
+console.log(Number.NEGATIVE_INFINITY); // 负无穷大
+
+// 4. 解析方法
+// parseInt() - 将字符串解析为整数
+console.log(Number.parseInt("123")); // 123
+console.log(Number.parseInt("123.45")); // 123
+console.log(Number.parseInt("123", 16)); // 291 (16进制)
+
+// parseFloat() - 将字符串解析为浮点数
+console.log(Number.parseFloat("123.45")); // 123.45
+console.log(Number.parseFloat("123.45.67")); // 123.45
+
+// 5. 符号相关方法
+// Math.sign() - 返回数字的符号
+console.log(Math.sign(5)); // 1
+console.log(Math.sign(-5)); // -1
+console.log(Math.sign(0)); // 0
+
+// 6. 比较方法
+let num1 = 123, num2 = 456;
+
+// Math.max() - 返回最大值
+console.log(Math.max(num1, num2)); // 456
+
+// Math.min() - 返回最小值
+console.log(Math.min(num1, num2)); // 123
+```
+
+
+
+#### 3. Boolean 包装类
+
+> Boolean对象是对布尔原始类型的包装。
+
+常用方法
+
+- `toString()`: 转换为字符串 "true" 或 "false"
+- `valueOf()`: 返回原始布尔值
+
+```js
+let bool = new Boolean(true);
+console.log(bool.toString()); // "true"
+console.log(bool.valueOf()); // true
+```
+
+
+
+
+
+#### 4. Symbol（ES6+）
+
+> Symbol是ES6引入的新的原始数据类型，用于创建唯一的标识符。
+
+常用方法和属性
+
+- `Symbol.for(key)`: 搜索现有的symbol，如果找到则返回它，否则创建一个新的symbol
+- `Symbol.keyFor(sym)`: 获取全局symbol的key
+- `description`: 返回symbol的可选描述
+
+```js
+let sym1 = Symbol("my symbol");
+let sym2 = Symbol.for("shared symbol");
+console.log(sym1.description); // "my symbol"
+console.log(Symbol.keyFor(sym2)); // "shared symbol"
+```
+
+
+
+
+
+#### 5. BigInt（ES11+）
+
+> BigInt是用于表示任意精度整数的数据类型。
+
+常用方法
+
+- `toString(radix)`: 转换为字符串，可指定基数
+- `valueOf()`: 返回BigInt的原始值
+
+```js
+let bigInt = 1234567890123456789012345678901234567890n;
+console.log(bigInt.toString()); // "1234567890123456789012345678901234567890"
+console.log(bigInt.toString(16)); // "3b9ac9ff8e7ce5a45c9c7c25c21a3d5fn"
+```
+
+
+
+
+
+### 注意事项
+
+1. 虽然可以使用 `new String()`, `new Number()`, 或 `new Boolean()` 创建包装对象，但通常不推荐这样做，因为它可能导致意外的行为。
+2. `null` 和 `undefined` 没有对应的包装类。
+3. 使用包装类的方法不会改变原始值，而是返回一个新值。
+4. ES6+引入的 `Symbol` 和 `BigInt` 类型有一些特殊性，它们的行为可能与其他原始类型略有不同。
+
+
+
+
+
+## 10. 内置类
+
+### JavaScript内置类
+
+JavaScript中的主要内置类包括:
+
+1. Object
+2. Array
+3. String
+4. Number
+5. Boolean
+6. Function
+7. Date
+8. RegExp
+9. Error
+10. Math
+
+下面详细列出每个类的主要属性和方法:
+
+#### 1. Object
+
+属性:
+- `constructor`: 返回创建此对象的构造函数
+
+方法:
+- `hasOwnProperty(prop)`: 检查对象是否具有指定的属性
+- `isPrototypeOf(object)`: 检查当前对象是否在另一个对象的原型链中
+- `propertyIsEnumerable(prop)`: 检查指定属性是否可枚举
+- `toString()`: 返回对象的字符串表示
+- `valueOf()`: 返回对象的原始值
+
+```js
+// Object 类的方法和属性
+
+// 创建一个示例对象
+let exampleObj = {
+    name: "测试对象",
+    value: 42
+};
+
+// 1. Object 构造函数方法
+
+// Object.assign() - 将一个或多个源对象的可枚举属性复制到目标对象
+let targetObj = { a: 1 };
+let sourceObj = { b: 2 };
+console.log(Object.assign(targetObj, sourceObj)); // { a: 1, b: 2 }
+
+// Object.create() - 使用指定的原型对象和属性创建一个新对象
+let prototypeObj = { greet() { console.log("你好!"); } };
+let newObj = Object.create(prototypeObj);
+newObj.greet(); // 输出: 你好!
+
+// Object.defineProperty() - 在对象上定义新属性或修改现有属性
+Object.defineProperty(exampleObj, 'readOnlyProp', {
+    value: 'This is read-only',
+    writable: false
+});
+console.log(exampleObj.readOnlyProp); // This is read-only
+exampleObj.readOnlyProp = "尝试修改"; // 在严格模式下会抛出错误
+console.log(exampleObj.readOnlyProp); // 仍然是: This is read-only
+
+// Object.defineProperties() - 在对象上定义新的或修改现有的多个属性
+Object.defineProperties(exampleObj, {
+    prop1: { value: 42, writable: true },
+    prop2: { value: '你好', writable: false }
+});
+console.log(exampleObj.prop1, exampleObj.prop2); // 42 '你好'
+
+// Object.entries() - 返回对象自身可枚举属性的键值对数组
+console.log(Object.entries(exampleObj)); // [['name', '测试对象'], ['value', 42], ...]
+
+// Object.freeze() - 冻结对象，防止添加新属性和修改现有属性
+Object.freeze(exampleObj);
+exampleObj.newProp = "新属性"; // 在严格模式下会抛出错误
+console.log(exampleObj.newProp); // undefined
+
+// Object.fromEntries() - 将键值对列表转换为对象
+let entries = [['name', 'Alice'], ['age', 30]];
+let objFromEntries = Object.fromEntries(entries);
+console.log(objFromEntries); // { name: 'Alice', age: 30 }
+
+// Object.getOwnPropertyDescriptor() - 返回对象指定属性的属性描述符
+console.log(Object.getOwnPropertyDescriptor(exampleObj, 'name'));
+// { value: '测试对象', writable: true, enumerable: true, configurable: true }
+
+// Object.getOwnPropertyDescriptors() - 返回对象所有自有属性的属性描述符
+console.log(Object.getOwnPropertyDescriptors(exampleObj));
+
+// Object.getOwnPropertyNames() - 返回对象所有自有属性的名称数组
+console.log(Object.getOwnPropertyNames(exampleObj)); // ['name', 'value', 'readOnlyProp', 'prop1', 'prop2']
+
+// Object.getOwnPropertySymbols() - 返回对象所有自有 Symbol 属性的数组
+let sym = Symbol('testSymbol');
+exampleObj[sym] = 'Symbol value';
+console.log(Object.getOwnPropertySymbols(exampleObj)); // [Symbol(testSymbol)]
+
+// Object.getPrototypeOf() - 返回指定对象的原型
+console.log(Object.getPrototypeOf(exampleObj) === Object.prototype); // true
+
+// Object.is() - 判断两个值是否相同
+console.log(Object.is(NaN, NaN)); // true
+console.log(Object.is(0, -0)); // false
+
+// Object.isExtensible() - 判断对象是否可扩展
+console.log(Object.isExtensible(exampleObj)); // false (因为之前被冻结了)
+
+// Object.isFrozen() - 判断对象是否被冻结
+console.log(Object.isFrozen(exampleObj)); // true
+
+// Object.isSealed() - 判断对象是否被密封
+console.log(Object.isSealed(exampleObj)); // true
+
+// Object.keys() - 返回对象自身可枚举属性的键名数组
+console.log(Object.keys(exampleObj)); // ['name', 'value', 'prop1', 'prop2']
+
+// Object.preventExtensions() - 防止对象被扩展
+let extensibleObj = { a: 1 };
+Object.preventExtensions(extensibleObj);
+extensibleObj.b = 2; // 在严格模式下会抛出错误
+console.log(extensibleObj.b); // undefined
+
+// Object.seal() - 密封对象，防止添加新属性并将所有现有属性标记为不可配置
+let sealedObj = { x: 42 };
+Object.seal(sealedObj);
+sealedObj.y = 100; // 在严格模式下会抛出错误
+delete sealedObj.x; // 在严格模式下会抛出错误
+console.log(sealedObj); // { x: 42 }
+
+// Object.setPrototypeOf() - 设置对象的原型
+let protoObj = { protoMethod() { console.log("我是原型方法"); } };
+let objWithProto = {};
+Object.setPrototypeOf(objWithProto, protoObj);
+objWithProto.protoMethod(); // 输出: 我是原型方法
+
+// Object.values() - 返回对象自身可枚举属性的值的数组
+console.log(Object.values(exampleObj)); // ['测试对象', 42, 42, '你好']
+
+// 2. Object 实例方法
+
+// hasOwnProperty() - 检查对象是否具有指定的属性
+console.log(exampleObj.hasOwnProperty('name')); // true
+
+// isPrototypeOf() - 检查一个对象是否存在于另一个对象的原型链中
+console.log(Object.prototype.isPrototypeOf(exampleObj)); // true
+
+// propertyIsEnumerable() - 判断指定属性是否可枚举
+console.log(exampleObj.propertyIsEnumerable('name')); // true
+
+// toString() - 返回对象的字符串表示
+console.log(exampleObj.toString()); // [object Object]
+
+// valueOf() - 返回指定对象的原始值
+console.log(exampleObj.valueOf()); // 返回对象本身
+
+// 3. 其他重要属性
+
+// constructor - 指向创建此对象的构造函数
+console.log(exampleObj.constructor === Object); // true
+
+// __proto__ - 指向对象的原型（不推荐直接使用）
+console.log(exampleObj.__proto__ === Object.prototype); // true
+```
+
+
+
+#### 2. Array
+
+属性:
+- `length`: 数组的长度
+
+方法:
+- `push()`, `pop()`: 在数组末尾添加/删除元素
+- `unshift()`, `shift()`: 在数组开头添加/删除元素
+- `splice()`: 在指定位置添加或删除元素
+- `slice()`: 返回数组的一部分
+- `concat()`: 合并数组
+- `join()`: 将数组元素连接成字符串
+- `forEach()`, `map()`, `filter()`, `reduce()`: 用于遍历和处理数组的高阶函数
+
+#### 3. String
+
+属性:
+- `length`: 字符串的长度
+
+方法:
+- `charAt()`, `charCodeAt()`: 返回指定位置的字符或其Unicode值
+- `substring()`, `slice()`: 提取字符串的一部分
+- `indexOf()`, `lastIndexOf()`: 查找子字符串
+- `toUpperCase()`, `toLowerCase()`: 大小写转换
+- `trim()`: 去除字符串两端的空白
+- `split()`: 将字符串分割成数组
+- `replace()`: 替换字符串中的内容
+
+#### 4. Number
+
+属性:
+- `MAX_VALUE`, `MIN_VALUE`: 最大和最小可表示的数
+- `POSITIVE_INFINITY`, `NEGATIVE_INFINITY`: 正无穷和负无穷
+- `NaN`: 非数值
+
+方法:
+- `toFixed()`: 格式化小数
+- `toPrecision()`: 格式化数字的精度
+- `toString()`: 将数字转换为字符串
+
+#### 5. Boolean
+
+方法:
+- `toString()`: 返回布尔值的字符串表示
+- `valueOf()`: 返回布尔值的原始值
+
+#### 6. Function
+
+属性:
+- `length`: 函数期望的参数个数
+- `name`: 函数的名称
+
+方法:
+- `call()`, `apply()`: 以指定的this值和参数调用函数
+- `bind()`: 创建一个新函数，绑定指定的this值和部分参数
+
+#### 7. Date
+
+方法:
+- `getFullYear()`, `getMonth()`, `getDate()`: 获取年、月、日
+- `getHours()`, `getMinutes()`, `getSeconds()`: 获取时、分、秒
+- `setFullYear()`, `setMonth()`, `setDate()`: 设置年、月、日
+- `toString()`, `toLocaleString()`: 返回日期的字符串表示
+
+```js
+// 创建Date对象的方式
+// 1.没有传入任何的参数, 获取到当前时间
+var date1 = new Date()
+console.log(date1)
+
+// 2.传入参数: 时间字符串
+var date2 = new Date("2022-08-08")
+console.log(date2)
+
+// 3.传入具体的年月日时分秒毫秒
+var date3 = new Date(2033, 10, 10, 9, 8, 7, 333)
+console.log(date3)
+
+// 4.传入一个Unix时间戳
+// 1s -> 1000ms
+var date4 = new Date(10004343433)
+console.log(date4)
+
+var date = new Date()
+
+console.log(date)
+console.log(date.toDateString())
+console.log(date.toISOString())
+
+
+var date = new Date()
+
+console.log(date)
+console.log(date.toISOString())
+
+// 1.获取想要的时间信息
+var year = date.getFullYear()
+var month = date.getMonth() + 1
+var day = date.getDate()
+var hour = date.getHours()
+var minute = date.getMinutes()
+var second = date.getSeconds()
+console.log(year, month, day, hour, minute, second)
+console.log(`${year}/${month}/${day} ${hour}:${minute}:${second}`)
+
+var weekday = date.getDay() // 一周中的第几天
+console.log(weekday)
+
+
+// 2.也可以给date设置时间(了解)
+date.setFullYear(2033)
+// 自动校验
+date.setDate(32)
+console.log(date)
+
+
+// Date对象, 转成时间戳
+var date = new Date()
+var date2 = new Date("2033-03-03")
+
+// 方法一: 当前时间的时间戳
+var timestamp1 = Date.now()
+console.log(timestamp1)
+
+// 方法二/三将一个date对象转成时间戳
+var timestamp2 = date.getTime()
+var timestamp3 = date2.valueOf()
+console.log(timestamp2, timestamp3)
+
+// 方法四: 了解
+console.log(+date)
+
+
+// 计算这个操作所花费的时间
+var startTime = Date.now()
+for (var i = 0; i < 100000; i++) {
+    console.log(i)
+}
+var endTime = Date.now()
+console.log("执行100000次for循环的打印所消耗的时间:", endTime - startTime);
+
+
+// 封装一个简单函数
+function testPerformance(fn) {
+    var startTime = Date.now()
+    fn()
+    var endTime = Date.now()
+    }
+
+// Date.parse(str) 方法可以从一个字符串中读取日期，并且输出对应的Unix时间戳。
+// Date.parse(str) 
+// 	作用等同于 new Date(dateString).getTime() 操作；
+//  需要符合 RFC2822 或 ISO 8601 日期格式的字符串；
+//		比如YYYY-MM-DDTHH:mm:ss.sssZ
+//	其他格式也许也支持，但结果不能保证一定正常；
+//  如果输入的格式不能被解析，那么会返回NaN；
+var time1 = Date.parse("2024-07-07T16:00:00.000Z")
+console.log(time1)
+```
+
+
+
+#### 8. RegExp
+
+属性:
+- `global`, `ignoreCase`, `multiline`: 正则表达式的标志
+
+方法:
+- `test()`: 测试字符串是否匹配正则表达式
+- `exec()`: 在字符串中执行匹配搜索
+
+#### 9. Error
+
+属性:
+- `name`: 错误名称
+- `message`: 错误信息
+
+方法:
+- `toString()`: 返回错误的字符串表示
+
+#### 10. Math (静态对象)
+
+属性:
+- `PI`, `E`: 数学常量
+
+方法:
+- `abs()`, `max()`, `min()`: 绝对值、最大值、最小值
+- `round()`, `floor()`, `ceil()`: 四舍五入、向下取整、向上取整
+- `random()`: 生成随机数
+- `sin()`, `cos()`, `tan()`: 三角函数
