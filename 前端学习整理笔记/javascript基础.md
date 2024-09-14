@@ -3616,13 +3616,12 @@ for (let key in descriptors) {
 **可枚举 vs 不可枚举**
 
 1. **可枚举属性**：
-
    - 在 `for...in` 循环中会被遍历
-
+   
    - 会被 `Object.keys()` 方法返回
-
+   
    - 会被 `JSON.stringify()` 序列化
-
+   
 2. **不可枚举属性**：
 
    - 不会在 `for...in` 循环中被遍历
@@ -4520,3 +4519,1069 @@ console.log(time1)
 - `round()`, `floor()`, `ceil()`: 四舍五入、向下取整、向上取整
 - `random()`: 生成随机数
 - `sin()`, `cos()`, `tan()`: 三角函数
+
+
+
+## 11. DOM
+
+> DOM全称为：文档对象模型（Document Object Model），将页面的所有内容表示为可以修改的对象。是浏览器给我们提供操作页面的API。DOM把HTML文档表示为一个树状结构，其中每个节点代表文档的一部分，比如元素、属性、文本等。
+
+
+
+### 1. DOM类型继承图
+
+![image-20240910105029028](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240910105029028.png)
+
+### 2. document对象
+
+- Document节点表示整个载入的网页，它的实例是全局的**document对象**
+
+  - 对DOM的所有操作都是**从document对象开始**的
+  - 它是DOM的入口点，可以从**document**开始去访问任何节点元素
+
+- 对于最顶层的html、head、body元素，我们可以直接在document对象中获取到：
+
+  - html元素：`<html>` =  document.documentElement
+  - body元素：`<body>` = document.body
+  - head元素：`<head>`  = document.head
+  - 文档声明：`<!DOCTYPE html>` = document.doctype
+
+  
+
+### 3. 节点之间的导航
+
+- 如果我们获取到**一个节点（Node）**后，可以根据**这个节点去获取其他的节点**，我们称之为**节点之间的导航**。
+
+- **节点之间存在如下的关系：**
+
+  - 父节点：`parentNode`
+  - 前兄弟节点：`previousSibling`
+  - 后兄弟节点：`nextSibling`
+  - 子节点：`childNodes`
+  - 第一个子节点：`firstChild`
+  - 最后一个子节点：`lastChild`
+
+  ![image-20240910111935289](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240910111935289.png)
+
+### 4. 元素之间的导航
+
+- 如果我们获取到一个**元素（Element）**后，可以根据**这个元素去获取其他的元素**，我们称之为**元素之间的导航**。
+
+- 元素之间存在如下的关系：
+
+  - 父元素：`parentElement`
+  - 前兄弟元素节点：`previousElementSibling`
+  - 后兄弟元素节点：`nextElementSibling`
+  - 子元素节点：`children`
+  - 第一个元素子节点：`firstElementChild`
+  - 最后一个元素子节点：`lastElementChild`
+
+  ![image-20240910112532561](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240910112532561.png)
+
+
+
+### 5. 表格元素的导航
+
+- **table**元素支持以下这些属性：
+  - **table.rows** - `<tr>`元素的集合
+  - **table.caption/tHead/tFoot** - 引用元素`<caption> <thead> <tfoot>`
+  - **table.tBodies** - `<tbody>`元素的集合
+- **thead，tfoot，tbody**元素提供了**rows**属性：
+  - tbody.rows - 表格内部`<tr>`元素的集合
+- **tr**：
+  - **tr.cells** - 在给定 **tr** 中的 **td** 和 **th** 单元格的集合
+  - **tr.sectionRowIndex** - 给定的 ` <tr>` 在封闭的 `<thead>/<tbody>/<tfoot>` 中的位置（索引）
+  - **tr.rowIndex** - 在整个表格中 `<tr>` 的编号（包括表格的所有行）
+- **td 和 th**
+  - **td.cellIndex** - 在封闭的 `<tr>` 中单元格的编号
+
+
+
+### 6. 获取元素的方法
+
+- **DOM为我们提供了获取元素的方法**
+
+  | 方法名                 | 搜索方式     | 可以在元素上调用 | 实时的 |
+  | ---------------------- | ------------ | ---------------- | ------ |
+  | **querySelector**      | CSS-selector | ✔                | -      |
+  | **querySelectorAll**   | CSS-selector | ✔                | -      |
+  | getElementById         | id           | -                | -      |
+  | getElementsByName      | name         | -                | ✔      |
+  | getElementsByTagName   | tag or '*'   | ✔                | ✔      |
+  | getElementsByClassName | class        | ✔                | ✔      |
+
+
+
+### 7. 节点共有的属性 
+
+- **nodeType**属性
+
+  - nodeType属性提供了一种获取**节点类型**的方法
+  - 它有一个**数值型值**（numberic value）
+
+- 常见的节点类型有：
+
+  - | 常量                    | 值   | 描述                                                         |
+    | ----------------------- | ---- | ------------------------------------------------------------ |
+    | Node.ELEMENT_NODE       | 1    | 一个 元素 节点，例如 `<p>` 和 `<div>`。                      |
+    | Node.TEXT_NODE          | 3    | **Element** 或者 **Attr** 中实际的 文字                      |
+    | Node.COMMENT_NODE       | 8    | 一个 **Comment** 节点。                                      |
+    | Node.DOCUMENT_NODE      | 9    | 一个 **Document** 节点                                       |
+    | Node.DOCUMENT_TYPE_NODE | 10   | 描述文档类型的 DocumentType 节点。例如 `<!DOCTYPE html>` 就是用于 HTML5 的。 |
+
+
+
+- **nodeName**属性：获取node节点的名字
+- **tagName**属性：获取元素的标签名词
+
+
+
+- **tagName和 nodeName之间有什么不同呢？**
+  - tagName 属性仅适用于 Element 节点
+  - nodeName 是为任意 Node 定义的
+    - 对于元素，它的意义与 tagName 相同，所以使用哪一个都是可以的
+    - 对于其他节点类型（text，comment 等），它拥有一个对应节点类型的字符串
+
+
+
+- **innerHTML**属性
+  - 将元素中的 HTML 获取为字符串形式；
+  - 设置元素中的内容；
+- **outerHTML** 属性
+  - 包含了元素的完整 HTML
+  - 与innerHTML 加上元素本身一样的效果；
+- **textContent** 属性
+  - 仅仅获取元素中的文本内容；
+- **innerHTML和textContent的区别：**
+  - 使用 innerHTML，我们将其“作为 HTML”插入，带有所有 HTML 标签。
+  - 使用 textContent，我们将其“作为文本”插入，所有符号（symbol）均按字面意义处理。
+
+
+
+- **nodeValue**属性
+  - 用于获取非元素节点的文本内容
+
+
+
+- **hidden**属性：也是一个全局属性，可以用于设置元素隐藏（原理：display: none;）
+
+
+
+- **DOM元素**的其他属性
+  - **value**
+    - `<input>`，`<select>` 和 `<textarea>`（HTMLInputElement，HTMLSelectElement……）的 value。
+  - **href**
+    - `<a href="...">`（HTMLAnchorElement）的 href。
+  - **id**
+    - 所有元素（HTMLElement）的 “id” 特性（attribute）的值。
+
+
+
+### 8. 元素的属性（property）和特性（attribute）
+
+- 我们知道，一个元素除了有**开始标签、结束标签、内容**之外，还有很多的**属性（attribute）**
+
+  - ![image-20240911170727060](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240911170727060.png)
+
+- 浏览器在解析HTML元素时，会将**对应的attribute**也创建出来放到**对应的元素对象**上
+
+  - 比如**id、class就是全局的attribute**，会有对应的**id、class属性**；
+  - 比如**href属性**是针对**a元素**的，**type、value属性**是针对**input元素**的；
+
+- **属性attribute的分类：**
+
+  - **标准的attribute**：某些attribute属性是标准的，比如id、class、href、type、value等；
+
+  - **非标准的attribute**：某些attribute属性是自定义的，比如abc、age、height等；
+
+  - ```html
+    <div class="box" id="main" name="why" abc="abc" age="18" height="1.88">
+    	hehe
+    </div>
+    ```
+
+    
+
+- **对于所有的attribute访问都支持如下的方法**
+
+  - **elem.hasAttribute(name)** — 检查特性是否存在。
+
+  - **elem.getAttribute(name)** — 获取这个特性值。
+
+  - **elem.setAttribute(name, value)** — 设置这个特性值。
+
+  - **elem.removeAttribute(name)** — 移除这个特性。
+
+  - **attributes**：attr对象的集合，具有name、value属性；
+
+  - ```js
+    for(var attr of boxEl.attributes) {
+        console.log(attr.name, attr.value)
+    }
+    console.log(boxEl.hasAttribute("age"))
+    console.log(boxEl.getAttribute("name"))
+    boxEl.setAttribute("name", "kobe")
+    boxEl.removeAttribute("abc")
+    ```
+
+    
+
+- **attribute具备以下特征：**
+
+  - 它们的**名字是大小写不敏感**的（id 与 ID 相同）。
+  - 它们的**值总是字符串类型**的。
+
+
+
+- 对于**标准的attribute**，会在DOM对象上创建**与其对应的property属性**
+
+  - ```js
+    console.log(boxEl.id, boxEl.className) // box main
+    console.log(boxEl.abc, boxEl.age, boxEl.height) // undefined...
+    ```
+
+
+
+
+- **在大多数情况下，它们是相互作用的**
+
+  - 改变**property**，通过**attribute**获取的值，会随着改变；
+  - 通过**attribute**操作修改，**property**的值会随着改变；
+    - 但是input的value修改只能通过attribute的方法；
+
+- **除非特别情况，大多数情况下，设置、获取attribute，推荐使用property的方式：**
+
+  - 这是因为它默认情况下是有类型的；
+
+  - ```js
+    toggleBtn.onclick = function() {
+        checkBoxInput.cheked = !checkBoxInput.checked
+    }
+    ```
+
+    
+
+- **HTML5的data-\*自定义属性**
+
+  - 它们可以在dataset属性中获取到的：
+
+  - ```html
+    <div class="box" data-name="why" data-age="18"></div>
+    <script>
+    	var boxEl = document.querySelector(".box")
+        console.log(boxEl.dataset.name)
+        console.log(boxEl.dataset.age)
+    </script>
+    ```
+
+
+
+
+
+### 9. js动态修改样式
+
+- **有时候我们会通过JavaScript来动态修改样式，这个时候我们有两个选择：**
+
+  - 选择一：在CSS中编写好对应的样式，**动态的添加class；**
+  - 选择二：**动态的修改style属性；**
+
+- **开发中如何选择呢？**
+
+  - 在大多数情况下，如果可以动态修改class完成某个功能，更**推荐使用动态class；**
+  - 如果对于某些情况，无法通过动态修改class（比如精准修改某个css属性的值），那么就可以**修改style属性；**
+
+- **元素的className和classList**
+
+  - 元素的class attribute，对应的property并非叫class，而是**className**：
+
+    - 这是因为JavaScript早期是不允许使用class这种关键字来作为对象的属性，所以DOM规范使用了className；
+    - 虽然现在JavaScript已经没有这样的限制，但是并不推荐，并且依然在使用className这个名称；
+
+  - 我们可以对className进行赋值，它会替换整个类中的字符串。
+
+    - ```js
+      var boxEl = document.querySelector(".box")
+      boxEl.className = "abc why"
+      ```
+
+  - 如果我们需要添加或者移除单个的class，那么可以使用classList属性。
+
+  - elem.classList 是一个特殊的对象：
+
+    - elem.classList.add (class) ：添加一个类
+    - elem.classList.remove(class)：添加/移除类。
+    - elem.classList.toggle(class) ：如果类不存在就添加类，存在就移除它。
+    - elem.classList.contains(class)：检查给定类，返回 true/false。
+
+  - classList是**可迭代对象**，可以通过**for of**进行遍历。
+
+- **元素的style属性**
+
+  - **如果需要单独修改某一个CSS属性，那么可以通过style来操作：**
+
+    - 对于多词（multi-word）属性，使用驼峰式 camelCase
+
+    - ```javascript
+      boxEl.style.width = "100px"
+      boxEl.style.height = "50px"
+      boxEl.style.backgroundColor = "red"
+      ```
+
+      
+
+  - 如果我们将值设置为**空字符串**，那么会使用**CSS的默认样式**：
+  
+    - ```js
+      boxEl.style.display = ""
+      ```
+  
+  - 多个样式的写法，我们需要使用cssText属性；
+  
+    - 不推荐这种用法，因为它会替换整个字符串
+  
+    - ```js
+      boxEl.style.cssText = `width: 100px; height: 100px; background-color: red;`
+      ```
+
+
+
+### 10. 元素style的读取 - getComputedStyle
+
+- **如果我们需要读取样式**
+
+  - 对于**内联样式**，是可以通过**style.***的方式读取到的
+  - 对于**style、css文件中**的样式，是**读取不到**的
+
+- 这个时候，我们可以通过**getComputedStyle**的全局函数来实现
+
+  - ```js
+    console.log(getComputedStyle(boxEl).width)
+    console.log(getComputedStyle(boxEl).height)
+    console.log(getComputedStyle(boxEl).backgroundColor)
+    ```
+
+
+
+
+
+### 11. 创建元素
+
+- document.createElement(tag)
+
+
+
+### 12. 插入元素
+
+- 插入元素的方式如下：
+  - **node.append(...nodes or strings)** —— 在 node 末尾 插入节点或字符串，
+  - **node.prepend(...nodes or strings)** —— 在 node 开头 插入节点或字符串，
+  - **node.before(...nodes or strings)** —— 在 node 前面 插入节点或字符串，
+  - **node.after(...nodes or strings)** —— 在 node 后面 插入节点或字符串，
+  - **node.replaceWith(...nodes or strings)** —— 将 node 替换为给定的节点或字符串。
+
+![image-20240912104004885](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240912104004885.png)
+
+### 13. 移除和克隆元素
+
+- **移除元素我们可以调用元素本身的remove方法**
+
+  ```js
+  boxEl.remove()
+  ```
+
+- **如果我们想要复制一个现有的元素，可以通过cloneNode方法**
+
+  - 可以传入一个**Boolean类型**的值，来决定是否是**深度克隆**；
+
+  - 深度克隆会克隆对应元素的子元素，否则不会；
+
+    ```js
+    var cloneBoxEl = boxEl.cloneNode(true)
+    document.body.append(cloneBoxEl)
+    ```
+
+    
+
+### 14. 旧的元素操作方法
+
+- parentElem.appendChild(node)
+  - 在parentElem的父元素最后位置添加一个子元素
+- parentElem.insertBefore(node, nextSibling)
+  - 在parentElem的nextSibling前面插入一个子元素
+- parentElem.replaceChild(node, oldChild)
+  - 在parentElem中，新元素替换之前的oldChild元素
+- parentElem.removeChild(node)
+  - 在parentElem中，移除某一个元素；
+
+
+
+### 15. 元素的大小、滚动
+
+- clientWidth：contentWith+padding（不包含滚动条）
+
+- clientHeight：contentHeight+padding
+
+- clientTop：border-top的宽度
+
+- clientLeft：border-left的宽度
+
+- offsetWidth：元素完整的宽度
+
+- offsetHeight：元素完整的高度
+
+- offsetLeft：距离父元素的x
+
+- offsetHeight：距离父元素的y
+
+- scrollHeight：整个可滚动的区域高度
+
+- scrollTop：滚动部分的高度
+
+  ![image-20240912105929498](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240912105929498.png)
+
+
+
+### 16. window的大小、滚动
+
+- **window的width和height**
+  - innerWidth、innerHeight：获取window窗口的宽度和高度（包含滚动条）
+  - outerWidth、outerHeight：获取window窗口的整个宽度和高度（包括调试工具、工具栏）
+  - documentElement.clientHeight、documentElement.clientWidth：获取html的宽度和高度（不包含滚动条）
+- **window的滚动位置**
+  - scrollX：X轴滚动的位置（别名pageXOffset）
+  - scrollY：Y轴滚动的位置（别名pageYOffset）
+- **也有提供对应的滚动方法**
+  - 方法 scrollBy(x,y) ：将页面滚动至 相对于当前位置的 (x, y) 位置；
+  - 方法 scrollTo(pageX,pageY) 将页面滚动至 绝对坐标；
+
+
+
+### 17. 事件（Event）
+
+- **Web页面需要经常和用户之间进行交互，而交互的过程中我们可能想要捕捉这个交互的过程：**
+
+  - 比如用户点击了某个按钮、用户在输入框里面输入了某个文本、用户鼠标经过了某个位置；
+  - 浏览器需要搭建一条JavaScript代码和事件之间的桥梁；
+  - 当某个事件发生时，让JavaScript可以相应（执行某个函数），所以我们需要针对事件编写处理程序（handler）；
+
+- **事件监听的三种方式**
+
+  1. 在script中直接监听（很少使用）；
+  2. DOM属性，通过元素的on来监听事件；
+  3. 通过EventTarget中的addEventListener来监听；
+
+  ```html
+  <!-- 直接在html中编写JavaScript代码(了解) -->
+  <button onclick="console.log('按钮1发生了点击~');">按钮1</button>
+  <script>
+      // 2. onclick属性
+      function handleClick01() {
+          console.log("按钮2发生了点击~")
+      }
+      btn2El.onclick = handleClick01
+  
+      // 3. addEventListener(推荐)
+      btn3El.addEventListener("click", function() {
+          console.log("第一个btn3的事件监听~")
+      })
+      btn3El.addEventListener("click", function() {
+          console.log("第二个btn3的事件监听~")
+      })
+      btn3El.addEventListener("click", function() {
+          console.log("第三个btn3的事件监听~")
+      })
+  </script>
+  ```
+
+  
+
+### 18. 常见事件列表
+
+- **鼠标事件**
+  - click —— 当鼠标点击一个元素时（触摸屏设备会在点击时生成）。
+  - mouseover / mouseout —— 当鼠标指针移入/离开一个元素时。
+  - mousedown / mouseup —— 当在元素上按下/释放鼠标按钮时。
+  - mousemove —— 当鼠标移动时。
+-  **键盘事件**
+  - keydown 和 keyup —— 当按下和松开一个按键时。
+- **表单（form）元素事件**
+  - submit —— 当访问者提交了一个` <form>` 时
+  - focus —— 当访问者聚焦于一个元素时，例如聚焦于一个 `<input>`
+- **Document 事件**
+  - DOMContentLoaded —— 当 HTML 的加载和处理均完成，DOM 被完全构建完成时。
+- **CSS 事件**
+  - transitionend —— 当一个 CSS 动画完成时
+
+
+
+### 19. **认识事件流**
+
+- **事实上对于事件有一个概念叫做事件流，为什么会产生事件流呢？**
+
+  - 我们可以想到一个问题：当我们在浏览器上对着一个元素点击时，你点击的不仅仅是这个元素本身；
+
+  - 这是因为我们的HTML元素是存在父子元素叠加层级的；
+
+  - 比如一个span元素是放在div元素上的，div元素是放在body元素上的，body元素是放在html元素上的；
+
+    ```html
+    <div class="box">
+        <span></span>
+    </div>
+    
+    <script>
+    
+        // 1.获取元素
+        var spanEl = document.querySelector("span")
+        var divEl = document.querySelector("div")
+        var bodyEl = document.body
+    
+    
+        // 2.绑定点击事件
+        // spanEl.onclick = function() {
+        //   console.log("span元素发生了点击~")
+        // }
+        // divEl.onclick = function() {
+        //   console.log("div元素发生了点击~")
+        // }
+        // bodyEl.onclick = function() {
+        //   console.log("body元素发生了点击~")
+        // }
+    
+        // 默认情况下是事件冒泡
+        spanEl.addEventListener("click", function() {
+            console.log("span元素发生了点击~冒泡")
+        })
+        divEl.addEventListener("click", function() {
+            console.log("div元素发生了点击~冒泡")
+        })
+        bodyEl.addEventListener("click", function() {
+            console.log("body元素发生了点击~冒泡")
+        })
+    
+        // 设置希望监听事件捕获的过程
+        spanEl.addEventListener("click", function() {
+            console.log("span元素发生了点击~捕获")
+        }, true)
+        divEl.addEventListener("click", function() {
+            console.log("div元素发生了点击~捕获")
+        }, true)
+        bodyEl.addEventListener("click", function() {
+            console.log("body元素发生了点击~捕获")
+        }, true)
+    
+    </script>
+    ```
+
+
+
+### 20. 事件冒泡和事件捕获
+
+- 我们会发现默认情况下事件是**从最内层的span向外依次传递的顺序**，这个顺序我们称之为**事件冒泡（Event Bubble）**;
+- 事实上，还有另外一种监听事件流的方式就是**从外层到内层（body -> span）**，这种称之为**事件捕获（Event Capture）**；
+- 为什么会产生两种不同的处理流呢？
+  - 这是因为早期浏览器开发时，不管是IE还是Netscape公司都发现了这个问题;
+  - 但是他们采用了完全相反的事件流来对事件进行了传递；
+  - **IE**采用了**事件冒泡**的方式，**Netscape**采用了**事件捕获**的方式；
+
+
+
+### 21. 事件捕获和冒泡的过程
+
+- **如果我们都监听，那么会按照如下顺序来执行**
+- **捕获阶段（Capturing phase）**：
+  - 事件（从 Window）向下走近元素。
+- **目标阶段（Target phase）**：
+  - 事件到达目标元素。
+- **冒泡阶段（Bubbling phase）**：
+  - 事件从元素上开始冒泡。
+- 事实上，我们可以通过event对象来获取当前的阶段：
+  - eventPhase
+- 开发中通常会使用**事件冒泡**，所以事件捕获了解即可
+
+![image-20240912154525362](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240912154525362.png)
+
+
+
+### 22. 事件对象
+
+- **当一个事件发生时，就会有和这个事件相关的很多信息：**
+  - 比如事件的类型是什么，你点击的是哪一个元素，点击的位置是哪里等等相关的信息；
+  - 那么这些信息会被封装到一个Event对象中，这个对象由浏览器创建，称之为event对象；
+  - 该对象给我们提供了想要的一些属性，以及可以通过该对象进行某些操作；
+
+- 如何获取这个event对象？
+  
+  - **event对象**会在传入的**事件处理（event handler）函数回调时**，**被系统传入**
+  
+  - 我们可以在回调函数中拿到这个event对象；
+  
+    ```js
+    spanEl.onclick = function(event) {
+        console.log("事件对象:", event)
+    }
+    
+    spanEl.addEventListener("click", function(event) {
+        console.log("事件对象:", event)
+    })
+    ```
+  
+    
+  
+- **event对象常见的属性**
+
+  - type：事件的类型；
+  - target：当前事件发生的元素；
+  - currentTarget：当前处理事件的元素；
+  - eventPhase：事件所处的阶段；
+  - offsetX、offsetY：事件发生在元素内的位置；
+  - clientX、clientY：事件发生在客户端内的位置；
+  - pageX、pageY：事件发生在客户端相对于document的位置；
+  - screenX、screenY：事件发生相对于屏幕的位置；
+
+- **event对象常见的方法**
+
+  - preventDefault：取消事件的默认行为；
+  - stopPropagation：阻止事件的进一步传递（冒泡或者捕获都可以阻止）；
+
+
+
+### 23. 事件处理中的this
+
+- 在函数中，我们也可以通过this来获取当前的发生元素：
+
+  ```js
+  boxEl.addEventListener("click", function(event) {
+      console.log(this === event.target)
+  })
+  ```
+
+- 这是因为在浏览器内部，调用**event handler是绑定到当前的target上的**
+
+
+
+### 24. EventTarget类
+
+- **我们会发现，所有的节点、元素都继承自EventTarget**
+  - 事实上Window也继承自EventTarget；![image-20240913135928646](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240913135928646.png)
+- **那么这个EventTarget是什么呢？**
+  - EventTarget是一个**DOM接口**，主要用于**添加、删除、派发Event事件**；
+- **EventTarget常见的方法**
+  - **addEventListener**：注册某个事件类型以及事件处理函数；
+  - **removeEventListener**：移除某个事件类型以及事件处理函数；
+  - **dispatchEvent**：派发某个事件类型到EventTarget上；
+
+
+
+### 25. 事件委托（event delegation）
+
+- 事件冒泡在某种情况下可以帮助我们实现强大的事件处理模式 –**事件委托模式**（也是一种设计模式）
+
+- 那么这个模式是怎么样的呢？
+
+  - 因为**当子元素被点击**时，父元素可以**通过冒泡可以监听到子元素的点击**；
+  - 并且**可以通过event.target获取到当前监听的元素**；
+
+- 案例：一个ul中存放多个li，点击某一个li会变成红色
+
+  - 方案一：监听**每一个li的点击，并且做出相应；**
+
+  - 方案二：在**ul中监听点击**，并且**通过event.target拿到对应的li进行处理；**
+
+    - 因为这种方案并不需要遍历后给每一个li上添加事件监听，所以它更加高效；
+
+      ```js
+      var listEl = document.querySelector(".list")
+      var currentActive = null
+      listEl.addEventListener("click", function(event) {
+          if(currentActive) currentActive.classList.remove("active")
+          event.target.classList.add("active")
+          currentActive = event.target
+      })
+      ```
+
+
+
+### 26. 事件委托的标记
+
+- 某些事件委托可能需要对具体的子组件进行区分，这个时候我们可以使用*data-\*对其进行标记：
+
+- 比如多个按钮的点击，区分点击了哪一个按钮：
+
+  ```html
+  <div class="box">
+      <button data-action="search">搜索~</button>
+      <button data-action="new">新建~</button>
+      <button data-action="remove">移除~</button>
+      <button>1111</button>
+  </div>
+  
+  <script>
+  
+      var boxEl = document.querySelector(".box")
+      boxEl.onclick = function(event) {
+          var btnEl = event.target
+          var action = btnEl.dataset.action
+          switch (action) {
+              case "remove":
+                  console.log("点击了移除按钮")
+                  break
+              case "new":
+                  console.log("点击了新建按钮")
+                  break
+              case "search":
+                  console.log("点击了搜索按钮")
+                  break
+              default:
+                  console.log("点击了其他")
+          }
+      }
+  </script>
+  ```
+
+
+
+### 27. 常见的鼠标事件
+
+- 接下来我们来看一下常见的鼠标事件（不仅仅是鼠标设备，也包括模拟鼠标的设备，比如手机、平板电脑）
+
+- 常见的鼠标事件：
+
+  | 属性        | 描述                                         |
+  | ----------- | -------------------------------------------- |
+  | click       | 当用户点击某个对象时调用的事件句柄。         |
+  | contextmenu | 在用户点击鼠标右键打开上下文菜单时触发       |
+  | dblclick    | 当用户双击某个对象时调用的事件句柄           |
+  | mousedown   | 鼠标按钮被按下。                             |
+  | mouseup     | 鼠标按键被松开。                             |
+  | mouseover   | 鼠标移到某元素之上。（支持冒泡）             |
+  | mouseout    | 鼠标从某元素移开。（支持冒泡）               |
+  | mouseenter  | 当鼠标指针移动到元素上时触发。（不支持冒泡） |
+  | mouseleave  | 当鼠标指针移出元素时触发。（不支持冒泡）     |
+  | mousemove   | 鼠标被移动。                                 |
+
+  
+
+- **mouseenter和mouseleave**
+  - 不支持冒泡
+  - 进入子元素依然属于在该元素内，没有任何反应
+- **mouseover和mouseout**
+  - 支持冒泡
+  - 进入元素的子元素时
+    - 先调用父元素的mouseout
+    - 再调用子元素的mouseover
+    - 因为支持冒泡，所以会将mouseover传递到父元素中；
+
+
+
+### 28. 常见的键盘事件
+
+- **常见的键盘事件**
+
+  | **属性**   | **描述**             |
+  | ---------- | -------------------- |
+  | onkeydown  | 某个键盘按键被按下。 |
+  | onkeypress | 某个键盘按键被按下。 |
+  | onkeyup    | 某个键盘按键被松开。 |
+
+- **事件的执行顺序是 onkeydown、onkeypress、onkeyup**
+
+  - down事件先发生；
+  - press发生在文本被输入；
+  - up发生在文本输入完成；
+
+- **我们可以通过key和code来区分按下的键：**
+
+  - code：“按键代码”（"KeyA"，"ArrowLeft" 等），特定于键盘上按键的物理位置。
+  - key：字符（"A"，"a" 等），对于非字符（non-character）的按键，通常具有与 code 相同的值。）
+
+
+
+### 29. 常见表单事件
+
+| **属性** | **描述**                                                     |
+| -------- | ------------------------------------------------------------ |
+| onchange | 该事件在表单元素的内容改变时触发( `<input>, <keygen>, <select>, <textarea>`) |
+| oninput  | 元素获取用户输入时触发                                       |
+| onfocus  | 元素获取焦点时触发                                           |
+| onblur   | 元素失去焦点时触发                                           |
+| onreset  | 表单重置时触发                                               |
+| onsubmit | 表单提交时触发                                               |
+
+
+
+### 30. 文档加载事件
+
+- **DOMContentLoaded**：浏览器已完全加载 HTML，并构建了 DOM 树，但像 `<img>` 和样式表之类的外部资源可能尚未加载完成。
+
+- **load**：浏览器不仅加载完成了 HTML，还加载完成了所有外部资源：图片，样式等。
+
+  ```html
+  <script>
+  
+      // 注册事件监听
+      window.addEventListener("DOMContentLoaded", function() {
+          // 1.这里可以操作box, box已经加载完毕
+          // var boxEl = document.querySelector(".box")
+          // boxEl.style.backgroundColor = "orange"
+          // console.log("HTML内容加载完毕")
+  
+          // 2.获取img对应的图片的宽度和高度
+          var imgEl = document.querySelector("img")
+          console.log("图片的宽度和高度:", imgEl.offsetWidth, imgEl.offsetHeight)
+      })
+  
+      window.onload = function() {
+          console.log("文档中所有资源都加载完毕")
+          // var imgEl = document.querySelector("img")
+          // console.log("图片的宽度和高度:", imgEl.offsetWidth, imgEl.offsetHeight)
+      }
+  
+      window.onresize = function() {
+          console.log("创建大小发生改变时")
+      }
+  
+  </script>
+  
+  <div class="box">
+      <p>哈哈哈啊</p>
+  </div>
+  <a href="#">百度一下</a>
+  <img src="../images/kobe01.jpg" alt="">
+  ```
+
+  
+
+
+
+## 12. BOM：浏览器对象模型（Browser Object Model）
+
+> 简称 BOM，由浏览器提供的用于处理文档（document）之外的所有内容的其他对象；
+>
+> 比如navigator、location、history等对象；
+
+![image-20240914145819838](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240914145819838.png)
+
+- JavaScript有一个非常重要的运行环境就是浏览器
+  - 而且浏览器本身又作为一个应用程序需要对其本身进行操作；
+  - 所以通常浏览器会有对应的对象模型（BOM，Browser Object Model）；
+  - 我们可以将BOM看成是连接JavaScript脚本与浏览器窗口的桥梁；
+- BOM主要包括一下的对象模型：
+  - window：包括全局属性、方法，控制浏览器窗口相关的属性、方法；
+  - location：浏览器连接到的对象的位置（URL）；
+  - history：操作浏览器的历史；
+  - navigator：用户代理（浏览器）的状态和标识（很少用到）；
+  - screen：屏幕窗口信息（很少用到）；
+
+
+
+### 1. window对象
+
+- **window对象在浏览器中可以从两个视角来看待：**
+
+  - 视角一：全局对象。
+    - 我们知道ECMAScript其实是有一个全局对象的，这个全局对象在**Node中是global**；
+    - 在浏览器中就是**window对象；**
+  - 视角二：浏览器窗口对象。
+    - 作为浏览器窗口时，提供了对浏览器操作的相关的API；
+
+- **当然，这两个视角存在大量重叠的地方，所以不需要刻意去区分它们：**
+
+  - 事实上对于浏览器和Node中全局对象名称不一样的情况，目前已经指定了对应的标准，称之为globalThis，并且大多数现代浏览器都支持它；
+  - 放在window对象上的所有属性都可以被访问；
+  - 使用var定义的变量会被添加到window对象中；
+  - window默认给我们提供了全局的函数和类：setTimeout、Math、Date、Object等；
+
+- **事实上window对象上肩负的重担是非常大的：**
+
+  - 第一：包含大量的属性，localStorage、console、location、history、screenX、scrollX等等（大概60+个属性）；
+  - 第二：包含大量的方法，alert、close、scrollTo、open等等（大概40+个方法）；
+  - 第三：包含大量的事件，focus、blur、load、hashchange等等（大概30+个事件）；
+  - 第四：包含从EventTarget继承过来的方法，addEventListener、removeEventListener、dispatchEvent方法；
+
+- **那么这些大量的属性、方法、事件在哪里查看呢？**
+
+  - MDN文档：https://developer.mozilla.org/zh-CN/docs/Web/API/Window
+
+- **查看MDN文档时，我们会发现有很多不同的符号，这里我解释一下是什么意思：**
+
+  - 删除符号：表示这个API已经废弃，不推荐继续使用了；
+
+  - 点踩符号：表示这个API不属于W3C规范，某些浏览器有实现（所以兼容性的问题）；
+
+  - 实验符号：该API是实验性特性，以后可能会修改，并且存在兼容性问题；
+
+    
+
+`window`对象是浏览器中的全局对象，表示浏览器窗口，提供了大量的属性和方法，方便开发者操作浏览器、文档和与用户交互。以下是一些常见的属性和方法。
+
+#### 一、常见属性
+
+1. **`window.document`**
+   
+   - 描述：指向当前页面的DOM对象，常用于操作HTML文档结构。
+   - 示例：
+     ```javascript
+     console.log(window.document.title); // 获取页面标题
+     ```
+   
+2. **`window.innerWidth` & `window.innerHeight`**
+   - 描述：表示浏览器窗口的内容区域（不包括工具栏和滚动条）的宽度和高度，单位为像素。
+   - 示例：
+     ```javascript
+     console.log(window.innerWidth, window.innerHeight); // 输出窗口宽度和高度
+     ```
+
+3. **`window.outerWidth` & `window.outerHeight`**
+   
+   - 描述：浏览器窗口的整体宽度和高度，包含工具栏、菜单栏等。
+   - 示例：
+     ```javascript
+     console.log(window.outerWidth, window.outerHeight); // 输出浏览器整体的宽高
+     ```
+   
+4. **`window.location`**
+   
+   - 描述：用于获取或设置当前页面的URL信息。
+   - 示例：
+     ```javascript
+     console.log(window.location.href); // 获取当前页面URL
+     window.location.href = "https://example.com"; // 跳转到指定URL
+     ```
+   
+5. **`window.navigator`**
+   
+   - 描述：提供有关浏览器的信息，如用户代理、平台等。
+   - 示例：
+     ```javascript
+     console.log(window.navigator.userAgent); // 获取用户代理字符串
+     ```
+   
+6. **`window.history`**
+   
+   - 描述：允许你操作浏览器的会话历史记录。
+   - 示例：
+     ```javascript
+     window.history.back(); // 回到上一页
+     window.history.forward(); // 前进到下一页
+     ```
+   
+7. **`window.localStorage` & `window.sessionStorage`**
+   - 描述：提供在客户端存储数据的方式，`localStorage` 是持久的，`sessionStorage` 是会话的。
+   - 示例：
+     ```javascript
+     window.localStorage.setItem('key', 'value'); // 存储数据到localStorage
+     console.log(window.localStorage.getItem('key')); // 获取存储的数据
+     ```
+
+8. **`window.screen`**
+   - 描述：包含有关用户显示屏的信息，如分辨率、颜色深度等。
+   - 示例：
+     ```javascript
+     console.log(window.screen.width, window.screen.height); // 获取屏幕分辨率
+     ```
+
+9. **`window.scrollX` & `window.scrollY`**
+   - 描述：获取页面的水平和垂直滚动偏移量。
+   - 示例：
+     ```javascript
+     console.log(window.scrollX, window.scrollY); // 输出页面的滚动位置
+     ```
+
+10. **`window.console`**
+    - 描述：提供了对开发者控制台的访问接口，用于调试和输出信息。
+    - 示例：
+      ```javascript
+      window.console.log('Hello, World!'); // 输出信息到控制台
+      ```
+
+#### 二、常见方法
+
+1. **`window.alert()`**
+   - 描述：弹出一个带有消息的警告框。
+   - 示例：
+     ```javascript
+     window.alert('This is an alert!');
+     ```
+
+2. **`window.confirm()`**
+   
+   - 描述：弹出一个带有确认和取消按钮的对话框，返回布尔值。
+   - 示例：
+     ```javascript
+     const result = window.confirm('Are you sure?');
+     console.log(result); // 如果点击确定，返回true；否则返回false
+     ```
+   
+3. **`window.prompt()`**
+   - 描述：弹出一个带有输入框的对话框，允许用户输入值，返回输入的内容。
+   - 示例：
+     ```javascript
+     const name = window.prompt('What is your name?');
+     console.log(name); // 输出用户输入的内容
+     ```
+
+4. **`window.open()`**
+   - 描述：打开一个新的浏览器窗口或标签页。
+   - 示例：
+     ```javascript
+     window.open('https://example.com', '_blank'); // 在新窗口中打开指定URL
+     ```
+
+5. **`window.close()`**
+   - 描述：关闭当前的浏览器窗口（仅对由`window.open()`打开的窗口有效）。
+   - 示例：
+     ```javascript
+     window.close(); // 关闭当前窗口
+     ```
+
+6. **`window.setTimeout()`**
+   
+   - 描述：在指定的延迟时间后执行代码，仅执行一次。
+   - 示例：
+     ```javascript
+     window.setTimeout(() => {
+       console.log('This message appears after 2 seconds');
+     }, 2000); // 2秒后执行
+     ```
+   
+7. **`window.setInterval()`**
+   - 描述：每隔一段时间重复执行代码，直到手动停止。
+   - 示例：
+     ```javascript
+     const intervalId = window.setInterval(() => {
+       console.log('This message appears every 3 seconds');
+     }, 3000); // 每3秒执行一次
+     ```
+
+8. **`window.clearTimeout()` & `window.clearInterval()`**
+   - 描述：分别用于停止由`setTimeout()`或`setInterval()`启动的计时器。
+   - 示例：
+     ```javascript
+     const timeoutId = window.setTimeout(() => {
+       console.log('This will not appear');
+     }, 5000);
+     window.clearTimeout(timeoutId); // 停止计时器，代码不会执行
+     ```
+
+9. **`window.scrollTo()`**
+   
+   - 描述：将窗口滚动到指定的坐标位置。
+   - 示例：
+     ```javascript
+     window.scrollTo(0, 500); // 滚动到页面顶部500像素处
+     ```
+   
+10. **`window.addEventListener()`**
+    
+    - 描述：为窗口对象注册事件监听器。
+    - 示例：
+      ```javascript
+      window.addEventListener('resize', () => {
+        console.log('Window resized');
+      }); // 当窗口大小变化时执行代码
+      ```
+
+#### 总结
+
+`window`对象提供了与浏览器相关的大量接口，允许开发者控制窗口、访问文档、存储数据、处理事件等。熟悉这些常见属性和方法，可以帮助更好地开发网页应用。
