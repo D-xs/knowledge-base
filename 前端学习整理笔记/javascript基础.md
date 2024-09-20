@@ -5426,12 +5426,13 @@ console.log(time1)
      ```
    
 2. **`window.innerWidth` & `window.innerHeight`**
+   
    - 描述：表示浏览器窗口的内容区域（不包括工具栏和滚动条）的宽度和高度，单位为像素。
    - 示例：
      ```javascript
      console.log(window.innerWidth, window.innerHeight); // 输出窗口宽度和高度
      ```
-
+   
 3. **`window.outerWidth` & `window.outerHeight`**
    
    - 描述：浏览器窗口的整体宽度和高度，包含工具栏、菜单栏等。
@@ -5514,20 +5515,22 @@ console.log(time1)
      ```
    
 3. **`window.prompt()`**
+   
    - 描述：弹出一个带有输入框的对话框，允许用户输入值，返回输入的内容。
    - 示例：
      ```javascript
      const name = window.prompt('What is your name?');
      console.log(name); // 输出用户输入的内容
      ```
-
+   
 4. **`window.open()`**
+   
    - 描述：打开一个新的浏览器窗口或标签页。
    - 示例：
      ```javascript
      window.open('https://example.com', '_blank'); // 在新窗口中打开指定URL
      ```
-
+   
 5. **`window.close()`**
    - 描述：关闭当前的浏览器窗口（仅对由`window.open()`打开的窗口有效）。
    - 示例：
@@ -5582,6 +5585,1004 @@ console.log(time1)
       }); // 当窗口大小变化时执行代码
       ```
 
+`window` 对象是 JavaScript 中的全局对象，表示浏览器的窗口或框架。`window` 上有许多常用的事件可以响应用户或浏览器的行为。以下是一些常见的 `window` 事件：
+
+
+
+#### 三、常见事件
+
+1. **load**
+
+      - **描述**：当整个页面（包括所有依赖的资源，如图像、样式表等）加载完毕时触发。
+
+      - **用法**：
+        
+        ```javascript
+        window.addEventListener('load', function() {
+            console.log('页面完全加载');
+        });
+        ```
+
+
+2. **DOMContentLoaded**
+
+      - **描述**：当 HTML 文档被完全加载和解析时触发，不需要等待样式表、图像等外部资源加载完毕。
+
+      - **用法**：
+        
+        ```javascript
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM 内容加载完成');
+        });
+        ```
+
+
+3. **resize**
+
+      - **描述**：当浏览器窗口大小改变时触发。
+
+      - **用法**：
+        
+        ```javascript
+        window.addEventListener('resize', function() {
+            console.log('窗口大小改变');
+        });
+        ```
+
+
+4. **scroll**
+
+      - **描述**：当页面滚动时触发。
+
+      - **用法**：
+        
+        ```javascript
+        window.addEventListener('scroll', function() {
+            console.log('页面正在滚动');
+        });
+        ```
+
+
+5. **unload**
+
+      - **描述**：当页面或文档从浏览器窗口卸载时触发（通常用于页面关闭或导航离开）。
+
+      - **用法**：
+        
+        ```javascript
+        window.addEventListener('unload', function() {
+            console.log('页面将被卸载');
+        });
+        ```
+
+
+6. **beforeunload**
+
+      - **描述**：当用户试图离开页面时触发，可以用来显示确认对话框，提示用户保存未完成的工作。
+
+      - **用法**：
+        
+        ```javascript
+        window.addEventListener('beforeunload', function (event) {
+            event.preventDefault();
+            event.returnValue = '';  // 显示确认对话框
+        });
+        ```
+
+
+7. **error**
+
+      - **描述**：当页面中的 JavaScript 发生错误时触发。
+
+      - **用法**：
+        
+        ```javascript
+        window.addEventListener('error', function(event) {
+            console.error('发生错误:', event.message);
+        });
+        ```
+
+
+8. **focus**
+
+      - **描述**：当浏览器窗口或框架获得焦点时触发。
+
+      - **用法**：
+        
+        ```javascript
+        window.addEventListener('focus', function() {
+            console.log('窗口获得焦点');
+        });
+        ```
+
+
+9. **blur**
+
+      - **描述**：当浏览器窗口或框架失去焦点时触发。
+
+      - **用法**：
+        
+        ```javascript
+        window.addEventListener('blur', function() {
+            console.log('窗口失去焦点');
+        });
+        ```
+
+
+10. **hashchange**
+
+       - **描述**：当 URL 的哈希部分（即 `#` 之后的部分）发生变化时触发。
+
+       - **用法**：
+         
+         ```javascript
+         window.addEventListener('hashchange', function() {
+             console.log('URL 哈希变化:', location.hash);
+         });
+         ```
+
+
+11. **popstate**
+
+       - **描述**：当浏览器历史记录中的活动条目发生变化时触发（例如点击回退按钮）。
+
+       - **用法**：
+         
+         ```javascript
+         window.addEventListener('popstate', function(event) {
+             console.log('浏览器历史记录发生变化', event.state);
+         });
+         ```
+
+
+12. **online**
+
+       - **描述**：当浏览器重新连接到网络时触发。
+
+       - **用法**：
+         
+         ```javascript
+         window.addEventListener('online', function() {
+             console.log('网络连接恢复');
+         });
+         ```
+
+
+13. **offline**
+
+       - **描述**：当浏览器失去网络连接时触发。
+
+       - **用法**：
+         
+         ```javascript
+         window.addEventListener('offline', function() {
+             console.log('网络连接断开');
+         });
+         ```
+
+
+14. **storage**
+
+       - **描述**：当 `localStorage` 或 `sessionStorage` 发生改变时触发（但只有在不同页面之间变化时才会触发）。
+
+       - **用法**：
+         
+         ```javascript
+         window.addEventListener('storage', function(event) {
+             console.log('存储数据发生变化:', event.key, event.newValue);
+         });
+         ```
+
+
+这些是一些常见的 `window` 事件，可以用于处理页面加载、大小变化、滚动、历史记录变化、网络状态变化等。通过监听这些事件，开发者可以创建更加互动和响应式的 Web 应用。
+
+
+
 #### 总结
 
 `window`对象提供了与浏览器相关的大量接口，允许开发者控制窗口、访问文档、存储数据、处理事件等。熟悉这些常见属性和方法，可以帮助更好地开发网页应用。
+
+
+
+
+
+### 2. location对象
+
+>`location` 对象是 JavaScript 中的全局对象，代表当前文档的 URL，并提供了处理和修改 URL 的方法和属性。`location` 对象常用于重定向、导航和获取 URL 相关信息。location其实是URL的一个抽象实现；以下是 `location` 对象常见的属性和方法：
+
+![image-20240918101634907](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240918101634907.png)
+
+#### 一、常见属性
+
+1. **`location.href`**
+
+      - **描述**：获取或设置整个 URL。
+
+      - **用法**：
+        
+        ```javascript
+        console.log(location.href);  // 获取当前 URL
+        location.href = 'https://www.example.com';  // 跳转到新的 URL
+        ```
+
+
+2. **`location.protocol`**
+
+      - **描述**：返回当前 URL 的协议部分（包括 `:`），例如 `http:` 或 `https:`。
+
+      - **用法**：
+        
+        ```javascript
+        console.log(location.protocol);  // 输出: "https:"
+        ```
+
+
+3. **`location.host`**
+
+      - **描述**：返回当前 URL 的主机名和端口号，例如 `www.example.com:8080`。
+
+      - **用法**：
+        
+        ```javascript
+        console.log(location.host);  // 输出: "www.example.com:8080"
+        ```
+
+
+4. **`location.hostname`**
+
+      - **描述**：返回当前 URL 的主机名，不包含端口号，例如 `www.example.com`。
+
+      - **用法**：
+        
+        ```javascript
+        console.log(location.hostname);  // 输出: "www.example.com"
+        ```
+
+
+5. **`location.port`**
+
+      - **描述**：返回当前 URL 的端口号。如果 URL 没有指定端口号，则返回空字符串。
+
+      - **用法**：
+        
+        ```javascript
+        console.log(location.port);  // 输出: "8080" 或 ""
+        ```
+
+
+6. **`location.pathname`**
+
+      - **描述**：返回当前 URL 的路径部分（从主机名之后开始，包含 `/`），例如 `/path/to/page`。
+
+      - **用法**：
+        
+        ```javascript
+        console.log(location.pathname);  // 输出: "/path/to/page"
+        ```
+
+
+7. **`location.search`**
+
+      - **描述**：返回 URL 中的查询字符串部分，包括 `?`，例如 `?id=123&name=John`。
+
+      - **用法**：
+        
+        ```javascript
+        console.log(location.search);  // 输出: "?id=123&name=John"
+        ```
+
+
+8. **`location.hash`**
+
+      - **描述**：返回 URL 的锚部分（即 `#` 之后的部分），例如 `#section1`。
+
+      - **用法**：
+        
+        ```javascript
+        console.log(location.hash);  // 输出: "#section1"
+        location.hash = '#newSection';  // 改变 URL 锚
+        ```
+
+
+9. **`location.origin`**
+
+      - **描述**：返回当前页面的来源，包括协议、主机名和端口号，例如 `https://www.example.com:8080`。
+
+      - **用法**：
+        
+        ```javascript
+        console.log(location.origin);  // 输出: "https://www.example.com:8080"
+        ```
+
+
+#### 二、常见方法
+
+1. **`location.assign(url)`**
+
+      - **描述**：加载指定的 URL，相当于设置 `location.href`，并将当前页面加入到浏览器的历史记录中。
+
+      - **用法**：
+        
+        ```javascript
+        location.assign('https://www.example.com');  // 导航到新的 URL
+        ```
+
+
+2. **`location.reload(force)`**
+
+      - **描述**：重新加载当前页面。可选的 `force` 参数为 `true` 时，强制从服务器重新加载页面（忽略缓存）。
+
+      - **用法**：
+        
+        ```javascript
+        location.reload();  // 重新加载当前页面
+        location.reload(true);  // 强制从服务器重新加载页面
+        ```
+
+
+3. **`location.replace(url)`**
+
+      - **描述**：用新的 URL 替换当前页面，但不保留历史记录，因此不能通过浏览器的“后退”按钮返回之前的页面。
+
+      - **用法**：
+        
+        ```javascript
+        location.replace('https://www.example.com');  // 替换当前页面
+        ```
+
+
+4. **`location.toString()`**
+
+      - **描述**：返回当前 URL 的字符串形式。通常等同于 `location.href`。
+
+      - **用法**：
+        
+        ```javascript
+        console.log(location.toString());  // 输出当前 URL
+        ```
+
+
+#### 示例
+
+假设当前页面的 URL 是 `https://www.example.com:8080/path/to/page?id=123&name=John#section1`，我们可以获取以下信息：
+
+```javascript
+console.log(location.href);       // 输出: "https://www.example.com:8080/path/to/page?id=123&name=John#section1"
+console.log(location.protocol);   // 输出: "https:"
+console.log(location.host);       // 输出: "www.example.com:8080"
+console.log(location.hostname);   // 输出: "www.example.com"
+console.log(location.port);       // 输出: "8080"
+console.log(location.pathname);   // 输出: "/path/to/page"
+console.log(location.search);     // 输出: "?id=123&name=John"
+console.log(location.hash);       // 输出: "#section1"
+console.log(location.origin);     // 输出: "https://www.example.com:8080"
+```
+
+通过 `location` 对象，开发者可以轻松操作和获取当前页面的 URL 信息，并可以通过相关方法来控制页面的导航、刷新和重定向。
+
+
+
+#### 三、URI和URL
+
+> URI（统一资源标识符，**Uniform Resource Identifier**）和 URL（统一资源定位符，**Uniform Resource Locator**）是网络资源标识和访问的重要概念。它们常常会混用，但实际上存在一些细微的区别。
+
+1. **URI 和 URL 的定义**
+
+   - **URI（Uniform Resource Identifier，统一资源标识符）**：
+     - URI 是一个通用的概念，指代用来唯一标识资源的字符串。URI 可以表示资源的名字、位置，甚至其他描述。它包括两类：URL 和 URN（统一资源名称）。
+     - **URI 的作用**是标识某一个资源，而不一定要提供它的访问方式。
+
+
+   - **URL（Uniform Resource Locator，统一资源定位符）**：
+     - URL 是 URI 的一个子集，除了标识资源外，它还具体定义了访问该资源的方式（比如协议、主机名、端口号等）。URL 主要是用来“定位”资源。
+     - **URL 的作用**是标识资源，并且提供访问资源的方法。
+
+
+2. **区别与联系**
+
+   - **URI 是一个广义的概念**，它可以表示任何资源的标识，包括但不限于网络资源。URI 包含 URL 和 URN，两者是 URI 的子集。
+
+   - **URL 是 URI 的子集**，它不仅标识了资源，还提供了获取该资源的方式（协议 + 位置）。
+
+   - **URN（Uniform Resource Name，统一资源名称）**是 URI 的另一子集，它只用来标识资源而不涉及具体的访问方法。URN 主要用于给资源命名，而不涉及资源的物理位置。
+
+
+3. **URL 和 URI 的关系图**
+
+```
+URI
+ ├── URL （标识 + 访问方式）
+ └── URN （只标识资源）
+```
+
+4. **示例**
+
+   - **URL 示例**：
+     - `https://www.example.com/index.html`
+       - 这是一个 URL，因为它不仅标识了资源 `/index.html`，还包括了如何访问它：通过 `https` 协议从 `www.example.com` 主机获取资源。
+     
+   - **URN 示例**：
+     - `urn:isbn:0451450523`
+       - 这是一个 URN，因为它通过 ISBN 标识了一本书，但并没有说明如何通过网络访问这本书。
+
+
+   - **URI 示例**（包括 URL 和 URN）：
+     - `https://www.example.com/index.html`（URL 是 URI 的一种）
+     - `urn:isbn:0451450523`（URN 也是 URI）
+
+
+5. **URI 和 URL 的技术解析**
+
+   - **URI 结构**：
+     一个完整的 URI 通常由以下部分组成：
+     
+     ```
+     [scheme]://[userinfo]@[host]:[port]/[path]?[query]#[fragment]
+     ```
+     - **scheme**: 协议，比如 `http`、`https`、`ftp`。
+     - **userinfo**: 可选，通常用于用户名和密码认证，比如 `user:pass`。
+     - **host**: 主机名或 IP 地址，比如 `www.example.com` 或 `192.168.1.1`。
+     - **port**: 可选，网络端口号，比如 `:80`、`:443`。
+     - **path**: 资源的路径，比如 `/index.html`。
+     - **query**: 可选，查询参数，比如 `?id=123&name=John`。
+     - **fragment**: 可选，文档中的片段标识符，比如 `#section1`。
+     
+   - **URL 结构**：
+     URL 通常会有完整的 scheme 和 host 信息，用于定义资源位置和访问方式。例如：
+     
+     ```
+     https://www.example.com/path/to/resource?id=123#fragment
+     ```
+
+
+6. **总结**
+
+   - **URI** 是统一资源标识符，是一个更广泛的概念，用于标识资源。所有的 URL 和 URN 都是 URI。
+
+   - **URL** 是 URI 的一个子集，它不仅标识了资源，还提供了获取该资源的方式（比如使用 `http` 或 `ftp` 进行访问）。
+
+
+​	**因此，所有的 URL 都是 URI，但并非所有的 URI 都是 URL。**
+
+
+
+
+
+#### 四、URLSearchParams
+
+> `URLSearchParams` 是用于操作 URL 查询参数的接口，帮助我们轻松解析、添加、删除和修改 URL 中 `?` 后的查询字符串（键值对）。
+
+
+
+简单示例：
+
+给定 URL：`https://example.com/?name=John&age=30`，查询字符串为 `?name=John&age=30`，使用 `URLSearchParams` 可以操作这个部分。
+
+常用 API：
+
+1. **`get(name)`**：获取指定键的值。
+   ```javascript
+   const params = new URLSearchParams('name=John&age=30');
+   console.log(params.get('name'));  // 输出 'John'
+   ```
+
+2. **`set(name, value)`**：设置键的值（会覆盖已有值）。
+   ```javascript
+   params.set('name', 'Jane');
+   console.log(params.toString());  // 输出 'name=Jane&age=30'
+   ```
+
+3. **`append(name, value)`**：追加键值对（不覆盖原有值）。
+   ```javascript
+   params.append('color', 'blue');
+   console.log(params.toString());  // 输出 'name=Jane&age=30&color=blue'
+   ```
+
+4. **`has(name)`**：检查是否存在某个键。
+   ```javascript
+   console.log(params.has('age'));  // 输出 true
+   ```
+
+5. **`delete(name)`**：删除指定键及其值。
+   ```javascript
+   params.delete('age');
+   console.log(params.toString());  // 输出 'name=Jane'
+   ```
+
+6. **`toString()`**：将参数序列化为字符串。
+   
+   ```javascript
+   console.log(params.toString());  // 输出 'name=Jane'
+   ```
+
+
+
+### 3. history对象
+
+> `history` 对象是浏览器提供的接口，用于操作浏览器的历史记录。它包含了一系列属性和方法，可以让你通过编程的方式前进、后退或者跳转到指定的页面。
+
+#### 一、常见属性：
+
+1. **`length`**
+   - **描述**：返回当前浏览器会话中的历史记录数量。
+   - **示例**：
+     ```javascript
+     console.log(history.length);  // 输出历史记录的数量
+     ```
+
+2. **`state`**
+   - **描述**：返回当前历史记录条目的状态对象。
+   - **示例**：
+     ```javascript
+     console.log(history.state);  // 输出当前的状态对象
+     ```
+
+#### 二、常见方法：
+
+1. **`back()`**
+   - **描述**：让浏览器回退到上一个历史记录条目，等效于用户点击了浏览器的后退按钮。
+   - **示例**：
+     
+     ```javascript
+     history.back();  // 返回上一页
+     ```
+   
+2. **`forward()`**
+   - **描述**：让浏览器前进到下一个历史记录条目，等效于用户点击了浏览器的前进按钮。
+   - **示例**：
+     ```javascript
+     history.forward();  // 前进到下一页
+     ```
+
+3. **`go(n)`**
+   - **描述**：跳转到浏览器历史记录中的某个特定页面。参数 `n` 表示跳转的相对位置：
+     - `n = -1` 表示后退一页。
+     - `n = 1` 表示前进一页。
+   - **示例**：
+     ```javascript
+     history.go(-1);  // 后退一页
+     history.go(1);   // 前进一页
+     history.go(0);   // 重新加载当前页
+     ```
+
+4. **`pushState(state, title, url)`**
+   - **描述**：将一个新的状态添加到历史记录栈中，不会触发页面刷新。可以用来实现单页应用程序的前端路由。
+   - **参数**：
+     - `state`：与新历史记录条目相关联的状态对象。
+     - `title`：标题（目前大部分浏览器忽略该参数）。
+     - `url`：新的 URL。
+   - **示例**：
+     ```javascript
+     history.pushState({ page: 1 }, 'Title', '/page1');
+     ```
+
+5. **`replaceState(state, title, url)`**
+   - **描述**：修改当前历史记录条目的状态，不会添加新的历史记录条目，也不会触发页面刷新。
+   - **参数**：
+     - `state`：新的状态对象。
+     - `title`：标题。
+     - `url`：新的 URL。
+   - **示例**：
+     ```javascript
+     history.replaceState({ page: 2 }, 'Title', '/page2');
+     ```
+
+#### 三、总结：
+
+- **`history.length`**：获取历史记录条目数。
+- **`history.state`**：获取当前条目的状态对象。
+- **`history.back()`**：返回上一页。
+- **`history.forward()`**：前进到下一页。
+- **`history.go(n)`**：跳转到相对位置的页面。
+- **`history.pushState()`**：添加新的历史记录条目。
+- **`history.replaceState()`**：替换当前的历史记录条目。
+
+这些方法和属性是前端开发中操作浏览器历史记录的常见工具，尤其在开发单页应用（SPA）时非常有用。
+
+
+
+### 4. navigator对象
+
+> `navigator` 对象表示用户代理（通常是浏览器）的状态和身份，并提供与浏览器环境相关的信息。通过 `navigator` 对象，开发者可以获取设备信息、检测网络状态、访问用户的地理位置等。
+
+![image-20240918111924257](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240918111924257.png)
+
+#### 一、常见属性：
+
+1. **`navigator.userAgent`**
+   - **描述**：返回浏览器的用户代理字符串，提供关于浏览器和操作系统的相关信息。
+   - **示例**：
+     ```javascript
+     console.log(navigator.userAgent);  // 输出用户代理字符串，如 "Mozilla/5.0..."
+     ```
+
+2. **`navigator.language`**
+   - **描述**：返回浏览器的默认语言（例如 "en-US" 表示美式英语）。
+   - **示例**：
+     ```javascript
+     console.log(navigator.language);  // 输出当前语言，如 "en-US"
+     ```
+
+3. **`navigator.platform`**
+   - **描述**：返回浏览器正在运行的系统平台（例如 "Win32" 表示 Windows 操作系统）。
+   - **示例**：
+     ```javascript
+     console.log(navigator.platform);  // 输出系统平台，如 "Win32"
+     ```
+
+4. **`navigator.onLine`**
+   - **描述**：返回一个布尔值，表示当前设备是否连接到网络。
+   - **示例**：
+     ```javascript
+     console.log(navigator.onLine);  // 输出 true 或 false
+     ```
+
+5. **`navigator.cookieEnabled`**
+   - **描述**：返回一个布尔值，表示浏览器是否启用了 Cookie。
+   - **示例**：
+     ```javascript
+     console.log(navigator.cookieEnabled);  // 输出 true 或 false
+     ```
+
+6. **`navigator.geolocation`**
+   - **描述**：返回 `Geolocation` 对象，用于获取设备的地理位置信息。
+   - **示例**：
+     ```javascript
+     if (navigator.geolocation) {
+       navigator.geolocation.getCurrentPosition(function(position) {
+         console.log(position.coords.latitude, position.coords.longitude);
+       });
+     }
+     ```
+
+#### 二、常见方法：
+
+1. **`navigator.geolocation.getCurrentPosition(successCallback, errorCallback)`**
+   
+   - **描述**：获取设备的当前地理位置，返回纬度和经度信息。
+   - **参数**：
+     
+     - `successCallback`：成功时调用的回调函数。
+     - `errorCallback`：失败时调用的回调函数。
+   - **示例**：
+     ```javascript
+     navigator.geolocation.getCurrentPosition(function(position) {
+       console.log('Latitude: ' + position.coords.latitude);
+       console.log('Longitude: ' + position.coords.longitude);
+     }, function(error) {
+       console.log('Error occurred: ' + error.message);
+     });
+     ```
+   
+2. **`navigator.vibrate(pattern)`**
+   
+   - **描述**：让设备振动。常用于移动设备。
+   - **参数**：接受一个数组或整数，表示振动的模式和时间（以毫秒为单位）。
+   - **示例**：
+     ```javascript
+     navigator.vibrate(1000);  // 设备振动1秒
+     navigator.vibrate([200, 100, 200]);  // 振动200ms，停100ms，再振动200ms
+     ```
+   
+3. **`navigator.sendBeacon(url, data)`**
+   
+   - **描述**：用于向服务器异步发送数据，适用于发送小量数据且不需要立即处理响应的场景。
+   - **参数**：
+     - `url`：要发送数据的服务器地址。
+     - `data`：要发送的数据，可以是字符串、Blob 或 ArrayBuffer。
+   - **示例**：
+     
+     ```javascript
+     navigator.sendBeacon('/track', JSON.stringify({ event: 'pageUnload' }));
+     ```
+   
+4. **`navigator.clipboard.writeText(text)`**
+   
+   - **描述**：将文本写入系统剪贴板。
+   - **参数**：`text` 是要复制的文本内容。
+   - **示例**：
+     
+     ```javascript
+     navigator.clipboard.writeText('Hello World').then(function() {
+       console.log('Text copied to clipboard');
+     });
+     ```
+   
+5. **`navigator.clipboard.readText()`**
+   
+   - **描述**：从系统剪贴板中读取文本。
+   - **示例**：
+     
+     ```javascript
+     navigator.clipboard.readText().then(function(text) {
+       console.log('Clipboard content: ', text);
+     });
+     ```
+
+#### 总结：
+
+- **属性**：`userAgent`、`language`、`platform`、`onLine`、`cookieEnabled`、`geolocation`。
+- **方法**：`geolocation.getCurrentPosition()`、`vibrate()`、`sendBeacon()`、`clipboard.writeText()`、`clipboard.readText()`。
+
+`navigator` 对象为开发者提供了与用户设备和浏览器相关的有用信息和功能，在网页开发中广泛用于设备检测、网络状态管理和位置服务等场景。
+
+
+
+### 5. screen对象
+
+> `screen` 对象用于提供有关用户屏幕的信息，通常用于优化网页的布局和设计，以适应不同的屏幕大小。
+
+#### 一、常见属性：
+
+1. **`screen.width`**
+   - **描述**：返回屏幕的宽度（以像素为单位）。
+   - **示例**：
+     ```javascript
+     console.log(screen.width);  // 输出屏幕宽度
+     ```
+
+2. **`screen.height`**
+   - **描述**：返回屏幕的高度（以像素为单位）。
+   - **示例**：
+     ```javascript
+     console.log(screen.height);  // 输出屏幕高度
+     ```
+
+3. **`screen.availWidth`**
+   - **描述**：返回屏幕可用宽度，排除了操作系统任务栏或其他界面占用的部分。
+   - **示例**：
+     ```javascript
+     console.log(screen.availWidth);  // 输出可用的屏幕宽度
+     ```
+
+4. **`screen.availHeight`**
+   - **描述**：返回屏幕可用高度，排除了操作系统任务栏或其他界面占用的部分。
+   - **示例**：
+     ```javascript
+     console.log(screen.availHeight);  // 输出可用的屏幕高度
+     ```
+
+5. **`screen.colorDepth`**
+   - **描述**：返回屏幕显示的颜色深度（单位：位），即屏幕每像素使用的位数，通常是 24（即 16,777,216 色）。
+   - **示例**：
+     ```javascript
+     console.log(screen.colorDepth);  // 输出颜色深度，例如24
+     ```
+
+6. **`screen.pixelDepth`**
+   - **描述**：返回屏幕的像素深度，通常与 `colorDepth` 相同。
+   - **示例**：
+     ```javascript
+     console.log(screen.pixelDepth);  // 输出像素深度
+     ```
+
+#### 二、常见方法：
+
+`screen` 对象没有常用的内置方法，主要是通过其属性来获取与屏幕相关的信息。
+
+#### 三、实用场景示例：
+
+1. **适配布局**
+   
+   - 根据屏幕宽高，动态调整网页布局：
+     ```javascript
+     if (screen.width < 1024) {
+       console.log("小屏设备，调整布局");
+     } else {
+       console.log("大屏设备");
+     }
+     ```
+   
+2. **判断可用屏幕空间**
+   - 检查是否有足够的可用屏幕空间：
+     ```javascript
+     if (screen.availHeight < 800) {
+       console.log("可用屏幕空间较小，可能被任务栏占用");
+     }
+     ```
+
+3. **颜色深度优化**
+   - 根据屏幕的颜色深度，调整网页显示质量：
+     ```javascript
+     if (screen.colorDepth < 24) {
+       console.log("颜色深度较低，使用低质量图片");
+     }
+     ```
+
+#### 总结：
+
+- **属性**：
+  - `width` / `height`：屏幕的总宽度和高度。
+  - `availWidth` / `availHeight`：可用屏幕的宽度和高度。
+  - `colorDepth` / `pixelDepth`：屏幕的颜色深度和像素深度。
+- **方法**：`screen` 对象没有常用方法，主要用于获取屏幕信息。
+
+这些属性在适应不同屏幕设备的布局设计中十分重要，尤其是在响应式设计和跨设备开发时会经常用到。
+
+
+
+## 13. JSON
+
+> **JSON**（JavaScript Object Notation）是一种轻量级的数据交换格式，易于人阅读和编写，同时也便于机器解析和生成。尽管 JSON 的名字带有 JavaScript，但它是与语言无关的格式，现已成为数据交换的标准格式之一，广泛应用于各种编程语言中。
+
+#### 一、JSON 的用途：
+
+1. **数据交换**：客户端与服务器之间的数据传输，如 RESTful API、WebSocket、AJAX 请求等，常使用 JSON 格式。
+2. **配置文件**：许多应用程序使用 JSON 作为配置文件格式，例如 Node.js 中的 `package.json` 文件。
+3. **数据存储**：某些数据库（如 NoSQL 数据库 MongoDB）采用 JSON 或类似的 BSON 格式来存储数据。
+4. **跨平台通信**：JSON 是前后端分离架构中常用的通信格式，在不同语言之间进行数据传递时，JSON 是非常便捷的选择。
+
+#### 二、JSON 的语法：
+
+- **对象**：由键值对组成，键是字符串，值可以是字符串、数值、布尔值、数组、对象或 `null`，键值对之间用逗号分隔，整体用 `{}` 包裹。
+    ```json
+    {
+      "name": "John",
+      "age": 30,
+      "isStudent": false,
+      "courses": ["Math", "Science"],
+      "address": {
+        "city": "New York",
+        "zip": "10001"
+      }
+    }
+    ```
+
+- **数组**：JSON 中的数组是值的有序集合，元素之间用逗号分隔，整体用 `[]` 包裹。
+    ```json
+    ["apple", "banana", "cherry"]
+    ```
+
+- **基本数据类型**：
+  - **字符串**：必须用双引号包围。
+    ```json
+    "example"
+    ```
+  - **数值**：整数或浮点数，直接书写即可。
+    ```json
+    42
+    ```
+  - **布尔值**：`true` 或 `false`。
+    ```json
+    true
+    ```
+  - **`null`**：表示空值。
+    ```json
+    null
+    ```
+
+#### 三、JSON 常用 API：
+
+在 JavaScript 中，处理 JSON 数据的主要 API 是 `JSON.parse()` 和 `JSON.stringify()`。
+
+1. **`JSON.parse()`**
+   - **作用**：将 JSON 格式的字符串解析为 JavaScript 对象。
+   - **语法**：
+     ```javascript
+     JSON.parse(text);
+     ```
+   - **示例**：
+     
+     ```javascript
+     const jsonString = '{"name":"John", "age":30}';
+     const obj = JSON.parse(jsonString);
+     console.log(obj.name);  // 输出 "John"
+     ```
+   
+2. **`JSON.stringify()`**
+   - **作用**：将 JavaScript 对象转换为 JSON 格式的字符串。
+   - **语法**：
+     ```javascript
+     JSON.stringify(value[, replacer[, space]]);
+     ```
+   - **参数**：
+     - `value`：要转换为 JSON 字符串的 JavaScript 值（对象、数组等）。
+     - `replacer`：可选，函数或数组，用于筛选或转换对象中的值。
+     - `space`：可选，用于格式化输出（如添加缩进），通常是数值或字符串。
+   - **示例**：
+     
+     ```javascript
+     const obj = { name: "John", age: 30 };
+     const jsonString = JSON.stringify(obj);
+     console.log(jsonString);  // 输出 '{"name":"John","age":30}'
+     ```
+   
+3. **`JSON.stringify()` 使用 `space` 参数进行格式化**：
+   - **示例**：
+     ```javascript
+     const obj = { name: "John", age: 30 };
+     const jsonString = JSON.stringify(obj, null, 2);  // 使用 2 空格缩进
+     console.log(jsonString);
+     /* 输出:
+     {
+       "name": "John",
+       "age": 30
+     }
+     */
+     ```
+
+4. **处理 JSON 数组**：
+   
+   - **解析 JSON 数组**：
+     ```javascript
+     const jsonString = '["apple", "banana", "cherry"]';
+     const arr = JSON.parse(jsonString);
+     console.log(arr[1]);  // 输出 "banana"
+     ```
+   - **字符串化 JavaScript 数组**：
+     
+     ```javascript
+     const arr = ["apple", "banana", "cherry"];
+     const jsonString = JSON.stringify(arr);
+     console.log(jsonString);  // 输出 '["apple","banana","cherry"]'
+     ```
+
+#### 总结：
+
+- **JSON** 是一种轻量级的数据交换格式，适合传递数据和配置。
+- **语法**：包括对象 `{}`、数组 `[]`、字符串、数值、布尔值和 `null`。
+- **常用 API**：
+  - `JSON.parse()`：将 JSON 字符串解析为 JavaScript 对象。
+  - `JSON.stringify()`：将 JavaScript 对象转换为 JSON 字符串。
+
+
+
+
+
+## 14、浏览器中的storage
+
+> 浏览器的 `Storage` 是用于在客户端（浏览器）中存储数据的机制，它允许 web 应用程序在用户的设备上存储数据，以便在页面刷新、关闭或重新打开时，数据仍然能够被持久化或临时存储。`Storage` 包含两个主要的 API：`localStorage` 和 `sessionStorage`，它们在功能上有些不同。
+
+### 1. `localStorage`
+`localStorage` 用于存储持久化的数据，数据没有过期时间，除非手动删除，否则会一直保存在用户的浏览器中，即使浏览器关闭或计算机重启，数据仍然存在。
+
+**特点：**
+- 数据存储在浏览器中，持久化保存。
+- 不限制页面或会话的生命周期，可以跨会话、跨标签页读取。
+- 数据容量一般限制在 5MB 左右，不同浏览器略有不同。
+- 只能存储字符串类型的数据，如果是对象类型需要通过 JSON 序列化。
+
+**常用 API：**
+```javascript
+// 设置数据
+localStorage.setItem('key', 'value');
+
+// 获取数据
+const value = localStorage.getItem('key');
+
+// 删除数据
+localStorage.removeItem('key');
+
+// 清空所有数据
+localStorage.clear();
+```
+
+### 2. `sessionStorage`
+`sessionStorage` 用于在一个会话（session）内存储数据。当浏览器标签页关闭时，数据会被清除。它的数据仅在页面会话期间有效，不会在页面之间共享，主要用于在当前标签页中临时保存数据。
+
+**特点：**
+- 数据在会话结束（关闭标签页或浏览器）时清除。
+- 只在当前页面或标签页中有效，不会在不同的标签页之间共享数据。
+- 数据容量一般与 `localStorage` 类似，约 5MB。
+- 只能存储字符串类型的数据，同样需要序列化对象。
+
+**常用 API：**
+```javascript
+// 设置数据
+sessionStorage.setItem('key', 'value');
+
+// 获取数据
+const value = sessionStorage.getItem('key');
+
+// 删除数据
+sessionStorage.removeItem('key');
+
+// 清空所有数据
+sessionStorage.clear();
+```
+
+### 区别总结：
+- **`localStorage`**：数据持久化，除非手动删除，否则不会过期。
+- **`sessionStorage`**：数据只在当前会话中有效，会话结束后自动删除。
+
+这两种 `Storage` 方法都属于 `HTML5` 标准的一部分，用于在客户端存储数据，避免频繁的网络请求，优化性能，增强用户体验。
