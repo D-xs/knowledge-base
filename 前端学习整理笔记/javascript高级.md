@@ -1489,3 +1489,5091 @@ fn()
   ![image-20240924175733589](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240924175733589.png)
 
 - 观察上面的结果是没有age和message属性的，这个就涉及到JS引擎的实现了，像V8引擎就对其进行了优化，对于闭包内层函数没有使用到的自由变量，是不会被保存的，这样就大大提升了内存的使用率；
+
+## 四、函数增强
+
+> js中的函数也是一个对象，既然是一个对象，那么也可有自己的属性和方法；只是比较特殊，因为函数可以调用。
+
+### 1、常见属性和方法：
+
+1. **length**
+
+- 表示函数的**形参个数**（即声明时函数期望的参数数量，不包括默认参数和剩余参数）。
+  
+  ```javascript
+  function sum(a, b) { return a + b; }
+  console.log(sum.length); // 2
+  
+  // 从左往右开始，查找到第一个有默认值的形参，此时length的值为该形参左侧的所有形参之和
+  function sum(a = 1, b) { return a + b; }
+  console.log(sum.length); // 0
+  
+  function sum(a, b = 1) { return a + b; }
+  console.log(sum.length); // 1
+  
+  // 不包括剩余参数
+  function sum(a, b, ...args) { return a + b; }
+  console.log(sum.length); // 2
+  ```
+
+2. **name**
+
+- 返回函数的**名称**，如果是匿名函数表达式，`name` 将返回空字符串。
+
+  ```javascript
+  function multiply() {}
+  console.log(multiply.name); // 'multiply'
+  
+  const anonymousFunc = function() {};
+  console.log(anonymousFunc.name); // ''
+  ```
+
+3. **prototype**
+
+- 每个函数都具有 `prototype` 属性，它用于为构造函数提供原型链（适用于 `new` 操作符创建的对象）。这是构造函数的重要属性。
+
+  ```javascript
+  function Person(name) {
+      this.name = name;
+  }
+  
+  Person.prototype.greet = function() {
+      console.log(`Hello, ${this.name}`);
+  };
+  
+  const person = new Person('John');
+  person.greet(); // 'Hello, John'
+  ```
+
+4. **caller (deprecated)**
+
+- 返回调用当前函数的函数（如果有的话）。该属性已被弃用，推荐使用 **`arguments.callee.caller`** 或者调试工具代替。
+
+  ```javascript
+  function outer() {
+      inner();
+  }
+  
+  function inner() {
+      console.log(inner.caller); // 输出 outer 函数
+  }
+  
+  outer();
+  ```
+
+5. **arguments (非属性)**
+
+- `arguments` 对象在**函数内部**自动创建，用于存储调用函数时传递的所有参数。
+
+- 它是类似数组的对象，拥有 `length` 属性，可以通过索引访问参数，但它**不是真正的数组**，因此不继承数组方法。
+
+- 可以用于处理未知数量的参数（当你不确定调用时会传递多少参数时）。
+
+	```javascript
+    function showArgs() {
+        console.log(arguments); // 输出类数组对象
+        console.log(arguments.length); // 参数的个数
+    }
+	
+    showArgs(1, 2, 3); // 输出: [1, 2, 3], 3
+	```
+
+  **访问 `arguments` 中的元素**
+
+    `arguments` 的元素可以通过**索引**访问，类似于数组。
+
+    ```javascript
+    function sum() {
+        let total = 0;
+        for (let i = 0; i < arguments.length; i++) {
+            total += arguments[i];
+        }
+        return total;
+    }
+  
+    console.log(sum(1, 2, 3, 4)); // 10
+    ```
+
+  **`arguments.length`**
+
+    - `length` 属性表示传递给函数的参数个数。
+
+    ```javascript
+    function argLength() {
+        return arguments.length;
+    }
+  
+    console.log(argLength(1, 2, 3)); // 3
+    ```
+
+  **函数参数和 `arguments` 的关系**
+
+    - 当函数定义了形参时，`arguments` 中的值与形参**按顺序对应**。如果传递的实参比形参少或多，`arguments` 仍然会包含所有传递的实参。
+
+    ```javascript
+    function test(a, b) {
+        console.log(a); // 实参对应形参
+        console.log(b);
+        console.log(arguments[2]); // 可以访问多余的参数
+    }
+  
+    test(1, 2, 3); // 输出: 1, 2, 3
+    ```
+
+  **动态函数参数**
+
+    `arguments` 对象在处理**变长参数**时非常有用，比如你不知道要传递多少个参数。
+
+    ```javascript
+    function logAllArgs() {
+        for (let i = 0; i < arguments.length; i++) {
+            console.log(arguments[i]);
+        }
+    }
+  
+    logAllArgs('a', 'b', 'c'); // 输出: 'a', 'b', 'c'
+    ```
+
+  **`arguments` 与数组的区别**
+
+    尽管 `arguments` 是类似数组的对象，但它不是真正的数组，不能直接使用数组的方法（如 `map()`、`filter()` 等）。不过可以将 `arguments` 转为数组。
+
+    ```javascript
+  // 1. Array.prototype.slice.call
+  // 这种方法通过 call 将 slice 方法应用于 arguments 对象，将其转换为数组。
+  function argsToArray() {
+      const argsArray = Array.prototype.slice.call(arguments);
+      console.log(argsArray);
+  }
+  
+  argsToArray(1, 2, 3); // [1, 2, 3]
+  
+  // 2. Array.from
+  // Array.from 方法可以直接将类数组对象（如 arguments）转换为数组。
+  function argsToArray() {
+      const argsArray = Array.from(arguments);
+      console.log(argsArray);
+  }
+  
+  argsToArray(4, 5, 6); // [4, 5, 6]
+  
+  
+  // 3. 扩展运算符（Spread Operator）
+  // 在 ES6 中，可以使用扩展运算符 ... 来将 arguments 转换为数组。
+  function argsToArray() {
+      const argsArray = [...arguments];
+      console.log(argsArray);
+  }
+  
+  argsToArray(7, 8, 9); // [7, 8, 9]
+  
+  
+  // 4. 使用 Array 构造函数
+  // 虽然不常用，但也可以通过 Array 构造函数来转换，利用 apply 方法。
+  function argsToArray() {
+      const argsArray = Array.apply(null, arguments);
+      console.log(argsArray);
+  }
+  
+  argsToArray(10, 11, 12); // [10, 11, 12]
+    ```
+  
+  **限制与替代**
+  
+    - 在现代 JavaScript 中，`arguments` 对象逐渐被**剩余参数语法（rest parameters）**所替代，因为剩余参数提供了更好的语义和灵活性。
+  
+    **剩余参数语法示例：**
+  
+    ```javascript
+    function sum(...nums) {
+        return nums.reduce((total, num) => total + num, 0);
+    }
+  
+    console.log(sum(1, 2, 3)); // 6
+    ```
+    剩余参数语法不仅能够接收变长参数，而且它返回的是真正的数组，能够直接使用数组方法。
+  
+  **ES6+ 与 `arguments`**
+  
+    - 在箭头函数中，是没有自己的`arguments` 对象。所以我们在箭头函数中使用arguments会去上层作用域查找，如果需要处理变长参数，可以使用**剩余参数**来代替。
+  
+    ```javascript
+    function bar(m,n) {
+        return (x, y, z) => {
+            console.log(arguments)
+        }
+    }
+    
+    const fn = bar(20, 30)
+    fn(10, 20, 30) // [20, 30]
+    
+    const add = (...args) => args.reduce((acc, curr) => acc + curr, 0);
+    console.log(add(1, 2, 3)); // 6
+    ```
+  
+    `arguments` 对象是处理变长参数的经典方式，虽然在现代 JavaScript 中，剩余参数语法（`...args`）更加推荐使用，但 `arguments` 在老代码和某些场景下仍然有其独特的作用。如果你有具体使用场景，或者对 `arguments` 对象的某些用法有疑问，可以告诉我！
+
+
+
+6. **`__proto__` (继承自 Object.prototype)**
+
+- 指向创建函数的原型对象。函数是对象，因此它也继承自 `Object.prototype`，并拥有 `__proto__` 属性，指向其原型链。
+
+  ```javascript
+  function test() {}
+  
+  console.log(test.__proto__ === Function.prototype); // true
+  ```
+
+7. **constructor**
+
+- 指向创建该函数实例的构造函数。在函数上，通常是 `Function` 构造函数。
+
+  ```javascript
+  function example() {}
+  
+  console.log(example.constructor === Function); // true
+  ```
+
+8. **bind()、call()、apply()** (方法)
+
+- 虽然它们是函数的**方法**而非属性，但非常重要：
+  - `bind()`：创建一个新函数，并将其 `this` 值绑定到指定的对象。
+  - `call()`：立即调用函数，并传入一个 `this` 值和参数列表。
+  - `apply()`：立即调用函数，传入 `this` 值和参数数组。
+
+  ```javascript
+  function greet(greeting, name) {
+      console.log(`${greeting}, ${name}`);
+  }
+  
+  greet.call(null, 'Hello', 'John'); // 'Hello, John'
+  greet.apply(null, ['Hi', 'Jane']); // 'Hi, Jane'
+  
+  const greetJohn = greet.bind(null, 'Hey', 'John');
+  greetJohn(); // 'Hey, John'
+  ```
+
+总结
+
+JavaScript 中函数作为对象，拥有这些属性和方法，可以为函数提供更多的灵活性和功能。如果你对某个属性或方法想了解更多，随时告诉我！
+
+### 2、JavaScript函数式编程（纯函数、柯里化以及组合函数）
+
+> 函数式编程（Functional Programming），又称为泛函编程，是一种编程范式。早在很久以前就提出了函数式编程这个概念了，而后面一直长期被面向对象编程所统治着，最近几年函数式编程又回到了大家的视野中，JavaScript是一门以函数为第一公民的语言，必定是支持这一种编程范式的，下面就来谈谈JavaScript函数式编程中的核心概念纯函数、柯里化以及组合函数。
+
+#### 1.纯函数
+
+##### 1.1.纯函数的概念
+
+> 对于纯函数的定义，维基百科中是这样描述的：在程序设计中，若函数符合以下条件，那么这个函数被称之为纯函数。
+
+- 此函数在**相同的输入值**时，需**产生相同的输出**；
+- 函数的输入和输出值以外的**其他隐藏信息或状态无关**，也和**由I/O设备产生的外部输出无关**；
+- 该函数不能有语义上可观察的**函数副作用**，诸如“触发事件”，使输出设备输出，或更改输出值以外物件的内容等；
+
+对以上描述总结就是：
+
+- 对于相同的输入，永远会得到相同的输出；
+- 在函数的执行过程中，没有任何可观察的副作用；
+- 同时也不依赖外部环境的状态；
+
+##### 1.2.副作用
+
+> 上面提到了一个词叫“副作用”，那么什么是副作用呢？
+
+- 通常我们所说的副作用大多数是指药会产生的副作用；
+- 而在计算机科学中，副作用指在执行一个函数时，除了得到函数的返回值以外，还在函数调用时产生了附加的影响，比如修改了全局变量的状态，修改了传入的参数或得到了其它的输出内容等；
+
+##### 1.3.纯函数案例
+
+- 编写一个求和的函数sum，只要我们输入了固定的值，sum函数就会给我们返回固定的结果，且不会产生任何副作用。
+
+  ```js
+  function sum(a, b) {
+    return a + b
+  }
+  
+  console.log(sum(10, 20)); // 30
+  console.log(sum(10, 20)); // 30（相同输入，始终相同输出）
+  ```
+
+- 以下的sum函数虽然对于固定的输入也会返回固定的输出，但是函数内部修改了全局变量message，就认定为产生了副作用，不属于纯函数。
+
+  ```js
+  let message = 'hello'
+  function sum(a, b) {
+    message = 'hi'
+    return a + b
+  }
+  ```
+
+- 在JavaScript中也提供了许多的内置方法，有些是纯函数，有些则不是。像操作数组的两个方法slice和splice。
+
+  - slice方法就是一个纯函数，因为对于同一个数组固定的输入可以得到固定的输出，且没有任何副作用；
+
+    ```js
+    const nums = [1, 2, 3, 4, 5]
+    const newNums = nums.slice(1, 3)
+    console.log(newNums) // [2, 3]
+    console.log(nums) // [ 1, 2, 3, 4, 5 ]
+    ```
+
+  - splice方法不是一个纯函数，因为它改变了原数组nums；
+
+    ```js
+    const nums = [1, 2, 3, 4, 5]
+    const newNums = nums.splice(1, 3)
+    console.log(newNums) // [ 2, 3, 4 ]
+    console.log(nums) // [ 1, 5 ]
+    ```
+
+#### 2.柯里化
+
+##### 2.1.柯里化的概念
+
+> 对于柯里化的定义，维基百科中是这样解释的：
+
+- 柯里化是指把接收多个参数的函数，变成**接收一个单一参数**（最初函数的第一个参数）的函数，并且返回接收余下的参数，而且**返回结果的新函数**的技术；
+- 柯里化声称**“如果你固定某些参数，你将得到接受余下参数的一个函数”**；
+
+总结：只传递给函数**一部分参数**来调用它，让它**返回一个函数去处理剩余的参数**的过程就称之为柯里化。
+
+##### 2.2.函数柯里化的过程
+
+编写一个普通的三值求和函数：
+
+```js
+function sum(x, y, z) {
+  return x + y + z
+}
+
+const res = sum(10, 20, 30)
+console.log(res) // 60
+```
+
+将以上求和函数柯里化得：
+
+- 将传入的三个参数进行拆解，依次返回一个函数，并传入一个参数；
+- 在保证同样功能的同时，其调用方式却发生了变化；
+- 注意：在拆解参数时，不一定非要将参数拆成一个个的，也可以拆成2+1或1+2；
+
+```js
+function sum(x) {
+  return function(y) {
+    return function(z) {
+      return x + y + z
+    }
+  }
+}
+
+const res = sum(10)(20)(30)
+console.log(res)
+```
+
+使用ES6箭头函数简写为：
+
+```js
+const sum = x => y => z => x + y + z
+```
+
+##### 2.3.函数柯里化的特点及应用
+
+- **让函数的职责更加单一。**柯里化可以实现让一个函数处理的问题尽可能的单一，而不是将一大堆逻辑交给一个函数来处理。
+
+  - 将上面的三值求和函数增加一个需求，在计算结果之前给每个值加上2，先看看不使用柯里化的实现效果：
+
+    ```js
+    function sum(x, y, z) {
+      x = x + 2
+      y = y + 2
+      z = z + 2
+      return x + y + z
+    }
+    ```
+
+  - 柯里化的实现效果：
+
+    ```js
+    function sum(x) {
+      x = x + 2
+      return function(y) {
+        y = y + 2
+        return function(z) {
+          z = z + 2
+          return x + y + z
+        }
+      }
+    }
+    ```
+
+  - 很明显函数柯里化后，让我们对每个参数的处理更加单一
+
+- **提高函数参数逻辑复用。**同样使用上面的求和函数，增加另一个需求，固定第一个参数的值为10，直接看柯里化的实现效果吧，后续函数调用时第一个参数值都为10的话，就可以直接调用sum10函数了。
+
+  ```js
+  function sum(x) {
+    return function(y) {
+      return function(z) {
+        return x + y + z
+      }
+    }
+  }
+  
+  const sum10 = sum(10) // 指定第一个参数值为10的函数
+  const res = sum10(20)(30)
+  console.log(res) // 60
+  ```
+
+##### 2.4.自动柯里化函数的实现
+
+```js
+function autoCurrying(fn) {
+  // 1.拿到当前需要柯里化函数的参数个数
+  const fnLen = fn.length
+
+  // 2.定义一个柯里化之后的函数
+  function curried_1(...args1) {
+    // 2.1拿到当前传入参数的个数
+    const argsLen = args1.length
+
+    // 2.1.将当前传入参数个数和fn需要的参数个数进行比较
+    if (argsLen >= fnLen) {
+      // 如果当前传入的参数个数已经大于等于fn需要的参数个数
+      // 直接执行fn，并在执行时绑定this，并将对应的参数数组传入
+      return fn.apply(this, args1)
+    } else {
+      // 如果传入的参数不够，说明需要继续返回函数来接收参数
+      function curried_2(...args2) {
+        // 将参数进行合并，递归调用curried_1，直到参数达到fn需要的参数个数
+        return curried_1.apply(this, [...args1, ...args2])
+      }
+
+      // 返回继续接收参数函数
+      return curried_2
+    }
+  }
+
+  // 3.将柯里化的函数返回
+  return curried_1
+}
+```
+
+测试：
+
+```js
+function sum(x, y, z) {
+  return x + y + z
+}
+
+const curryingSum = autoCurrying(sum)
+
+const res1 = curryingSum(10)(20)(30)
+const res2 = curryingSum(10, 20)(30)
+const res3 = curryingSum(10)(20, 30)
+const res4 = curryingSum(10, 20, 30)
+console.log(res1) // 60
+console.log(res2) // 60
+console.log(res3) // 60
+console.log(res4) // 60
+```
+
+#### 3.组合函数
+
+> **组合函数（Compose Function）**是在JavaScript开发过程中一种对函数的使用技巧、模式。对某一个数据进行函数调用，执行两个函数，这两个函数需要依次执行，所以需要将这两个函数组合起来，自动依次调用，而这个过程就叫做函数的组合，组合形成的函数就叫做组合函数。
+
+需求：对一个数字先进行乘法运算，再进行平方运算。
+
+- 一般情况下，需要先定义两个函数，然后再对其依次调用：
+
+  ```js
+  function double(num) {
+    return num * 2
+  }
+  function square(num) {
+    return num ** 2
+  }
+  
+  const duobleResult = double(10)
+  const squareResult = square(duobleResult)
+  console.log(squareResult) // 400
+  ```
+
+- 实现一个组合函数，将duoble和square两个函数组合起来：
+
+  ```js
+  function composeFn(fn1, fn2) {
+    return function(num) {
+      return fn2(fn1(num))
+    }
+  }
+  
+  const execFn = composeFn(double, square)
+  const res = execFn(10)
+  console.log(res) // 400
+  ```
+
+实现一个自动组合函数的函数：
+
+```js
+function autoComposeFn(...fns) {
+  // 1.拿到需要组合的函数个数
+  const fnsLen = fns.length
+
+  // 2.对传入的函数进行边界判断，所有参数必须为函数
+  for (let i = 0; i < fnsLen; i++) {
+    if (typeof fns[i] !== 'function') {
+      throw TypeError('The argument passed must be a function.')
+    }
+  }
+
+  // 3.定义一个组合之后的函数
+  function composeFn(...args) {
+    // 3.1.拿到第一个函数的返回值
+    let result = fns[0].apply(this, args)
+
+    // 3.1.判断传入的函数个数
+    if (fnsLen === 1) {
+      // 如果传入的函数个数为一个，直接将结果返回
+      return result
+    } else {
+      // 如果传入的函数个数 >= 2
+      // 依次将函数取出进行调用，将上一个函数的返回值作为参数传给下一个函数
+      // 从第二个函数开始遍历
+      for (let i = 1; i < fnsLen; i++) {
+        result = fns[i].call(this, result)
+      }
+
+      // 将结果返回
+      return result
+    }
+  }
+
+  // 4.将组合之后的函数返回
+  return composeFn
+}
+```
+
+测试：
+
+```js
+function double(num) {
+  return num * 2
+}
+function square(num) {
+  return num ** 2 
+}
+
+const composeFn = autoComposeFn(double, square)
+const res = composeFn(10)
+console.log(res) // 400
+```
+
+
+
+## 五、JavaScript面向对象—对象的创建和操作
+
+> **前言**
+>
+> 虽然说在JavaScript编程语言中，函数是第一公民，但是JavaScript不仅支持函数式编程，也支持面向对象编程。JavaScript对象设计成了一组属性的无序集合，由key和value组成，key为一个标识符名称，而value可以是任意类型的值，当函数作为对象的属性值时，这个函数就可以称之为对象的方法。下面就来看看JavaScript的面向对象吧。
+
+### 1.JavaScript创建对象的方式
+
+> 一般地，常用于创建对象的方式有两种，早期经常使用Object类，通过new关键字来创建一个对象，有点类似于Java中创建对象，后来为了方便就直接使用对象字面量的方式来创建对象了，用法更为简洁。
+
+- 使用`Object`类创建对象；
+
+  ```js
+  const obj = new Object() // 创建一个空对象
+  // 往对象中添加属性
+  obj.name = 'curry'
+  obj.age = 30
+  ```
+
+- 使用对象字面量创建对象；
+
+  ```js
+  // 直接往{}添加键值对
+  const obj = {
+    name: 'curry',
+    age: 30
+  }
+  ```
+
+### 2.对象属性操作的控制
+
+> 对象创建出来后，如何对该对象进行操作控制呢？这里涉及到一个很重要的方法：Object.defineProperty()。
+
+#### 2.1.Object.defineProperty()
+
+> 该方法可以在对象上定义一个新的属性，也可修改对象现有属性，并将该对象返回。
+
+```js
+Object.defineProperty(obj, prop, descriptor)
+```
+
+接收三个参数：
+
+- obj：指定操作的对象；
+- prop：指定需要定义或修改的属性名称；
+- description：定义或修改的属性描述符；
+
+#### 2.2.属性描述符的分类
+
+> 什么是属性描述符？顾名思义就是对对象中的属性进行描述，简单来说就是给对象某个属性指定一些规则。属性描述符主要分为**数据属性描述符**和**存取属性描述符**两种类型。
+
+对于属性描述符中的属性是否两者都可以设置呢？其实数据和存取属性描述符两者是有区别，下面的表格统计了两者可用和不可用的属性：
+
+| 属性           | configurable | enumerable | value  | writable | get    | set    |
+| :------------- | :----------- | :--------- | :----- | :------- | :----- | :----- |
+| 数据属性描述符 | 可以         | 可以       | 可以   | 可以     | 不可以 | 不可以 |
+| 存取属性描述符 | 可以         | 可以       | 不可以 | 不可以   | 可以   | 可以   |
+
+那么为什么有些属性可以用，有些属性又不能用呢？因为数据属性描述符和存取属性描述符所担任的角色不一样，下面就来详细介绍一下，它们两者的区别。
+
+#### 2.3.数据属性描述符
+
+> 从上面的表格可以知道，数据属性描述符可以使用configurable、enumerable、value、writable。而这就是数据属性描述符的四个特性。
+
+- **Configurable**：表示是否可以通过delete删除对象属性，是否可以修改它的特性，或者是否可以将它修改为存取属性描述符。当通过`new Object()`或者字面量的方式创建对象时，其中的属性的`configurable`默认为`true`，当通过属性描述符定义一个属性时，其属性的`configurable`默认为`false`。
+- **Enumerable**：表示是否可以通过for-in或者Object.keys()返回该属性。当通过`new Object()`或者字面量的方式创建对象时，其中的属性的`enumerable`默认为`true`，当通过属性描述符定义一个属性时，其属性的`enumerable`默认为`false`。
+- **Writable**：表示是否可以修改属性的值。当通过`new Object()`或者字面量的方式创建对象时，其中的属性的`writable`性描述符定义一个属性时，其属性的`writable`默认为`false`。
+- **Value**：属性的value值，读取属性时会返回该值，修改属性时会对其进行修改。（默认：undefined）
+
+```js
+const obj = {
+  name: 'curry'
+}
+
+Object.defineProperty(obj, 'age', {
+  configurable: false, // age属性是否可以删除，默认false
+  enumerable: false, // age属性是否可以枚举，默认false
+  writable: false, // age属性是否可以写入（修改），默认false
+  value: 30 // age属性的值，默认undefined
+})
+
+// 当configurable为false，age属性是不可被删除的
+delete obj.age
+console.log(obj) // { name: 'curry', age: 30 }
+
+// 当writable为false，age属性的值是不可被修改的
+obj.age = 18
+console.log(obj) // { name: 'curry', age: 30 }
+```
+
+
+
+```js
+// 如果将enumerable修改为false，age属性是不可以被遍历出来的
+for (const key in obj) {
+  console.log(key) // name
+}
+```
+
+#### 2.4.存取属性描述符
+
+> 存取属性描述符可以使用configurable、enumerable、get、set。在获取对象某个属性值时，可以通过get来拦截，在设置对象某个属性值时，可以通过set来拦截。configurable和enumerable的用法和特性跟数据属性描述符一样。
+
+- **Get**：获取属性时会执行的函数。（默认undefined）
+- **Set**：设置属性时会执行的函数。（默认undefined）
+
+get和set的使用场景：
+
+- 隐藏某一个私有属性，不希望直接被外界使用和赋值。如下代码`_age`表示不想直接被外界使用，外界就可以通过使用`age`的set和get来访问设置`_age`了。
+
+- 如果希望截获某一个属性它访问和设置值的过程。（Vue2的响应式原理就在这）
+
+  ```js
+  const obj = {
+    name: 'curry',
+    _age: 30
+  }
+  
+  // 注意：这里的this是指向obj对象的
+  Object.defineProperty(obj, 'age', {
+    configurable: true,
+    enumerable: true,
+    get: function() {
+      console.log('age属性被访问了')
+      return this._age
+    },
+    set: function(newValue) {
+      console.log('age属性被设置了')
+      this._age = newValue
+    }
+  })
+  
+  obj.age // age属性被访问了
+  obj.age = 18 // age属性被设置了
+  ```
+
+#### 2.5.同时给多个属性定义属性描述符
+
+> 上面使用Object.defineProperty()方法都是给单个属性进行定义描述符，想要一次性定义多个属性，那么就可以使用Object.defineProperties()方法了。写法如下：
+
+```js
+Object.defineProperties(obj, {
+  name: {
+    configurable: true,
+    enumerable: true,
+    writable: true,
+    value: 'curry'
+  },
+  age: {
+    configurable: false,
+    enumerable: false,
+    get: function() {
+      return this._age
+    },
+    set: function(newValue) {
+      this._age = newValue
+    }
+  }
+})
+```
+
+### 3.Object中常用的方法
+
+> 上面介绍了Object中defineProperty和defineProperties两个方法。其实Object中还有很多方法，下面介绍一些常用的。
+
+- 获取对象的属性描述符：
+
+  - 获取单个属性：`Object.getOwnPropertyDescriptor`；
+  - 获取所有属性：`Object.getOwnPropertyDescriptors`；
+
+  ```js
+  const obj = {
+    name: 'curry',
+    age: 30
+  }
+  
+  console.log(Object.getOwnPropertyDescriptor(obj, 'age')) // { value: 30, writable: true, enumerable: true, configurable: true }
+  console.log(Object.getOwnPropertyDescriptors(obj))
+  /*
+    {
+      name: {
+        value: 'curry',
+        writable: true,
+        enumerable: true,
+        configurable: true
+      },
+      age: { value: 30, writable: true, enumerable: true, configurable: true }
+    }
+  */
+  ```
+
+- `Object.preventExtensions()`：禁止对象扩展新属性，给一个对象添加新的属性会失败（在严格模式下会报错）。
+
+- `Object.seal()`：将对象密封起来，不允许配置和删除属性。（实际还是调用`preventExtensions`，并且将现有属性的`configurable`设置为`false`）
+
+- `Object.freeze()`：将对象冻结起来，不允许修改对象现有属性。（实际上是调用seal，并且将现有属性的`writable`设置为`false`）
+
+### 4.JavaScript创建多个对象
+
+> 上面提到的创建对象的方式仅适用于创建单个对象适用，如果有多个对象比较类似，那么一个个创建必然是很麻烦的，如何批量创建对象呢？JavaScript也给我们提供了一些方案。
+
+#### 4.1.方案一：工厂函数
+
+> 如果我们不想在创建对象时做重复的工作，那么就可以定义一个函数为我们去做这些重复性的工作，我们只需要将属性对应的值传入函数即可。
+
+```js
+function createObj(name, age) {
+  // 创建一个空对象
+  const obj = {}
+
+  // 设置对应属性值
+  obj.name = name
+  obj.age = age
+  // 公共方法共用
+  obj.sayHello = function() {
+    console.log(`My name is ${this.namename}, I'm ${this.age} years old.`)
+  }
+
+  // 将对象返回
+  return obj
+}
+
+const obj1 = createObj('curry', 30)
+const obj2 = createObj('kobe', 24)
+console.log(obj1) // { name: 'curry', age: 30, sayHello: [Function (anonymous)] }
+console.log(obj2) // { name: 'kobe', age: 24, sayHello: [Function (anonymous)] }
+obj1.sayHello() // My name is undefined, I'm 30 years old.
+obj2.sayHello() // My name is undefined, I'm 24 years old.
+```
+
+**缺点**：创建出来的对象全是通过字面量创建的，获取不到对象真实的类型。
+
+#### 4.2.方案二：构造函数
+
+**（1）什么是构造函数？**
+
+- 构造函数也称之为构造器（constructor），通常是我们在创建对象时会调用的函数；
+- 在其他面向对象的编程语言里面，构造函数是存在于类中的一个方法，称之为构造方法；
+- 如果一个普通的函数被使用**new操作符来调用**了，那么这个函数就称之为是一个构造函数；
+- 一般规定构造函数的函数名首字母大写；
+
+**（2）new操作符调用函数的作用**
+
+> 当一个函数被new操作符调用了，默认会进行如下几部操作：
+
+- 在内存中创建一个**新的对象**（空对象）；
+- 这个对象内部的**[[prototype]]属性**会被赋值为该**构造函数的prototype属性**；
+- 构造函数内部的this，会**指向创建出来的新对象**；
+- 执行函数的**内部代码**（函数体代码）；
+- 如果构造函数没有返回**对象**，则默认返回创建出来的新对象。
+
+**（3）构造函数创建对象的过程**
+
+- 通过构造函数创建的对象就真实的类型了，如下所示的Person类型；
+
+```js
+function Person(name, age) {
+  this.name = name
+  this.age = age
+  
+  this.sayHello = function() {
+    console.log(`My name is ${this.name}, I'm ${this.age} years old.`)
+  }
+}
+
+const p1 = new Person('curry', 30)
+const p2 = new Person('kobe', 24)
+console.log(p1) // Person { name: 'curry', age: 30, sayHello: [Function (anonymous)] }
+console.log(p2) // Person { name: 'kobe', age: 24, sayHello: [Function (anonymous)] }
+```
+
+**缺点**：在每次使用new创建新对象时，会重新给每个对象创建新的属性，包括对象中方法，实际上，对象中的方法是可以共用的，消耗了不必要的内存。
+
+```js
+console.log(p1.sayHello === p2.sayHello) // false
+```
+
+#### 4.3.方案三：原型+构造函数
+
+> 在了解该方案之前，需要先简单的认识一下何为原型。
+
+**（1）对象的原型**
+
+> JavaScript中每个对象都有一个特殊的内置属性[[prototype]]（我们称之为**隐式原型**），这个特殊的属性指向另外一个对象。那么这个属性有什么用呢?
+
+- 前面介绍了，当我们通过对象的key来获取对应的value时，会触发对象的get操作；
+- 首先，get操作会先查看该对象自身是否有对应的属性，如果有就找到并返回其值；
+- 如果在对象自身没有找到该属性就会去对象的[[prototype]]这个内置属性中查找；
+
+那么对象的[[prototype]]属性怎么获取呢？主要有两种方法：
+
+- 通过对象的`__proto__`属性访问；
+- 通过`Object.getPrototypeOf()`方法获取；
+
+```js
+const obj = {
+  name: 'curry',
+  age: 30
+}
+
+console.log(obj.__proto__)
+console.log(Object.getPrototypeOf(obj))
+```
+
+![image-20240925160215971](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240925160215971.png)
+
+**（2）函数的原型**
+
+> 所有的函数都有一个prototype属性，并且只有函数才有这个属性。前面提到了new操作符是如何在内存中创建一个对象，并给我们返回创建出来的对象，其中第二步**这个对象内部的[[prototype]]属性会被赋值为该构造函数的prototype属性**。将代码与图结合，来看一下具体的过程。
+
+示例代码：
+
+```js
+function Person(name, age) {
+  this.name = name
+  this.age = age
+}
+
+const p1 = new Person('curry', 30)
+const p2 = new Person('kobe', 24)
+// 验证：对象(p1\p2)内部的[[prototype]]属性(__proto__)会被赋值为该构造函数(Person)的prototype属性；
+console.log(p1.__proto__ === Person.prototype) // true
+console.log(p2.__proto__ === Person.prototype) // true
+```
+
+内存表现：
+
+- p1和p2的原型都指向Person函数的prototype原型；
+- 其中还有一个constructor属性，默认原型上都会有这个属性，并且指向当前的函数对象；
+
+![image-20240925160253372](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240925160253372.png)
+
+**（3）结合对象和函数的原型，创建对象**
+
+> 先简单的总结一下：
+
+- 前面使用构造函数创建对象的缺点是对象中的方法不能共用；
+- 对象的属性可以通过[[prototype]]隐式原型进行查找；
+- 构造函数创建出来的对象[[prototype]]与构造函数prototype指向同一个对象（同一个地址空间）；
+- 那么我们可以将普通的属性放在构造函数的内部，将方法放在构造函数的原型上，当查找方法时，就都会去到构造函数的原型上，从而实现方法共用；
+
+```js
+function Person(name, age) {
+  this.name = name
+  this.age = age
+}
+
+Person.prototype.sayHello = function() {
+  console.log(`My name is ${this.name}, I'm ${this.age} years old.`)
+}
+
+const p1 = new Person('curry', 30)
+const p2 = new Person('kobe', 24)
+
+console.log(p1.sayHello === p2.sayHello) // true
+```
+
+
+
+
+
+## 六、JavaScript面向对象—继承的实现
+
+> 面向对象的三大特性：封装、继承和多态。上一篇我们简单的了解了封装的过程，也就是把对象的属性和方法封装到一个函数中，这一篇讲一下JavaScript中继承的实现，继承是面向对象中非常重要的特性，它可以帮助我们提高代码的复用性。继承主要的思想就是将重复的代码逻辑抽取到分类中，子类只需要通过继承分类，就可以使用分类中的方法，但是在实现JavaScript继承之前，需要先了解一个重要的知识点“原型链”。
+
+### 1.JavaScript中的原型链
+
+> 在上面**JavaScript面向对象—对象的创建和操作**中已经简单的了解过了JavaScript中对象的原型和函数的原型，当我们从一个对象上获取属性时，如果在当前对象自身没有找到该属性的话，就会去它原型上面获取，如果原型中也没有找到就会去它原型的原型上找，沿着这么一条线进行查找，那么这条线就是我们所说的原型链了。
+
+示例代码：
+
+```js
+const obj = {
+  name: 'curry',
+  age: 30
+}
+
+obj.__proto__ = {}
+obj.__proto__.__proto__ = {}
+obj.__proto__.__proto__.__proto__ = { height: 1.83 }
+
+console.log(obj.height) // 1.83
+```
+
+对应的内存中的查找过程：
+
+![image-20240925160837609](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240925160837609.png)
+
+当通过原型链查找某个属性时，一直找不到的话会一直查找下去么？肯定是不会的，JavaScript的原型链也是有尽头的，这个尽头就是Object的原型。
+
+### 2.Object的原型
+
+> 事实上，不管是对象还是函数，它们原型链的尽头都是Object的原型，也称之为顶层原型，我们可以打印看看这个顶层原型长什么样。
+
+**（1）打印Object的原型**
+
+```js
+console.log(Object.prototype)
+```
+
+- 在node环境中：
+
+![image-20240925160940559](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240925160940559.png)
+
+- 在浏览器中：
+
+![image-20240925161025696](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240925161025696.png)
+
+**（2）Object原型的特殊之处**
+
+- 如果我们再次打印`Object.prototype`的原型，这个原型属性已经指向了**null**；
+
+  ```js
+  console.log(Object.prototype.__proto__) // null
+  ```
+
+- 并且在`Object.prototype`上有很多默认的属性和方法，像`toString、hasOwnProperty`等；
+
+**（3）上一篇中讲到当使用new操作符调用构造函数时，其对象的`[[prototype]]`会指向该构造函数的原型`prototype`，其实`Object`也是一个构造函数，因为我们可以使用new操作符来调用它，创建一个空对象。**
+
+- 示例代码：
+
+  ```js
+  const obj = new Object()
+  
+  obj.name = 'curry'
+  obj.age = 30
+  
+  console.log(obj.__proto__ === Object.prototype) // true
+  console.log(obj.__proto__) // [Object: null prototype] {}
+  console.log(obj.__proto__.__proto__) // null
+  ```
+
+- 内存表现：
+
+  ![image-20240925161111036](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240925161111036.png)
+
+**（4）总结**
+
+- 从Object的原型可以得出一个结论“原型链最顶层的原型对象就是Object的原型对象”，这也就是为什么所有的对象都可以调用`toString`方法了；
+- 从继承的角度来讲就是“Object是所有类的父类”；
+
+### 3.JavaScript继承的实现方案
+
+#### 3.1.方案一：通过原型链实现继承
+
+> 如果需要实现继承，那么就可以利用原型链来实现了。
+
+- 定义一个父类`Person`和子类`Student`；
+- 父类中存放公共的属性和方法供子类使用；
+- 核心：将父类的实例化对象赋值给子类的原型；
+
+```js
+// 定义Person父类公共的属性
+function Person() {
+  this.name = 'curry'
+  this.age = 30
+}
+// 定义Person父类的公共方法
+Person.prototype.say = function() {
+  console.log('I am ' + this.name)
+}
+
+// 定义Student子类特有的属性
+function Student() {
+  this.sno = 101111
+}
+
+// 实现继承的核心：将父类的实例化对象赋值给子类的原型
+Student.prototype = new Person()
+
+// 定义Student子类特有的方法
+Student.prototype.studying = function() {
+  console.log(this.name + ' studying')
+}
+
+// 实例化Student
+const stu = new Student()
+console.log(stu.name) // curry
+console.log(stu.age) // 30
+console.log(stu.sno) // 101111
+stu.say() // I am curry
+stu.studying() // curry studying
+```
+
+内存表现：
+
+![image-20240925161147176](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240925161147176.png)
+
+**缺点**：
+
+- 从内存表现图中就可以看出，当打印stu对象时，name和age属性是看不到的，因为不会打印原型上的东西；
+- 当父类中的属性为引用类型时，子类的多个实例对象会共用这个引用类型，如果进行修改，会相互影响；
+- 在使用该方案实现继承时，属性都是写死的，不支持动态传入参数来定制化属性值；
+
+#### 3.2.方案二：借用构造函数实现继承
+
+> 针对方案一的缺点，可以借用构造函数来进行优化。
+
+- 在子类中通过call调用父类，这样在实例化子类时，每个实例就可以创建自己单独属性了；
+
+```js
+// 定义Person父类公共的属性
+function Person(name, age) {
+  this.name = name
+  this.age = age
+}
+// 定义Person父类的公共方法
+Person.prototype.say = function() {
+  console.log('I am ' + this.name)
+}
+
+// 定义Student子类特有的属性
+function Student(name, age, sno) {
+  // 通过call调用Person父类，创建自己的name和age属性
+  Person.call(this, name, age)
+  this.sno = sno
+}
+
+// 实现继承的核心：将父类的实例化对象赋值给子类的原型
+Student.prototype = new Person()
+
+// 定义Student子类特有的方法
+Student.prototype.studying = function() {
+  console.log(this.name + ' studying')
+}
+
+// 实例化Student
+const stu1 = new Student('curry', 30, 101111)
+const stu2 = new Student('kobe', 24, 101112)
+console.log(stu1) // Person { name: 'curry', age: 30, sno: 101111 }
+console.log(stu2) // Person { name: 'kobe', age: 24, sno: 101112 }
+```
+
+内存表现：
+
+![image-20240925161235266](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240925161235266.png)
+
+缺点：
+
+- 在实现继承的过程中，Person构造函数被调用了两次，一次在`new Person()`，一次在`Person.call()`；
+- 在Person的实例化对象上，也就是stu1和stu2的原型上，多出来了没有使用的属性name和age；
+
+#### 3.3.方案三：寄生组合式继承
+
+> 通过上面两种方案，我们想实现继承的目的是重复利用另外一个对象的属性和方法，如果想解决方案二中的缺点，那么就要减少Person的调用次数，避免去执行`new Person()`，而解决的办法就是可以新增一个对象，让该对象的原型指向Person的原型即可。
+
+**（1）对象的原型式继承**
+
+> 将对象的原型指向构造函数的原型的过程就叫做对象的原型式继承，主要可以通过以下三种方式实现：
+
+- 封装一个函数，将传入的对象赋值给构造函数的原型，最后将构造函数的实例化对象返回；
+
+  ```js
+  function createObj(o) {
+    // 定义一个Fn构造函数
+    function Fn() {}
+    // 将传入的对象赋值给Fn的原型
+    Fn.prototype = o
+    // 返回Fn的实例化对象
+    return new Fn()
+  }
+  
+  const protoObj = {
+    name: 'curry',
+    age: 30
+  }
+  
+  const obj = createObj(protoObj) // 得到的obj对象的原型已经指向了protoObj
+  console.log(obj.name) // curry
+  console.log(obj.age) // 30
+  console.log(obj.__proto__ === protoObj) // true
+  ```
+
+- 改变上面方法中的函数体实现，使用`Object.setPrototypeOf()`方法来实现，该方法设置一个指定的对象的原型到另一个对象或null；
+
+  ```js
+  function createObj(o) {
+    // 定义一个空对象
+    const newObj = {}
+    // 将传入的对象赋值给该空对象的原型
+    Object.setPrototypeOf(newObj, o)
+    // 返回该空对象
+    return newObj
+  }
+  ```
+
+- 直接使用`Object.create()`方法，该方法可以创建一个新对象，使用现有的对象来提供新创建的对象的`__proto__`；
+
+  ```js
+  const protoObj = {
+    name: 'curry',
+    age: 30
+  }
+  
+  const obj = Object.create(protoObj)
+  console.log(obj.name) // curry
+  console.log(obj.age) // 30
+  console.log(obj.__proto__ === protoObj) // true
+  ```
+
+**（2）寄生组合式继承的实现**
+
+> 寄生式继承就是将对象的原型式继承和工厂模式进行结合，即封装一个函数来实现继承的过程。而这样结合起来实现的继承，又可以称之为寄生组合式继承。下面就看看具体的实现过程吧。
+
+- 创建一个原型指向`Person`父类的对象，将其赋值给`Student`子类的原型；
+- 在上面的实现方案中，`Student`子类的实例对象的类型都是`Person`，可以通过重新定义`constructor`来优化；
+
+```js
+// 定义Person父类公共的属性
+function Person(name, age) {
+  this.name = name
+  this.age = age
+}
+// 定义Person父类的公共方法
+Person.prototype.say = function() {
+  console.log('I am ' + this.name)
+}
+
+// 定义Student子类特有的属性
+function Student(name, age, sno) {
+  // 通过call调用Person父类，创建自己的name和age属性
+  Person.call(this, name, age)
+  this.sno = sno
+}
+
+// 调用Object.create方法生成一个原型指向Person原型的对象，并将这个对象赋值给Student的原型
+Student.prototype = Object.create(Person.prototype)
+// 定义Student原型上constructor的值为Student
+Object.defineProperty(Student.prototype, 'constructor', {
+  configurable: true,
+  enumerable: false,
+  writable: true,
+  value: Student
+})
+
+// 定义Student子类特有的方法
+Student.prototype.studying = function() {
+  console.log(this.name + ' studying')
+}
+
+// 实例化Student
+const stu1 = new Student('curry', 30, 101111)
+const stu2 = new Student('kobe', 24, 101112)
+console.log(stu1) // Student { name: 'curry', age: 30, sno: 101111 }
+console.log(stu2) // Student { name: 'kobe', age: 24, sno: 101112 }
+```
+
+内存表现：
+
+![image-20240925161352287](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240925161352287.png)
+
+总结：
+
+- 多个地方用到了继承，可以将上面的核心代码赋值在一个函数里面，如果不想用`Object.create()`，也可以使用上面封装的`createObj`函数；
+
+  ```js
+  function createObj(o) {
+    function Fn() {}
+    Fn.prototype = o
+    return new Fn()
+  }
+  
+  /**
+   * @param {function} SubClass 
+   * @param {function} SuperClass 
+   */
+  function inherit(SubClass, SuperClass) {
+    SubClass.prototype = createObj(SuperClass.prototype)
+    Object.defineProperty(SubClass.prototype, 'constructor', {
+      configurable: true,
+      enumerable: false,
+      writable: true,
+      value: SubClass
+    })
+  }
+  ```
+
+- 寄生组合式实现继承的原理其实就是创建一个空对象用于存放子类原型上的方法，并且这个对象的原型指向父类的原型，在ES6中推出的class的实现原理就在这；
+
+
+
+
+
+
+
+## 七、JavaScript面向对象—深入ES6的class
+
+> 在上面一篇中主要介绍了JavaScript中使用**构造函数+原型链**实现继承，从实现的步骤来说还是比较繁琐的。在ES6中推出的class的关键字可以直接用来定义类，写法类似与其它的面向对象语言，但是使用class来定义的类其本质上依然是构造函数+原型链的语法糖而已，下面就一起来全面的了解一下class吧。
+
+### 1.类的定义
+
+> class关键字定义类可使用两种方式来定义：
+
+```js
+class Person {} // 类声明
+const Person = class {} // 类表达式
+```
+
+### 2.类的构造函数
+
+> 从上面class定义类可以发现是没有`()`让我们来传递参数的，当希望在实例化对象的给类传递一些参数，这个时候就可以使用到类的构造函数`constructor`了。
+
+- 每个类都可以有一个自己的`constructor`方法，**注意只能有一个**，如果有多个会抛出异常；
+
+  ```js
+  class Person {
+    constructor(name, age) {
+      this.name = name
+      this.age = age
+    }
+  
+    constructor() {}
+  }
+  ```
+
+  ![image-20240925162930137](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240925162930137.png)
+
+- 当通过new操作符来操作类时，就会去调用这个类的`constructor`方法，并返回一个对象（具体new操作符调用函数时的默认操作步骤在上一篇中有说明）；
+
+  ```js
+  class Person {
+    constructor(name, age) {
+      this.name = name
+      this.age = age
+    }
+  }
+  
+  const p = new Person('curry', 30)
+  console.log(p) // Person { name: 'curry', age: 30 }
+  ```
+
+### 3.类的实例方法
+
+> 在构造函数中实现方法继承是将其放到构造函数的原型上，而在class定义的类中，可直接在类中定义方法，最终class还是会帮我们放到其原型上，供多个实例来使用。
+
+```js
+class Person {
+  constructor(name, age) {
+    this.name = name
+    this.age = age
+  }
+
+  eating() {
+    console.log(this.name + 'is eating.')
+  }
+
+  running() {
+    console.log(this.name + 'is running.')
+  }
+}
+```
+
+### 4.类的访问器方法
+
+> 在使用`Object.defineProperty()`方法来控制对象的属性时，在其数据属性描述符中可以使用setter和getter函数，在class定义的类中，也是可以使用这两个访问器方法的。
+
+```js
+class Person {
+  constructor(name, age) {
+    this.name = name
+    this._age = 30 // 使用_定义的属性表示为私有属性，不可直接访问
+  }
+
+  get age() {
+    console.log('age被访问')
+    return this._age
+  }
+
+  set age(newValue) {
+    console.log('age被设置')
+    this._age = newValue
+  }
+}
+
+const p = new Person('curry', 30)
+console.log(p) // Person { name: 'curry', _age: 30 }
+p.age // age被访问
+p.age = 24 // age被设置
+console.log(p) // Person { name: 'curry', _age: 24 }
+```
+
+### 5.类的静态方法
+
+> 什么叫类的静态方法呢？该方法不是供实例对象来使用的，而是直接加在类本身的方法，可以使用类名点出来的方法，可以使用static关键字来定义静态方法。
+
+```js
+class Person {
+  constructor(name, age) {
+    this.name = name
+    this.age = age
+  }
+
+  static foo() {
+    console.log('我是Person类的方法')
+  }
+}
+
+Person.foo() // 我是Person类的方法
+```
+
+### 6.类的继承
+
+#### 6.1.extends关键字
+
+> 在ES6之前实现继承是不方便的，ES6中增加了extends关键字，可以方便的帮助我们实现类的继承。
+
+实现`Student`子类继承自`Person`父类：
+
+```js
+class Person {
+  constructor(name, age) {
+    this.name = name
+    this.age = age
+  }
+
+  eating() {
+    console.log(this.name + ' is eating.')
+  }
+}
+
+class Student extends Person {
+  constructor(sno) {
+    this.sno = sno
+  }
+
+  studying() {
+    console.log(this.name + ' is studying.')
+  }
+}
+```
+
+那么子类如何使用父类的属性和方法呢？
+
+#### 6.2.super关键字
+
+> 使用super关键字可以在子类构造函数中调用父类的构造函数，但是必须在子类构造函数中使用this或者返回默认对象之前使用super。
+
+```js
+class Person {
+  constructor(name, age) {
+    this.name = name
+    this.age = age
+  }
+
+  eating() {
+    console.log(this.name + ' is eating.')
+  }
+}
+
+class Student extends Person {
+  constructor(name, age, sno) {
+    super(name, age)
+    this.sno = sno
+  }
+
+  studying() {
+    console.log(this.name + ' is studying.')
+  }
+}
+
+const stu = new Student('curry', 30, 101111)
+console.log(stu) // Student { name: 'curry', age: 30, sno: 101111 }
+// 父类的方法可直接调用
+stu.eating() // curry is eating.
+stu.studying() // curry is studying.
+```
+
+但是super关键字的用途并不仅仅只有这个，super关键字一般可以在三个地方使用：
+
+- **子类的构造函数中**（上面的用法）；
+
+- **实例方法中**：子类不仅可以重写父类中的实例方法，还可以通过super关键字复用父类实例方法中的逻辑代码；
+
+  ```js
+  class Person {
+    constructor(name, age) {
+      this.name = name
+      this.age = age
+    }
+  
+    eating() {
+      console.log(this.name + ' is eating.')
+    }
+  
+    parentMethod() {
+      console.log('父类逻辑代码1')
+      console.log('父类逻辑代码2')
+      console.log('父类逻辑代码3')
+    }
+  }
+  
+  class Student extends Person {
+    constructor(name, age, sno) {
+      super(name, age)
+      this.sno = sno
+    }
+  
+    // 直接重写父类eating方法
+    eating() {
+      console.log('Student is eating.')
+    }
+  
+    // 重写父类的parentMethod方法，并且复用逻辑代码
+    parentMethod() {
+      // 通过super调用父类方法，实现复用
+      super.parentMethod()
+  
+      console.log('子类逻辑代码4')
+      console.log('子类逻辑代码5')
+      console.log('子类逻辑代码6')
+    }
+  }
+  ```
+
+  ![image-20240925163122334](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240925163122334.png)
+
+- **静态方法中**：用法就和实例方法的方式一样了；
+
+  ```js
+  class Person {
+    constructor(name, age) {
+      this.name = name
+      this.age = age
+    }
+  
+    static parentMethod() {
+      console.log('父类逻辑代码1')
+      console.log('父类逻辑代码2')
+      console.log('父类逻辑代码3')
+    }
+  }
+  
+  class Student extends Person {
+    constructor(name, age, sno) {
+      super(name, age)
+      this.sno = sno
+    }
+  
+    // 重写父类的parentMethod静态方法，并且复用逻辑代码
+    static parentMethod() {
+      // 通过super调用父类静态方法，实现复用
+      super.parentMethod()
+  
+      console.log('子类逻辑代码4')
+      console.log('子类逻辑代码5')
+      console.log('子类逻辑代码6')
+    }
+  }
+  
+  Student.parentMethod()
+  ```
+
+  ![image-20240925163154437](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240925163154437.png)
+
+#### 6.3.继承内置类
+
+> extends关键字不仅可以实现继承我们自定义的父类，还可以继承JavaScript提供的内置类，可对内置类的功能进行扩展。
+
+比如，在`Array`类上扩展两个方法，一个方法获取指定数组的第一个元素，一个方法数组的最后一个元素：
+
+```js
+class myArray extends Array {
+  firstItem() {
+    return this[0]
+  }
+
+  lastItem() {
+    return this[this.length - 1]
+  }
+}
+
+const arr = new myArray(1, 2, 3)
+console.log(arr) // myArray(3) [ 1, 2, 3 ]
+console.log(arr.firstItem()) // 1
+console.log(arr.lastItem()) // 3
+```
+
+### 7.类的混入
+
+> 何为类的混入？在上面的演示代码中，都只实现了子类继承自一个父类，因为JavaScript的类只支持单继承，不能继承自多个类。如果非要实现继承自多个类呢？那么就可以引入混入（Mixin）的概念了。
+
+看看JavaScript中通过代码如何实现混入效果：
+
+```js
+// 封装混入Animal类的函数
+function mixinClass(BaseClass) {
+  // 返回一个匿名类
+  return class extends BaseClass {
+    running() {
+      console.log('running...')
+    }
+  }
+}
+
+class Person {
+  eating() {
+    console.log('eating...')
+  }
+}
+
+class Student extends Person {
+  studying() {
+    console.log('studying...')
+  }
+}
+
+const NewStudent = mixinClass(Student)
+const stu = new NewStudent
+stu.running() // running...
+stu.eating() // eating...
+stu.studying() // studying...
+```
+
+混入的实现一般不常用，因为参数不太好传递，过于局限，在JavaScript中单继承已经足够用了。
+
+### 8.class定义类转ES5
+
+> 上面介绍ES6中类的各种使用方法，极大的方便了我们对类的使用。我们在日常开发中编写的ES6代码都是会被babel解析成ES5代码，为了对低版本浏览器做适配。那么使用ES6编写的类被编译成ES5语法会是什么样呢？通过[babel官网的试一试](https://www.babeljs.cn/repl)可以清楚的看到ES6语法转成ES5后的样子。
+
+- 刚开始通过**执行自调用函数**得到一个Person构造函数；
+- 定义的实例方法和类方法会分别收集到一个数组中，便于后面直接调用函数进行遍历添加；
+- 判断方法类型：如果是实例方法就添加到Person原型上，是类方法直接添加到Person上；
+- 所以class定义类的本质还是通过构造函数+原型链，class就是一种语法糖；
+
+![image-20240925163315349](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240925163315349.png)
+
+这里可以提出一个小问题：定义在`constructor`外的属性最终会被添加到哪里呢？还是会被添加到类的实例化对象上，因为ES6对这样定义的属性进行了单独的处理。
+
+```js
+class Person {
+  message = 'hello world'
+
+  constructor(name, age) {
+    this.name = name
+    this.age = age
+  }
+
+  eating() {
+    console.log(this.name + ' is eating.')
+  }
+
+  static personMethod() {
+    console.log('personMethod')
+  }
+}
+
+const p = new Person('curry', 30)
+console.log(p) // Person { message: 'hello world', name: 'curry', age: 30 }
+```
+
+![image-20240925163349924](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240925163349924.png)
+
+**扩展**：在上图中通过通过babel转换后的代码中，定义的Person函数前有一个`/*#__PURE__*/`，那么这个有什么作用呢？
+
+- 实际上这个符号将函数标记为了**纯函数**，在JavaScript中纯函数的特点就是没有副作用，不依赖于其它东西，独立性很强；
+- 在使用webpack构建的项目中，通过babel转换后的语法更有利于webpack进行`tree-shaking`，没有使用到的纯函数会直接在打包的时候被压缩掉，达到减小包体积效果；
+
+
+
+
+
+## 八、ES6-ES12简单知识点总结
+
+### 1.ES6相关知识点
+
+#### 1.1.对象字面量的增强
+
+> ES6中对对象字面量的写法进行了增强，主要包含以下三个方面的增强：
+
+- 属性的简写：当给对象设置属性时，如果希望变量名和属性名一样就可以直接写该变量名；
+- 方法的简写：对象中的方法可直接写成`foo() {}`的形式；
+- 计算属性名：对象的属性名可以动态传入，将变量使用`[]`包裹即可；
+
+```js
+const obj = {
+  // 1.属性简写
+  name,
+  age,
+  // 2.方法简写
+  foo() {
+    console.log('foo')
+  },
+  // 3.计算属性名
+  [key]: 'value'
+}
+```
+
+#### 1.2.解构
+
+> 为了方便从数组或对象中获取数据，ES6给我们提供了解构的方案，可分为数组的解构和对象的解构。
+
+- 数组的解构：注意数组的解构是按元素顺序来的。
+
+  ```js
+  const names = ['curry', 'kobe', 'klay', 'james']
+  
+  // 1.基本的解构，解构出数组所有的元素
+  var [name1, name2, name3, name4] = names
+  console.log(name1, name2, name3, name4) // curry kobe klay james
+  
+  // 2.解构部分元素，只解构后面两个元素
+  var [, , name3, name4] = names
+  console.log(name3, name4) // klay james
+  
+  // 3.解构出第一个元素，后面的元素放到一个新数组中
+  var [name1, ...newNames] = names
+  console.log(newNames) // [ 'kobe', 'klay', 'james' ]
+  
+  // 4.解构数组的同时，给元素指定默认值，如果数组中没有该元素，就会使用默认值
+  var [name1, name2, name3, name4, name5 = 'default'] = names
+  console.log(name1, name2, name3, name4, name5) // curry kobe klay james default
+  ```
+
+- 对象的解构：对象的解构是不按顺序的，是根据key来赋值的。
+
+  ```js
+  const obj = {
+    name: 'curry',
+    age: 30,
+    team: '金州勇士'
+  }
+  
+  // 1.基本的解构
+  var { name, age, team } = obj
+  console.log(name, age, team) // curry 30 金州勇士
+  
+  // 2.解构的同时重命名
+  var { name: newName, age: newAge, team: newTeam } = obj
+  console.log(newName, newAge, newTeam) // curry 30 金州勇士
+  
+  // 3.解构的同时指定默认值，当对象中没有该属性时，就会取默认值
+  var { height = '1.83' } = obj
+  console.log(height) // 1.83
+  
+  // 4.同时重命名和指定默认值
+  var { height: newHeight = '1.83' } = obj
+  console.log(newHeight) // 1.83
+  ```
+
+- 解构的应用场景：一般开发中拿到一个变量，可以对其进行解构使用，比如对函数的参数进行解构。
+
+  ```js
+  function fn({ name, age, team }) {
+    console.log(name, age, team)
+  }
+  fn(obj) // curry 30 金州勇士
+  ```
+
+#### 1.3.let和const的使用
+
+> 在ES5中，声明变量都是使用var，从ES6开始新增了两个声明变量的关键字let和const。
+
+- let关键字：从直观的角度来说，let和var是没有太大的区别的，都是用于声明一个变量。
+
+  ```js
+  let message = 'hello world'
+  ```
+
+- const关键字：const声明的变量称为常量，表示保存的数据一旦被赋值就不能再被修改了，但是如果是引用类型的数据，还是可以通过引用找到对应的对象进行修改的。
+
+  ```js
+  const obj = {
+    name: 'curry',
+    age: 30
+  }
+  const names = ['curry', 'kobe']
+  
+  obj.name = 'kobe'
+  names.push('klay')
+  
+  console.log(obj) // { name: 'kobe', age: 30 }
+  console.log(names) // [ 'curry', 'kobe', 'klay' ]
+  
+  // 注意：不能直接给引用类型重新赋值
+  /*
+    obj = {} // TypeError: Assignment to constant variable.
+    names = [] // TypeError: Assignment to constant variable.
+  */
+  ```
+
+- **注意**：与var不同的是，let和const是不允许重复声明变量的。并且使用let和const声明的变量是具有自己的块级作用域的。var和let可以不设置初始值，const必须设置。
+
+**有关作用域提升的问题：**
+
+> 使用过var关键字的人都知道，var声明的变量是会进行作用域提升的，如果使用let和const声明的变量，是不允许在声明之前对其进行访问的，会直接报错。
+
+```js
+console.log(message) // undefined
+var message = 'hello world'
+```
+
+```js
+console.log(message) // ReferenceError: Cannot access 'message' before initialization
+let message = 'hello world'
+```
+
+**为什么var声明的变量有作用域提升，而let和const没有呢？**
+
+- **作用域提升**：在声明变量的作用域中，如果这个变量可以**在声明之前被访问**，那么就可以称之为作用域提升。
+- 在JavaScript执行之前，会先对我们声明的变量进行收集创建，普通变量的默认值都为undefined，只有等到执行赋值代码时，该变量才会被真正赋值，所以在声明之前访问就为undefined。
+- 那let和const不能访问，是不是let和const声明的变量没有在代码执行前被收集创建呢？到底let和const有没有作用域提升？
+  - 其实let和const声明的变量在代码执行前是有被收集创建的，只是不能访问而已，所以就不能称之为作用域提升，在ECMA262对let和const的描述中，这些变量会被创建在包含它们的词法环境被实例化时，但是是**不可以访问它们**的，直到词法绑定被求值（也就是变量被赋值之后）；
+  - 在使用var声明的变量，是会添加到window上的，而let和const声明的变量是不会被添加到window上的，实际上是被添加到了变量环境中进行存储；
+  - **暂时性死区**：在代码中，使用let、const声明的变量，在声明之前变量是不可以被访问的，这种现象称之为temporal dead zone（**TDZ**）；
+
+**总结**：在上面的代码中，其实message在代码执行前就已经被创建了，在用let进行修饰后，js底层会对其进行约束，以至于在声明前不可以访问。
+
+#### 1.4.模板字符串
+
+> ES6允许使用字符串模板来嵌入JS的变量或者表达式来进行拼接。
+
+使用**``**来编写字符串，可以${expression}来嵌入动态内容，里面可以写一个表达式。
+
+```js
+const name = 'curry'
+const age = 30
+
+console.log(`My name is ${name}\nMy age is ${age}`)
+```
+
+![image-20240925165613188](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240925165613188.png)
+
+**标签模板字符串**：模板字符串另外一种用法，可以用来调用函数，如果使用标签模板字符串，并且在调用的时候插入其他的变量。
+
+- 模板字符串被拆分了；
+- 第一个元素是数组，元素为被`${}`的字符串组合；
+- 后面的元素是一个个`${}`中传入的变量值；
+
+```js
+function fn(x, y, z) {
+  console.log(x, y, z)
+}
+
+const name = 'curry'
+const age = 30
+
+fn`sojfo${name}hghaooa${age}jgoajg` // [ 'sojfo', 'hghaooa', 'jgoajg' ] curry 30
+```
+
+应用：在react中编写css就有这么一个库叫`styled-components`，其原理就是使用的标签模块字符串。
+
+![image-20240925165516066](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240925165516066.png)
+
+#### 1.5.函数的默认参数
+
+> 在ES6之前，我们编写的函数参数是没有默认值的，而ES6给我们提供了默认参数，如果传入了该参数就使用传入的值，没有传入就使用默认值。
+
+- 在ES6之前，如果想实现默认参数的效果，就必须编写以下最终代码。
+
+  ```js
+  function fn() {
+    var m = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'aaa'
+    var n = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'bbb'
+    console.log(m, n)
+  }
+  
+  fn() // aaa bbb
+  fn(111, 222) // 111 222
+  ```
+
+- 在ES6中，可以在声明函数时给其参数默认值。
+
+  - 一般默认值写法：
+
+    ```js
+    function fn(m = 'aaa', n = 'bbb') {
+      console.log(m, n)
+    }
+    ```
+
+  - 默认值搭配解构的使用：
+
+    ```js
+    // 1.写法一：对象参数+解构
+    function fn1({ name, age } = { name: 'curry', age: 30 }) {
+      console.log(name, age)
+    }
+    fn1() // curry 30
+    
+    // 2.写法二：解构+默认值
+    function fn2({ name = 'curry', age = 30 } = {}) {
+      console.log(name, age)
+    }
+    fn2() // curry 30
+    ```
+
+**注意**：有默认值的参数一般会放到最后，在JS中函数都会有一个length属性，length长度代表函数参数个数，但是有默认值的参数是不会被计算在内的。但是如果将有默认值的参数放在中间，那么后面的参数也不会被计算在内的。
+
+```js
+function fn1(x, y, z) {}
+console.log(fn1.length) // 3
+
+function fn2(x, y, z = 30) {}
+console.log(fn2.length) // 2
+
+function fn3(x, y = 30, z) {}
+console.log(fn3.length) // 1
+```
+
+#### 1.6.函数的剩余参数
+
+> ES6中引用了剩余参数，可以将不定数量的参数放入到一个数组中，如果最后一个参数是以...为前缀的，那么它会将剩余的参数放入到该参数中，并且作为一个数组。
+
+剩余参数和arguments有什么区别呢？
+
+- 剩余参数只包含那些没有对应形参的实参，而arguments对象包含了传给函数的所有实参；
+- arguments对象不是一个真正的数组，而rest是一个真正的数组，可以进行数组的所有操作；
+- arguments是早期的ECMAScript中为了方便去获取所有的参数提供的一个数据结构，而剩余参数是ES6中提供并且希望代替arguments的；
+
+```js
+function foo(m, n, ...args) {
+  console.log(m, n, args)
+  console.log(arguments) // [Arguments] { '0': 10, '1': 20, '2': 30, '3': 40, '4': 50 }
+}
+
+foo(10, 20, 30, 40, 50) // 10 20 [ 30, 40, 50 ]
+```
+
+#### 1.7.箭头函数
+
+> 相比于普通函数，箭头函数有一下几个特殊点：
+
+- 箭头函数内部是不绑定this的，会去它上一层作用域中找；
+- 箭头函数是没有显示原型的，所以不能作为构造函数，使用new操作符来调用；
+- 箭头函数没有自己的argments；
+
+```js
+const fn = () => {
+  console.log(this)
+  // console.log(argments) // ReferenceError: argments is not defined
+}
+
+fn() // window对象
+console.log(fn.prototype) // undefined
+```
+
+#### 1.8.展开语法
+
+> 展开语法（spread syntax）可以在函数调用或数组构造是，将数组表示或者字符串在语法层面展开，还可以在构造字面量对象时，将对象表达式按键值对的方式展开。
+
+展开语法的主要使用场景：在**函数调用时**和**数组构造时**使用：
+
+```js
+const nums = [1, 2, 3]
+const str = 'abc'
+
+function fn(x, y, z) {
+  console.log(x, y, z)
+}
+
+// 函数调用时
+fn(...nums) // 1 2 3
+fn(...str) // a b c
+
+// 数组构造时
+const newNums1 = [...nums, 4, 5]
+const newNums2 = [...nums, ...str]
+console.log(newNums1) // [ 1, 2, 3, 4, 5 ]
+console.log(newNums2) // [ 1, 2, 3, 'a', 'b', 'c' ]
+```
+
+#### 1.9.数值的表示
+
+> ES6中规范了二进制和八进制的写法。
+
+```js
+const num1 = 188 // 十进制
+const num2 = 0b101 // 二进制
+const num3 = 0o567 // 八进制
+const num4 = 0x8cf // 十六进制
+
+// 打印转成对应的十进制数
+console.log(num1, num2, num3, num4) // 188 5 375 2255
+```
+
+#### 1.10.Symbol的使用
+
+> 在ES6之前，对象属性名都是字符串形式，很容易造成属性名冲突，Symbol是ES6中新增的一个基本数据类型，可用来生成一个独一无二的值。
+
+- 作为属性名：
+
+  ```js
+  const s1 = Symbol()
+  const s2 = Symbol()
+  const s3 = Symbol()
+  
+  // 对比调用Symbol生成的值
+  console.log(s1 === s2) // false
+  
+  // Symbol值作为对象key
+  // 写法一：定义对象字面量时使用
+  const obj = {
+    [s1]: 'aaaa'
+  }
+  // 写法二：对象新增属性
+  obj[s2] = 'bbbb'
+  // 写法三：通过Object.defineProperty()
+  Object.defineProperty(obj, s3, {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: 'cccc'
+  })
+  
+  console.log(obj) // { [Symbol()]: 'aaaa', [Symbol()]: 'bbbb', [Symbol()]: 'cccc' }
+  ```
+
+- 作为属性值：
+
+  ```js
+  const s1 = Symbol()
+  
+  const obj = {
+    name: 'curry',
+    age: s1
+  }
+  
+  console.log(obj) // { name: 'curry', age: Symbol() }
+  ```
+
+- 注意：Symbol作为属性名时，不能通过`.`方式来获取，也就是`obj.s1`，只能通过`obj[s1]`的方式获取。并且在通过`Object.keys()`获取对象所有的key时，是获取不到这些Symbol的，可以借助`Object.getOwnPropertySymbols()`来获取所有类型为Symbol的key。
+
+  ```js
+  console.log(obj.s1) // undefined
+  
+  console.log(obj[s1]) // aaaa
+  console.log(obj[s2]) // bbbb
+  
+  // 使用Object.keys获取对象所有key并打印，发现数组中是没有Symbol的key
+  console.log(Object.keys(obj)) // []
+  
+  // 使用Object.getOwnPropertySymbols(obj)获取所有的Symbol的key
+  console.log(Object.getOwnPropertySymbols(obj)) // [ Symbol(), Symbol(), Symbol() ]
+  ```
+
+延伸：Symbol的作用就是给我们创建一个独一无二的值，如果我们想创建一个相同的Symbol可以怎么做呢？
+
+- 可以使用`Symbol.for()`来做到这一点；
+- 并且可以通过`Symbol.keyFor()`方法来获取对应的key；
+
+```js
+// 通过Symbol.for(描述)创建并传入相同描述
+const s1 = Symbol.for('aaaa')
+const s2 = Symbol.for('aaaa')
+
+console.log(s1 === s2) // true
+
+// 拿到s1传入的值
+const key = Symbol.keyFor(s1)
+console.log(key) // aaaa
+
+// 将拿到的值又传给s3
+const s3 = Symbol.for(key)
+console.log(s3 === s1) // true
+console.log(s3 === s2) // true
+```
+
+#### 1.11.Set和WeakSet的使用
+
+> 在ES6之前，存储数据的结构主要有两种，分别是数组和对象。在ES6中新增了另外两种数据结构：Set、Map，以及它们另外形式的WeakSet、WeakMap。下面就先来看看Set和WeakSet。
+
+**（1）Set**：用于保存数据，类似于数组，与数组不同的是Set中的元素是不能重复的。
+
+- Set的基本使用：
+
+  ```js
+  // 1.创建一个Set结构
+  const set = new Set()
+  
+  // 2.往set中添加元素
+  set.add(30)
+  set.add(30) // 相同的基本数据类型只会保留一个
+  set.add('abc')
+  set.add(undefined)
+  set.add({})
+  set.add({}) // 对象可以重复的原因是，对象存放的是内存地址
+  set.add(NaN)
+  set.add(NaN) // 为什么NaN也不能重复，因为在Set内部会视NaN为同一个东西
+  
+  console.log(set) // Set(6) { 30, 'abc', undefined, {}, {}, NaN }
+  ```
+
+- Set常见的属性：
+
+  - size：返回Set中元素的个数；
+
+    ```js
+    console.log(set.size) // 6
+    ```
+
+- Set常见的方法：
+
+  - add(value)：添加一个元素，返回set对象本身；
+  - delete(value)：从set中删除与value值相等的元素，返回boolean类型；
+  - has(value)：判断set中是否存在value这个元素，返回boolean；
+  - clear()：清空set中所有的元素，无返回值；
+  - forEach(callback，[thisArg])：遍历set对象（**Set的实例化对象是一个可迭代对象，所以也支持for...of遍历**）；
+
+  ```js
+  // add
+  console.log(set.add(30)) // Set(1) { 30 }
+  console.log(set.add(60)) // Set(2) { 30, 60 }
+  console.log(set.add(90)) // Set(2) { 30, 60, 90 }
+  // delete
+  console.log(set.delete(40)) // 未找到40，返回false
+  console.log(set.delete(30)) // true
+  // has
+  console.log(set.has(60)) // true
+  console.log(set.has(30)) // false
+  // forEach
+  set.forEach(item => {
+    console.log(item) // 60 90
+  })
+  // for...of
+  for (const item of set) {
+    console.log(item) // 60 90
+  }
+  // clear
+  set.clear()
+  console.log(set) // Set(0) {}
+  ```
+
+**（2）WeakSet**：也要求内部元素不能重复。
+
+- WeakSet与Set的区别：
+
+  - 区别一：WeakSet中**只能存放对象类型**，不能存放基本数据类型；
+  - 区别二：WeakSet对元素的引用是**弱引用**，如果没有其他引用对该元素进行引用，是可以被GC回收的；
+  - 区别三：WeakSet由于是弱引用的原因，所以是不能进行遍历的，存储到WeakSet中的对象是没办法通过遍历获取的；
+  - 什么是弱引用？：简单理解就是对对象类型的引用是可以看成没有的，但是却可以访问其对象内部的数据；
+
+- WeakSet常见方法：add(value)、delete(value)、has(value)，没有clear和forEach；
+
+- WeakSet的基本使用：
+
+  ```js
+  const wSet = new WeakSet()
+  // 只能存放对象类型
+  // wSet.add(10) // TypeError: Invalid value used in weak set
+  wSet.add({ name: 'curry', age: 30 })
+  wSet.add([1, 2, 3])
+  ```
+
+#### 1.12.Map和WeakMap的使用
+
+> 下面来讲讲Map和WeakMap，主要用于存储映射关系。
+
+**（1）Map**：对于普通对象存储映射关系，只能使用字符串或者Symbol作为属性名，如果普通对象使用对象来作为key的话，会自动将对象转成字符串，但是Map允许我们使用对象作为key。
+
+```js
+const obj1 = { name: 'curry', age: 30 }
+
+const obj = {
+  [obj1]: 'aaaa'
+}
+// 普通对象使用对象作为key，对象会自动转成字符串[object Object]
+console.log(obj) // { '[object Object]': 'aaaa' }
+```
+
+- Map的基本使用：
+
+  ```js
+  const obj1 = { name: 'curry', age: 30 }
+  const obj2 = { name: 'kobe', age: 24 }
+  
+  // 方式一：创建map后，通过set添加属性
+  const map1 = new Map()
+  map1.set(obj1, 'aaaa')
+  map1.set(obj2, 'bbbb')
+  
+  // 方式二：创建map时，传入一个数组
+  const map2 = new Map([
+    [obj1, 'aaaa'],
+    [obj2, 'bbbb']
+  ])
+  
+  console.log(map1)
+  console.log(map2)
+  ```
+
+  ![image-20240925165414238](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240925165414238.png)
+
+- Map常见的属性：
+
+  - size：返回Map中元素的个数；
+
+    ```js
+    console.log(map1.size) // 2
+    ```
+
+- Map常见的方法：与Set很相似，设置和获取属性不太一样。
+
+  - set(key, value)：在Map中添加key和value，并且返回整个map对象；
+  - get(key)：根据key获取map中的value；
+  - has(key)：判断map中是否包含某一个key，返回boolean值；
+  - delete(key)：根据key删除一个键值对，返回boolean值；
+  - clear()：清空所有的属性；
+  - forEach(callback, [thisArg])：遍历map（也可使用for...of遍历）；
+
+  ```js
+  const map = new Map()
+  const obj = { name: 'curry', age: 30 }
+  
+  // set
+  map.set(obj, 'aaaa')
+  map.set('bbbb', 1234)
+  map.set(11, 'cccc')
+  // get
+  console.log(map.get(obj)) // aaaa
+  // delete
+  console.log(map.delete(11)) // true
+  console.log(map.delete(22)) // false
+  // has
+  console.log(map.has('bbbb')) // true
+  console.log(map.has('abc')) // false
+  // forEach
+  map.forEach((value, key) => {
+    console.log(key, value)
+    /*
+      { name: 'curry', age: 30 } aaaa
+      bbbb 1234
+    */
+  })
+  // clear
+  map.clear()
+  
+  console.log(map) // Map(0) {}
+  ```
+
+  如果map使用for...of遍历，看一下遍历出来的值是什么样子的：
+
+  ```js
+  // 这里取出的item是一个个数组，数组第一个元素是key，第二个元素是value
+  for (const item of map) {
+    console.log(item)
+  }
+  
+  // 所以可以在取值的时候对item进行解构
+  for (const [key, value] of map) {
+    console.log(key, value)
+  }
+  ```
+
+  ![image-20240925165338838](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240925165338838.png)
+
+**（2）WeakMap**：也是以键值对的形式存在。
+
+- WeakMap和Map的区别：与Set和WeakSet的区别类似；
+  - 区别一：WeakMap的key只能使用对象，不接受其他类型作为key；
+  - 区别二：WeakMap的key对对象的引用是弱引用，如果没有其他引用指向这个对象，那么GC可以回收该对象；
+  - 区别三：WeakMap和WeakSet一样也不能进行遍历；
+- WeakMap常见的方法：set(key, value)、get(key)、has(key)、delete(key)，没有clear和forEach；
+
+### 2.ES7相关知识点
+
+#### 2.1.数组的includes方法
+
+> 在ES7之前，判断数组中包含某一个元素，一般可以用indexOf判断是否为-1，ES7给我们提供了includes方法来判断数组中是否包含指定元素，返回boolean类型；
+
+```js
+arr.includes(valueToFind[, fromIndex])
+```
+
+- valueToFind：需要查找的元素；
+- fromIndex：从指定索引开始查找，如果from为负值，就从`array.length + fromIndex`的位置开始查找（默认值为0）；
+
+```js
+const names = ['curry', 'kobe', NaN]
+
+console.log(names.includes('curry')) // true
+console.log(names.includes('klay')) // false
+console.log(names.includes('curry', 1)) // false
+
+console.log(names.indexOf(NaN)) // -1
+console.log(names.includes(NaN)) // true
+```
+
+注意：includes方法是可以判断NaN是否存在的，因为includes的内部实现对NaN采用isNaN方法进行判断。
+
+![image-20240925165306908](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240925165306908.png)
+
+#### 2.2.指数运算符
+
+> 在ES7之前，计算数字的指数需要通过Math.pow方法来完成，在ES7中，增加了`**`运算符，可以来计算指数。
+
+计算2的3次方：
+
+```js
+const res1 = Math.pow(2, 3)
+const res2 = 2 ** 3
+
+console.log(res1, res2) // 8 8
+```
+
+### 3.ES8相关知识点
+
+#### 3.1.获取对象所有的value
+
+> 我们知道可以使用Object.keys获取一个对象的所有key，ES8给我们提供了Object.values来获取所有的value值。
+
+```js
+const obj = {
+  name: 'curry',
+  age: 30,
+  team: '勇士'
+}
+
+// 传入一个对象
+console.log(Object.values(obj)) // [ 'curry', 30, '勇士' ]
+// 传入一个字符串，达到split的效果
+console.log(Object.values('abc')) // [ 'a', 'b', 'c' ]
+```
+
+#### 3.2.Object的entries方法
+
+> 通过Object.entries()可以获取到一个二维数组，数组中会存放可枚举的键值对数组，数组元素分别为对象的key和value。
+
+```js
+const obj = {
+  name: 'curry',
+  age: 30,
+  team: '勇士'
+}
+
+// 传入一个对象
+console.log(Object.entries(obj)) // [ [ 'name', 'curry' ], [ 'age', 30 ], [ 'team', '勇士' ] ]
+
+for (const [key, value] of Object.entries(obj)) {
+  console.log(key, value)
+  /*
+    name curry
+    age 30
+    team 勇士
+  */
+}
+
+// 传入一个数组，下标作为第一个元素
+console.log(Object.entries(['curry', 'kobe', 'klay'])) // [ [ '0', 'curry' ], [ '1', 'kobe' ], [ '2', 'klay' ] ]
+
+// 传入一个字符串，下标作为第一个元素
+console.log(Object.entries('abc')) // [ [ '0', 'a' ], [ '1', 'b' ], [ '2', 'c' ] ]
+```
+
+#### 3.3.字符串的填充
+
+> 如果需要对字符串进行前后填充，来实现某种展示格式，ES8中提供了padStart和padEnd方法，分别可以对字符串进行首位填充。
+
+```js
+const str = 'ssssssssss'
+
+// 如果指定填充的位数小于等于str的长度，就不会进行填充
+// 指定的位数需大于str的长度，就会填充str长度减去指定位数
+// 如下指定了15，最终填充的只有5位，因为str的长度为10
+console.log(str.padStart(15, '*')) // *****ssssssssss
+console.log(str.padEnd(15, '-')) // ssssssssss-----
+```
+
+应用场景：字符串的填充可以用于对身份证、银行卡进行位数隐藏。
+
+```js
+const bankCard = '2034399002125581'
+// 截取银行卡后四位数组
+const lastFourNum = bankCard.slice(-4)
+// 将前面数组全部填充为*
+const finalBankCard = lastFourNum.padStart(bankCard.length, '*')
+console.log(finalBankCard) // ************5581
+```
+
+#### 3.4.Object的getOwnPropertyDescriptors方法
+
+> Object.getOwnPropertyDescriptors()方法用来获取一个对象的所有自身属性的描述符。
+
+```js
+const obj = {}
+
+Object.defineProperties(obj, {
+  name: {
+    configurable: false,
+    writable: false,
+    enumerable: false,
+    value: 'curry'
+  },
+  age: {
+    configurable: true,
+    writable: true,
+    enumerable: true,
+    value: 30
+  }
+})
+
+console.log(Object.getOwnPropertyDescriptors(obj))
+```
+
+![image-20240925165216342](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240925165216342.png)
+
+### 4.ES9相关知识点
+
+#### 4.1.对象的展开语法
+
+> 在前面讲了，数组是可以使用展开语法的，在ES9中，在构建对象字面量时，也可以使用展开语法了。
+
+```js
+const obj1 = {
+  name: 'curry',
+  age: 30
+}
+
+const newObj1 = { ...obj1, team: '勇士' }
+console.log(newObj1) // { name: 'curry', age: 30, team: '勇士' }
+```
+
+注意：对象的展开运算符只能实现浅拷贝，如果对象内部还包含引用类型的值，就会指向同一地址空间。
+
+```js
+const obj = {
+  name: 'curry',
+  age: 30,
+  friends: ['kobe', 'klay']
+}
+
+const newObj = { ...obj }
+newObj.friends.push('james')
+console.log(newObj) // { name: 'curry', age: 30, team: '勇士' }
+console.log(obj) // { name: 'curry', age: 30, friends: [ 'kobe', 'klay', 'james' ] }
+```
+
+### 5.ES10相关知识点
+
+#### 5.1.flat和flatMap
+
+**（1）flat方法**
+
+> 按照一个可指定的深度递归遍历数组，并将所有的元素和遍历到的子数组合并为一个新数组返回。（可用于数组扁平化）
+
+```js
+const nums = [1, 2, [3, 3], [4, [5, 5]]]
+
+// 对数组进行降维处理
+console.log(nums.flat(1)) // [ 1, 2, 3, 3, 4, [ 5, 5 ] ]
+console.log(nums.flat(2)) // [ 1, 2, 3, 3, 4, 5, 5 ]
+// 如果不知道数组嵌套了多少层，可直接指定Infinity
+console.log(nums.flat(Infinity)) // [ 1, 2, 3, 3, 4, 5, 5 ]
+```
+
+（2）**flatMap方法**
+
+> 首先使用映射函数映射每个元素，然后将结果压缩成一个新数组。
+
+- flatMap先进行map操作，然后做flat操作；
+- flatMap中的flat操作深度为1；
+
+```js
+const arr = [[1, 2, 3, 4], ['a', 'b','c', 'd']]
+
+// 数组自动降一维
+const newArr = arr.flatMap(item => {
+  return item
+})
+
+console.log(newArr) // [ 1, 2, 3, 4, 'a', 'b', 'c', 'd' ]
+```
+
+#### 5.2.Object的fromEntries方法js
+
+> 在前面讲了可以通过Object.entries()将一个对象转换成键值对数组，而Object.fromEntries()可以将键值对列表转换成对象。
+
+```js
+const entries = [
+  ['name', 'curry'],
+  ['age', 30]
+]
+
+const obj = Object.fromEntries(entries)
+console.log(obj) // { name: 'curry', age: 30 }
+```
+
+应用场景：解析url的query部分，将其转成一个对象。
+
+```js
+const url = 'http://127.0.0.1:8000/search?name=curry&age=30'
+
+const queryStr = url.slice(url.indexOf('?') + 1, url.length)
+console.log(queryStr) // name=curry&age=30
+
+// URLSearchParams：可用于处理url的查询字符串
+const queryParams = new URLSearchParams(queryStr)
+console.log(queryParams) // URLSearchParams { 'name' => 'curry', 'age' => '30' }
+
+const paramObj = Object.fromEntries(queryParams)
+console.log(paramObj) // { name: 'curry', age: '30' }
+```
+
+#### 5.3.去除字符串首尾空格
+
+> 去除一个字符串首尾空格可以通过trim()方法，而trimStart和trimEnd方法分别可以单独去除字符串前或后的空格。
+
+```js
+// 这里以·代表空格
+const str = '····ssss···'
+console.log(str.trim()) // ssss
+console.log(str.trimStart()) // ssss···  
+console.log(str.trimEnd()) // ····ssss
+```
+
+#### 5.4.Symbol的description
+
+> 在前面讲了Symbol类型，在创建一个Symbol类型的值时，还可以传入指定的描述符。
+
+```js
+const s1 = Symbol('aaaa')
+const s2 = Symbol('bbbb')
+
+console.log(s1.description) // aaaa
+console.log(s2.description) // bbbb
+```
+
+### 6.ES11相关知识点
+
+#### 6.1.BigInt类型
+
+> 在JavaScript中，如果数字过大，可能是不正确的，先看看JavaScript提供给我们的最大值和最小值是多少。
+
+```js
+const maxNum = Number.MAX_SAFE_INTEGER
+const minNum = Number.MIN_SAFE_INTEGER
+
+console.log(maxNum) // 9007199254740991
+console.log(minNum) // -9007199254740991
+```
+
+如果给最大值再加大数值，很明显数值是不正确的：
+
+```js
+console.log(maxNum + 1) // 9007199254740992
+console.log(maxNum + 2) // 9007199254740992
+```
+
+所以，ES11引入了新的数据类型BigInt，可用于表示很大的整数：
+
+- BigInt的写法需要在数值后面加上`n`；
+- 只有数值同为BigInt类型才能进行运算（**不能进行隐式转换**），如果需要运算的数据不是BigInt类型就要加上`n`转成BigInt；
+- 也可使用`BigInt()`方法进行转类型；
+
+```js
+const bigInt = 9007199254740991n
+console.log(bigInt + 2n) // 9007199254740993n
+console.log(bigInt + bigInt) // 18014398509481982n
+```
+
+#### 6.2.空值合并操作符（??）
+
+> 如果`||`不能对空字符串和0进行很好的判断，就可以使用`??`。
+
+```js
+const test1 = ''
+const test2 = 0
+const test3 = null
+const test4 = undefined
+
+const res1 = test1 || 'default'
+const res2 = test2 || 'default'
+console.log(res1) // default
+console.log(res2) // default
+
+// ??认为空字符串和0是真值的
+const res3 = test1 ?? 'default'
+const res4 = test2 ?? 'default'
+console.log(res3) // ''
+console.log(res4) // 0
+
+// 只有当??前面的值为null或者undefined，才会使用后面的值
+const res5 = test3 ?? 'default'
+const res6 = test4 ?? 'default'
+console.log(res5) // default
+console.log(res6) // default
+```
+
+#### 6.3.可选链
+
+> 可选链（Optional Chaining）的主要作用就是让代码在进行null和undefined判断时更加清晰和简洁，确保我们访问对象属性是安全的（因为从undefined里面取值是会报错的）。
+
+```js
+const obj = {
+  name: 'curry',
+  friend: {
+    name: 'kobe',
+    age: 24
+  }
+}
+
+// 先判断obj中是否有friend属性，然后再判断friend中是否有name属性
+console.log(obj?.friend?.name) // kobe
+
+// console.log(obj.teammate.name) // TypeError: Cannot read property 'name' of undefined
+// obj中没有teammate属性，所以就直接返回undefined，不会再从undefined中取name了，不会报错影响后面程序运行
+console.log(obj?.teammate?.name) // undefined
+```
+
+#### 6.4.globalThis
+
+> 在ES11之前获取JavaScript的全局对象在不同的环境下的获取方式不同：
+
+- 浏览器中：this、window获取；
+- node中：global获取；
+
+ES11中，对我们获取全局对象进行统一规范：
+
+```js
+console.log(globalThis)
+```
+
+浏览器中：
+
+![image-20240925165129080](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240925165129080.png)
+
+node中：
+
+[![img](https://img2022.cnblogs.com/blog/2506425/202203/2506425-20220324003342620-843748149.png)](https://img2022.cnblogs.com/blog/2506425/202203/2506425-20220324003342620-843748149.png)
+
+### 7.ES12相关知识点
+
+#### 7.1.FinalizationRegistry
+
+> FinalizationRegistry对象可以让你在对象被垃圾回收时请求一个回调。
+
+- FinalizationRegistry提供了这样的一种方法：当一个在注册表中注册的对象被回收时，请求在某个时间点上调用一个清理回调；（清理回调有时被称为 finalizer ）
+- FinalizationRegistry可实例化一个对象，可以借助该对象注册想要清理回调的对象，传入该对象和所含的值；
+
+```js
+let obj1 = { name: 'curry', age: 30 }
+let obj2 = { name: 'kobe', age: 24 }
+
+// 实例化注册表
+const register = new FinalizationRegistry(value => {
+  console.log(`${value}对象被销毁了`)
+})
+
+// 注册obj1和obj2，并指定其值
+register.register(obj1, 'obj1')
+register.register(obj2, 'obj2')
+
+// 将两个对象销毁
+obj1 = null
+obj2 = null
+```
+
+需要借助浏览器的GC来进行测试，当两个对象被真正回收了，就会调用清理回调，打印对应内容：
+
+![image-20240925165045476](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240925165045476.png)
+
+#### 7.2.WeakRef
+
+> 在前面讲了WeakSet和WeakMap中的元素对对象的引用都是弱引用，WeakRef就可以专门实现对一个对象进行弱引用，也就是说该对象被GC回收时，是不会看它是否有弱引用的，有没有弱引用一样被回收。
+
+可以结合上面的FinalizationRegistry进行测试：
+
+- WeakRef创建的弱引用需通过`deref()`来访问对象属性；
+
+```js
+let obj = { name: 'curry', age: 30 }
+
+// 创建一个弱引用weakObj指向对象{ name: 'curry', age: 30 }
+let weakObj = new WeakRef(obj)
+
+// 拿到{ name: 'curry', age: 30 }对象
+// console.log(weakObj.deref())
+// console.log(weakObj.deref().name) // curry
+// console.log(weakObj.deref().age) // 30
+
+const register = new FinalizationRegistry(value => {
+  console.log(`${value}对象被销毁了`)
+})
+register.register(obj, 'obj')
+
+// 去掉obj对对象{ name: 'curry', age: 30 }的引用
+obj = null
+
+// 等对象回收后再打印
+setTimeout(() => {
+  // 注意：当弱引用的对象被GC回收后，weakObj.deref()的值为undefined
+  // 如果不想报错，可以使用可选链或者逻辑与
+  console.log(weakObj.deref()?.name)
+  console.log(weakObj.deref() && weakObj.deref().name)
+}, 10000)
+```
+
+![image-20240925165014209](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240925165014209.png)
+
+#### 7.3.逻辑赋值运算
+
+> ES12为我们提供了三种逻辑赋值运算：
+
+- `||=`：逻辑或赋值运算；
+
+  ```js
+  let msg = undefined
+  msg ||= 'default'
+  console.log(msg) // default
+  /*
+    等同于：
+    msg = msg || 'default'
+  */
+  ```
+
+- `&&=`：逻辑与赋值运算；
+
+  ```js
+  let obj = {
+    name: 'curry',
+    age: 30
+  }
+  // 在obj有值的情况下，将obj赋值为obj.name
+  obj &&= obj.name
+  console.log(obj) // curry
+  /*
+    等同于：
+    obj = obj && obj.name
+  */
+  ```
+
+- `??=`：逻辑空赋值运算；
+
+  ```js
+  let msg = 0
+  // 当msg为null或undefined情况下，将msg赋值为default，这里为0，所以值还是0
+  msg ??= 'default'
+  console.log(msg) // 0
+  /*
+    等同于：
+    msg = msg ?? 'default'
+  */
+  ```
+
+**注意**：该新增特性可能过新，可能出现node版本不支持的情况，可以在浏览器中打印查看。
+
+#### 7.4.数值分隔符
+
+> 当数值过长时，ES12允许我们使用`_`进行连接，方便阅读。
+
+```js
+const num = 100_000_000
+console.log(num) //100000000
+```
+
+#### 7.5.字符串替换
+
+> ES12提供了一个replaceAll方法，该返回一个新字符串，新字符串所有满足 `pattern` 的部分都已被`replacement` 替换。`pattern`可以是一个**字符串**或一个**RegExp**， `replacement`可以是一个字符串或一个在每次匹配被调用的函数。
+
+```js
+const newStr = str.replaceAll(regexp|substr, newSubstr|function)
+```
+
+将所有的a替换为b：
+
+```js
+const str = 'ababababab'
+
+// 字符串
+const newStr1 = str.replaceAll('a', 'b')
+// 正则
+const regex = /a/g
+const newStr2 = str.replace(regex, 'b')
+
+console.log(newStr1) // bbbbbbbbbb
+console.log(newStr2) // bbbbbbbbbb
+```
+
+**注意**：该新增特性可能过新，可能出现node版本不支持的情况，可以在浏览器中打印查看。
+
+### 总结：
+
+本篇文字只总结了ES6-ES12部分简单知识点，还有一些其它ES6之后新增的特性，如Promise、迭代器、生成器、async、await等等，将会在后续的文章中进行整理。
+
+
+
+
+
+## 九、Promise
+
+> 在ES6之前，对于一些异步任务的处理始终没有很好的方案可以解决，处理异步的方案可谓是十分混乱，在业务需求下异步请求的套用，就形成了回调地狱，严重影响代码的阅读性。而Promise的出现，给我们统一了规范，解决了之前处理异步任务的许多痛点，并且它友好的使用方式，使之成为了JavaScript一大重点，同时也是面试的高频问点，下面就一起来全面认识一下Promise吧。
+
+### 1.什么是Promise？
+
+> 如果我们想在一个异步请求之后，拿到请求的结果，在ES6之前我们可以怎么做呢？
+
+比如，给定一个请求地址，希望拿到它请求成功或者失败的结果：
+
+- 可以通过分别设置**成功和失败的两个回调**；
+- 当请求成功后调用成功的回调，将成功的结果传递过去；
+- 当请求失败后调用失败的回调，将失败的结果传递过去；
+
+```js
+function request(url, successCb, failCb) {
+  setTimeout(function() {
+    if (url === '/aaa/bbb') { // 请求成功
+      let res = [1, 2, 3]
+      successCb(res)
+    } else { // 请求失败
+      let err = 'err message'
+      failCb(err)
+    }
+  })
+}
+
+// 调用方式，从回调中拿结果
+request('/aaa/bbb', function(res) {
+  console.log(res)
+}, function(err) {
+  console.log(err)
+})
+```
+
+将上面的情况使用Promise来实现一下：
+
+- Promise是一个类，通过new调用，可以给予调用者一个承诺；
+- 通过new创建Promise对象时，需要传入一个**回调函数**，这个回调函数称之为executor，executor接收两个参数resolve和reject；
+- 传入的回调会被立即执行，当调用resolve函数时，会去执行Promise对象的then方法中传入的成功回调；
+- 当调用reject函数时，会去执行Promise对象的then方法中传入的失败回调函数，并且请求后的结果可以通过参数传递过去；
+
+```js
+function request(url) {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      if (url === '/aaa/bbb') {
+        let res = [1, 2, 3]
+        resolve(res) // 请求成功调用resolve
+      } else {
+        let err = 'err message'
+        reject(err) // 请求失败调用reject
+      }
+    })
+  })
+}
+
+const p = request('/aaa/bbb')
+
+p.then(res => {
+  console.log(res) // 拿到resolve传递过来的值
+}, err => {
+  console.log(err) // 拿到reject传递过来的值
+})
+```
+
+### 2.Promise的三种状态
+
+> 为什么Promise能够将请求的结果准确的传递到then中的回调函数中，因为Promise其核心就用三种状态来进行管控。
+
+- **待定状态（pending）**：Promise的初始状态；
+- **已兑现（resolved、fulfilled）**：操作成功，如执行resolve时就变为该状态；
+- **已拒绝（rejected）**：操作失败，如执行reject时就变为该状态；
+
+通过上面的案例，可以在浏览器中查看Promise分别在执行resolve和reject后的打印结果和Promise当时处于的状态：
+
+- resolve和reject都没执行：
+
+  ![image-20240925174539055](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240925174539055.png)
+
+- 执行resolve，请求成功：
+
+  ![image-20240925174508222](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240925174508222.png)
+
+- 执行reject，请求失败：
+
+  ![image-20240925174445486](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240925174445486.png)
+
+注意：在后续的对Promise的讲述过程中，都需要带着Promise的状态去理解。
+
+### 3.executor
+
+> executor是在创建Promise是需要传入的一个回调函数，这个回调函数会被立即执行，并且传入两个参数，分别就是resolve和reject。
+
+```js
+new Promise((resolve, reject) => {
+  console.log('我是executor中的代码，我会被立即执行~')
+})
+```
+
+通常我们会在executor中确定Promise的状态，而且状态一旦被确定下来，Promise的状态就会被锁死，**即Promise的状态一旦修改，就不能再次更改了**。
+
+- 当调用resolve，如果resolve传入的值不是一个Promise（即传入的值为一个普通值），Promise的状态就会立即变成fulfilled；
+- 但是，如果在resolve后接着调用reject，是不会有任何的效果的，因为reject已经无法改变Promise的结果了；
+
+### 4.resolve的参数
+
+> 上面聊到了resolve需要传入一个普通值，Promise的状态才会被立即锁定为fulfilled，那么如果传递的不是普通值呢？一般resolve传递以下三类值，会有不同的表现效果。
+
+- **传值一**：resolve传入一个普通值或普通对象，那么这个值会作为then中第一个回调的参数；
+
+  ```js
+  const p = new Promise((resolve, reject) => {
+    resolve(123)
+  })
+  
+  p.then(res => {
+    console.log(res) // 123
+  })
+  ```
+
+- **传值二**：resolve传入一个Promise，那么这个传入的Promise会决定原来Promise的状态；
+
+  - 传入的Promise调用的是resolve；
+
+    ```js
+    const newP = new Promise((resolve, reject) => {
+      resolve(123)
+    })
+    
+    const p = new Promise((resolve, reject) => {
+      resolve(newP)
+    })
+    
+    p.then(res => {
+      console.log(res) // 123
+    }, err => {
+      console.log(err)
+    })
+    ```
+
+  - 传入的Promise调用的是reject；
+
+    ```js
+    const newP = new Promise((resolve, reject) => {
+      reject('err message')
+    })
+    
+    const p = new Promise((resolve, reject) => {
+      resolve(newP)
+    })
+    
+    p.then(res => {
+      console.log(res)
+    }, err => {
+      console.log(err) // err message
+    })
+    ```
+
+- **传值三**：resolve传入一个特殊对象，该对象中实现了then方法，那么Promise的状态就是对象中then方法执行后的结果来决定的；
+
+  - then中执行了resolve；
+
+    ```js
+    const obj = {
+      then: function(resolve, reject) {
+        resolve(123)
+      }
+    }
+    
+    const p = new Promise((resolve, reject) => {
+      resolve(obj)
+    })
+    
+    p.then(res => {
+      console.log(res) // 123
+    }, err => {
+      console.log(err)
+    })
+    ```
+
+  - then中执行了reject；
+
+    ```js
+    const obj = {
+      then: function(resolve, reject) {
+        reject('err message')
+      }
+    }
+    
+    const p = new Promise((resolve, reject) => {
+      resolve(obj)
+    })
+    
+    p.then(res => {
+      console.log(res)
+    }, err => {
+      console.log(err) // err message
+    })
+    ```
+
+### 5.Promise相关实例方法
+
+> Promise的实例方法，就是可以通过其实例对象进行调用的方法。
+
+#### 5.1.then方法
+
+> then方法是Promise实例对象上的一个方法：`Promise.prototype.then`
+
+**（1）then方法接收两个参数**
+
+- 状态变成fulfilled的回调函数；
+- 状态变成rejected的回调函数；
+
+```js
+promise.then(res => {
+  console.log('状态变成fulfilled回调')
+}, err => {
+  console.log('状态变成rejected回调')
+})
+```
+
+**（2）then方法多次调用**
+
+- 一个Promise的then方法是可以被多次调用的，每次调用都可以传入对应的fulfilled回调；
+- 当Promise的状态变成fulfilled的时候，这些回调函数都会被执行；
+- 反之，当Promise的状态变成rejected，所有then中传入的rejected回调都会被执行；
+
+```js
+const p = new Promise((resolve, reject) => {
+  resolve('aaa')
+})
+
+p.then(res => {
+  console.log(res) // aaa
+})
+p.then(res => {
+  console.log(res) // aaa
+})
+p.then(res => {
+  console.log(res) // aaa
+})
+```
+
+**（3）then方法中的返回值**
+
+> then调用本身是有返回值的，并且它的返回值是一个Promise，所以then可以进行链式调用，但是then方法调用的返回值的状态是什么呢？主要是由其返回值决定的。
+
+- 当then方法中的回调在执行时处于pending状态；
+
+- 当then方法中的回调返回一个结果时处于fulfilled状态，并且会将结果作为resolve的参数；
+
+  - 返回一个普通的值：这个普通的值会被作为一个新Promise的resolve中的值
+
+    ```js
+    p.then(res => {
+      return 123
+      // 相当于：
+      /*
+        return new Promise((resolve, reject) => {
+          resolve(123)
+        })
+      */
+    }).then(res => {
+      console.log(res) // 123
+    })
+    ```
+
+  - 返回一个实现了then方法的对象：
+
+    ```js
+    p.then(res => {
+      const obj = {
+        then: function(resolve, reject) {
+          resolve('abc')
+        }
+      }
+      return obj
+      // 相当于：
+      /*
+        return new Promise((resolve, reject) => {
+          resolve(obj.then)
+        })
+      */
+    }).then(res => {
+      console.log(res) // abc
+    })
+    ```
+
+  - 返回一个Promise：
+
+    ```js
+    p.then(res => {
+      const newP = new Promise((resolve, reject) => {
+        resolve(123)
+      })
+      return newP
+      // 相当于：
+      /*
+        const newP = new Promise((resolve, reject) => {
+          resolve(123)
+        })
+        return new Promise((resolve, reject) => {
+          resolve(newP)
+        })
+      */
+    }).then(res => {
+      console.log(res) // 123
+    })
+    ```
+
+- 当then方法执行时抛出一个异常，就处于rejected状态，同样，Promise的executor在执行的时候抛出异常，Promise对应的状态也会变成rejected；
+
+  ```js
+  const p = new Promise((resolve, reject) => {
+    throw new Error('err message')
+  })
+  
+  p.then(res => {
+    console.log(res)
+  }, err => {
+    console.log(err) // Error: err message
+    return new Error('then err message')
+  }).then(res => {
+    console.log(res)
+  }, err => {
+    console.log(err) // Error: then err message
+  })
+  ```
+
+#### 5.2.catch方法
+
+> catch方法是Promise实例对象上的一个方法：`Promise.prototype.catch`
+
+**（1）catch方法可多次调用**
+
+- 一个Promise的catch方法也是可以被多次调用的，每次调用都可以传入对应的reject回调；
+- 当Promise的状态变成rejected的时候，这些回调就都会执行；
+- catch方法的效果和then方法的第二个回调函数差不多，可用于替代then方法的第二个回调；
+
+```js
+const p = new Promise((resolve, reject) => {
+  reject('err message')
+})
+
+p.catch(err => {
+  console.log(err) // err message
+})
+p.catch(err => {
+  console.log(err) // err message
+})
+p.catch(err => {
+  console.log(err) // err message
+})
+```
+
+**（2）catch方法的返回值**
+
+- catch方法的执行返回的也是一个Promise对象，使用catch后面可以继续调用then方法或者catch方法；
+
+- 如果在catch后面调用then方法，会进入到then方法的fulfilled回调函数中，因为catch返回的Promise默认是fulfilled；
+
+  ```js
+  p.catch(err => {
+    return 'catch return value'
+  }).then(res => {
+    console.log(res) // catch return value
+  })
+  ```
+
+- 如果catch后续又调用了catch，那么可以抛出一个异常，就会进入后面的catch回调中；
+
+  ```js
+  p.catch(err => {
+    throw new Error('catch err message')
+  }).catch(err => {
+    console.log(err) // Error: catch err message
+  })
+  ```
+
+**（3）catch的作用**
+
+- catch主要是用于捕获异常的，当executor抛出异常是，可以通过catch进行处理；
+
+- **注意**：当Promise的executor执行reject或者抛出异常，后续必须要有捕获异常的处理，如下代码，虽然都调用了then方法，接着后续又调用了catch方法，但是then和catch是两次独立的调用，两次调用并没有联系，所以就被认定为没有处理异常。
+
+  ```js
+  const p = new Promise((resolve, reject) => {
+    reject('err message')
+  })
+  
+  p.then(res => {
+    console.log(res)
+  })
+  
+  p.catch(err => {
+    console.log(err)
+  })
+  ```
+
+  ![image-20240925173056672](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240925173056672.png)
+
+- 正确处理的方法为：
+
+  ```js
+  // 方法一：
+  p.then(res => {
+    console.log(res)
+  }).catch(err => {
+    console.log(err)
+  })
+  
+  // 方法二：
+  p.then(res => {
+    console.log(res)
+  }, err => {
+    console.log(err)
+  })
+  ```
+
+#### 5.3.finally方法
+
+> finally方法是Promise实例对象上的一个方法：`Promise.prototype.finally`
+
+- finally是在ES9中新增的，无论Promise的状态变成fulfilled还是rejected，最终都会执行finally中的回调；
+- 注意finally是不接收参数的，因为它必定执行；
+
+```js
+const p = new Promise((resolve, reject) => {
+  resolve(123)
+})
+
+p.then(res => {
+  console.log(res) // 123
+}).catch(err => {
+  console.log(err)
+}).finally(() => {
+  console.log('finally code') // finally code
+})
+```
+
+### 6.Promise相关类方法
+
+> Promise的类方法，就是直接通过Promise进行调用。
+
+#### 6.1.resolve方法
+
+> resolve方法具体有什么用呢？当我们希望将一个值转成Promise来使用，就可以通过直接调用resolve方法来实现，其效果就相当于在new一个Promise时在executor中执行了resolve方法。
+
+resolve传入的参数类型：
+
+- 参数为一个普通的值；
+
+  ```js
+  const p = Promise.resolve('aaaa')
+  // 相当于：
+  /*
+    const p = new Promise((resolve, reject) => {
+      resolve('aaaa')
+    })
+  */
+  console.log(p)
+  ```
+
+  ![image-20240925173026102](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240925173026102.png)
+
+- 参数为一个实现了then方法的对象；
+
+  ```js
+  const p = Promise.resolve({
+    then: function(resolve, reject) {
+      resolve('aaaa')
+    }
+  })
+  // 相当于：
+  /*
+    const p = new Promise((resolve, reject) => {
+      resolve({
+        then: function(resolve, reject) {
+          resolve('aaaa')
+        }
+      })
+    })
+  */
+  console.log(p)
+  ```
+
+  ![image-20240925173001465](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240925173001465.png)
+
+- 参数为一个Promise；
+
+  ```js
+  const p = Promise.resolve(new Promise((resolve, reject) => {
+    resolve('abc')
+  }))
+  // 相当于：
+  /*
+    const p = new Promise((resolve, reject) => {
+      resolve(new Promise((resolve, reject) => {
+        resolve('abc')
+      }))
+    })
+  */
+  console.log(p)
+  ```
+
+  ![image-20240925172943586](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240925172943586.png)
+
+#### 6.2.reject方法
+
+> reject方法和resolve的用法一致，只不过是将可以得到一个状态为rejected的Promise对象，并且reject不过传入的是什么参数，都会原封不动作为rejected状态传递到catch中。
+
+```js
+// 1.传入普通值
+const p1 = Promise.reject(123)
+p1.then(res => {
+  console.log(res)
+}).catch(err => {
+  console.log('err:', err)
+})
+
+// 2.传入实现then方法对象
+const p2 = Promise.reject({
+  then: function(resolve, reject) {
+    resolve('aaaa')
+  }
+})
+p2.then(res => {
+  console.log(res)
+}).catch(err => {
+  console.log('err:', err)
+})
+
+// 3.传入Promise
+const p3 = Promise.reject(new Promise((resolve, reject) => {
+  resolve('aaaa')
+ })
+)
+p3.then(res => {
+  console.log(res)
+}).catch(err => {
+  console.log('err:', err)
+})
+```
+
+![image-20240925172850322](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240925172850322.png)
+
+#### 6.3.all方法
+
+> all方法可以接收由多个Promise对象组成的数组（准确来说是可接收一个可迭代对象），all方法调用返回的Promise状态，由所有Promise对象共同决定。
+
+- 当传入的所有Promise对象的状态都为fulfilled是，all方法返回的Promise状态就为fulfilled，并且会将所有Promise对象的**返回值组成一个数组**；
+
+  ```js
+  const p1 = new Promise((resolve, reject) => {
+    setTimeout(() => {
+      resolve(111)
+    }, 1000)
+  })
+  const p2 = new Promise((resolve, reject) => {
+    setTimeout(() => {
+      resolve(222)
+    }, 2000)
+  })
+  const p3 = new Promise((resolve, reject) => {
+    setTimeout(() => {
+      resolve(333)
+    }, 3000)
+  })
+  
+  Promise.all([p1, p2, p3]).then(res => {
+    console.log('res:', res) // res: [ 111, 222, 333 ]
+  }).catch(err => {
+    console.log('err:', err)
+  })
+  ```
+
+- 当传入的Promise有一个变成了rejected状态，那么就会获取**第一个变成rejected状态的返回值**作为all方法返回的Promise状态；
+
+  ```js
+  const p1 = new Promise((resolve, reject) => {
+    setTimeout(() => {
+      resolve(111)
+    }, 1000)
+  })
+  const p2 = new Promise((resolve, reject) => {
+    setTimeout(() => {
+      reject('err message')
+    }, 2000)
+  })
+  const p3 = new Promise((resolve, reject) => {
+    setTimeout(() => {
+      resolve(333)
+    }, 3000)
+  })
+  
+  Promise.all([p1, p2, p3]).then(res => {
+    console.log('res:', res)
+  }).catch(err => {
+    console.log('err:', err) // err: err message
+  })
+  ```
+
+#### 6.4.allSettled方法
+
+> 相比于all方法，allSettled方法不管传入的Promise对象的状态是fulfilled还是rejected，最终都会讲结果返回，并且返回的结果是一个数组，数组中存放着每一个Promise对应的状态status和对应的值value。
+
+```js
+const p1 = new Promise((resolve, reject) => {
+  setTimeout(() => {
+    resolve(111)
+  }, 1000)
+})
+const p2 = new Promise((resolve, reject) => {
+  setTimeout(() => {
+    reject('err message')
+  }, 2000)
+})
+const p3 = new Promise((resolve, reject) => {
+  setTimeout(() => {
+    resolve(333)
+  }, 3000)
+})
+
+Promise.allSettled([p1, p2, p3]).then(res => {
+  console.log('res:', res)
+}).catch(err => {
+  console.log('err:', err)
+})
+```
+
+![image-20240925172811302](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240925172811302.png)
+
+#### 6.5.race方法
+
+> race翻译为竞争，顾名思义哪一个Promise对象最先返回结果，就使用最先返回结果的Promise状态。
+
+一下代码是`p1`最先有结果的，`p1`中执行的是resolve，所以返回的状态为fulfilled：
+
+```js
+const p1 = new Promise((resolve, reject) => {
+  setTimeout(() => {
+    resolve(111)
+  }, 1000)
+})
+const p2 = new Promise((resolve, reject) => {
+  setTimeout(() => {
+    reject('err message')
+  }, 2000)
+})
+const p3 = new Promise((resolve, reject) => {
+  setTimeout(() => {
+    resolve(333)
+  }, 3000)
+})
+
+Promise.race([p1, p2, p3]).then(res => {
+  console.log('res:', res) // res: 111
+}).catch(err => {
+  console.log('err:', err)
+})
+```
+
+#### 6.6.any方法
+
+> any方法是ES12中新增的方法，与race是类似的，any方法会等到有一个fulfilled状态的Promise，才会决定any调用返回新Promise的状态（**也就是说any一定会等到有一个Promise状态为fullfilled**）。
+
+那么，如果所有的Promise对象的状态都变为了rejected呢？最终就会报一个`AggregateError`错误，如果想拿到所有的rejected状态的返回值，可以通过在捕获异常回调参数中的`errors`获取：
+
+```js
+const p1 = new Promise((resolve, reject) => {
+  setTimeout(() => {
+    reject('err message1')
+  }, 1000)
+})
+const p2 = new Promise((resolve, reject) => {
+  setTimeout(() => {
+    reject('err message2')
+  }, 2000)
+})
+const p3 = new Promise((resolve, reject) => {
+  setTimeout(() => {
+    reject('err message3')
+  }, 3000)
+})
+
+Promise.any([p1, p2, p3]).then(res => {
+  console.log('res:', res)
+}).catch(err => {
+  console.log(err)
+  console.log(err.errors)
+})
+```
+
+![image-20240925172729787](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240925172729787.png)
+
+**注意**：any方法是ES12新增的，node版本过低的话是会报错找不到any方法的，可以在浏览器中测试。
+
+### 7.手写Promise
+
+> 掌握了以上Promise的用法，那么就一步步来实现一下Promise吧。
+
+#### 7.1.executor的实现
+
+- 创建一个类，这个类可接收一个executor函数；
+- executor函数需传入两个函数resolve和reject，并且**executor是需要立即执行**的；
+- 创建三个常量用于管理Promise的三种状态；
+- 一旦Promise的状态改变就**不能再次被修改**；
+- 还需将传入resolve和reject的参数值进行保存，便于后续then的使用；
+
+```js
+// 定义Promise的三种状态常量
+const PENDING_STATUS = 'pending'
+const FULFILLED_STATUS = 'fulfilled'
+const REJECTED_STATUS = 'rejected'
+
+class MyPromise {
+  constructor(executor) {
+    // 初始化Promise的状态为pending
+    this.promiseStatus = PENDING_STATUS
+    // 初始化变量，用于保存resolve和reject传入的参数值
+    this.value = undefined
+    this.reason = undefined
+
+    // 1.定义executor需要传入的resolve函数
+    const resolve = (value) => {
+      // 只有当Promise的状态为pending，才能将状态改变fulfilled
+      if (this.promiseStatus === PENDING_STATUS) {
+        this.promiseStatus = FULFILLED_STATUS
+        this.value = value
+        console.log('调用了resolve，状态变成fulfilled啦~')
+      }
+    }
+
+    // 2.定义executor需要传入的reject函数
+    const reject = (reason) => {
+      // 只有当Promise的状态为pending，才能将状态改变为rejected
+      if (this.promiseStatus === PENDING_STATUS) {
+        this.promiseStatus = REJECTED_STATUS
+        this.reason = reason
+        console.log('调用了reject，状态变成rejected啦~')
+      }
+    }
+
+    // 3.将定义的两个函数传入executor并调用
+    executor(resolve, reject)
+  }
+}
+```
+
+简单测试一下：
+
+```js
+// 先调用resolve
+new MyPromise((resolve, reject) => {
+  resolve()
+  reject()
+})
+// 先调用reject
+new MyPromise((resolve, reject) => {
+  reject()
+  resolve()
+})
+```
+
+![image-20240925172709189](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240925172709189.png)
+
+#### 7.2.then方法的实现
+
+**（1）then基本实现**
+
+- then方法接收两个参数：
+  - onFulfilled回调：当Promise状态变为fulfilled需要执行的回调；
+  - onRejected回调：当Promise状态变为rejected需要执行的回调
+
+```js
+class MyPromise {
+  constructor(executor) {
+    // 初始化Promise的状态为pending
+    this.promiseStatus = PENDING_STATUS
+    // 初始化变量，用于保存resolve和reject传入的参数值
+    this.value = undefined
+    this.reason = undefined
+
+    // 1.定义executor需要传入的resolve函数
+    const resolve = (value) => {
+      // 只有当Promise的状态为pending，才能将状态改变fulfilled
+      if (this.promiseStatus === PENDING_STATUS) {
+        // 添加微任务
+        queueMicrotask(() => {
+          // 如果Promise状态不为pending，后面的代码就不再执行了
+          if (this.promiseStatus !== PENDING_STATUS) return
+          this.promiseStatus = FULFILLED_STATUS
+          this.value = value
+          // 状态变成fulfilled就去调用onFulfilled
+          this.onFulfilled(this.value)
+        })
+      }
+    }
+
+    // 2.定义executor需要传入的reject函数
+    const reject = (reason) => {
+      // 只有当Promise的状态为pending，才能将状态改变为rejected
+      if (this.promiseStatus === PENDING_STATUS) {
+        // 添加微任务
+        queueMicrotask(() => {
+          // 如果Promise状态不为pending，后面的代码就不再执行了
+          if (this.promiseStatus !== PENDING_STATUS) return
+          this.promiseStatus = REJECTED_STATUS
+          this.reason = reason
+          // 状态变成rejected就去调用onRejected
+          this.onRejected(this.reason)
+        })
+      }
+    }
+
+    // 3.将定义的两个函数传入executor并调用
+    executor(resolve, reject)
+  }
+
+  then(onFulfilled, onRejected) {
+    // 保存fulfilled和rejected状态的回调
+    this.onFulfilled = onFulfilled
+    this.onRejected = onRejected
+  }
+}
+```
+
+**注意**：这里将onFulfilled和onRejected的调动放在了`queueMicrotask`，在JavaScript中可以通过`queueMicrotask`使用微任务，而原Promise的then中回调的执行，也是会被放在微任务中的，为什么要放在微任务中呢？
+
+**原因**：如果不使用微任务，那么在executor中执行resolve或者reject时，then方法还没被调用，onFulfilled和onRejected就都还没被赋值，所以调用时会报错，加入微任务就可以实现将onFulfilled和onRejected的调用推迟到下一次事件循环，也就是等then调用后赋值了才会执行。
+
+简单测试一下：
+
+```js
+const p1 = new MyPromise((resolve, reject) => {
+  resolve('aaaa')
+})
+const p2 = new MyPromise((resolve, reject) => {
+  reject('err message')
+})
+
+p1.then(res => {
+  console.log(res) // aaaa
+}, err => {
+  console.log(err)
+})
+
+p2.then(res => {
+  console.log(res)
+}, err => {
+  console.log(err) // err message
+})
+```
+
+**（2）then优化一**
+
+- 对于以上then的基本实现，还存在一些不足之处，比如：
+  - then方法是可以进行多次调用的，并且每一次调用都是独立调用，互不影响，所以需要收集当Promise状态改变时，对应需要执行哪些回调，需用数组进行收集；
+  - 如果then是放到定时器中调用的，那么改then的回调是不会被调用的，因为在前面我们是通过将回调添加到微任务中执行的，而定时器是宏任务，会在微任务执行完成后执行，所以定时器中then的回调就没有被调用；
+  - 当then是放到定时器中执行的，那么执行的时候，微任务已经执行完成了，Promise状态肯定也确定下来了，那么只需要直接调用then中的回调即可；
+
+```js
+class MyPromise {
+  constructor(executor) {
+    // 初始化Promise的状态为pending
+    this.promiseStatus = PENDING_STATUS
+    // 初始化变量，用于保存resolve和reject传入的参数值
+    this.value = undefined
+    this.reason = undefined
+    // 初始化两个数组，分别用于保存then中对应需要执行的回调
+    this.onFulfilledFns = []
+    this.onRejectedFns = []
+
+    // 1.定义executor需要传入的resolve函数
+    const resolve = (value) => {
+      // 只有当Promise的状态为pending，才能将状态改变fulfilled
+      if (this.promiseStatus === PENDING_STATUS) {
+        // 添加微任务
+        queueMicrotask(() => {
+          // 如果Promise状态不为pending，后面的代码就不再执行了
+          if (this.promiseStatus !== PENDING_STATUS) return
+          this.promiseStatus = FULFILLED_STATUS
+          this.value = value
+          // 状态变成fulfilled就去遍历调用onFulfilled
+          this.onFulfilledFns.forEach(fn => {
+            fn(this.value)
+          })
+        })
+      }
+    }
+
+    // 2.定义executor需要传入的reject函数
+    const reject = (reason) => {
+      // 只有当Promise的状态为pending，才能将状态改变为rejected
+      if (this.promiseStatus === PENDING_STATUS) {
+        // 添加微任务
+        queueMicrotask(() => {
+          // 如果Promise状态不为pending，后面的代码就不再执行了
+          if (this.promiseStatus !== PENDING_STATUS) return
+          this.promiseStatus = REJECTED_STATUS
+          this.reason = reason
+          // 状态变成rejected就去遍历调用onRejected
+          this.onRejectedFns.forEach(fn => {
+            fn(this.reason)
+          })
+        })
+      }
+    }
+
+    // 3.将定义的两个函数传入executor并调用
+    executor(resolve, reject)
+  }
+
+  then(onFulfilled, onRejected) {
+    // 1.如果在调用then时，Promise的状态已经确定了，就直接执行回调
+    if (this.promiseStatus === FULFILLED_STATUS && onFulfilled) {
+      onFulfilled(this.value)
+    }
+    if (this.promiseStatus === REJECTED_STATUS && onRejected) {
+      onRejected(this.reason)
+    }
+
+    // 2.如果调用then时，Promise的状态还没确定下来，就放入微任务中执行
+    if (this.promiseStatus === PENDING_STATUS) {
+      // 将then中成功的回调和失败的回调分别存入数组中
+      this.onFulfilledFns.push(onFulfilled)
+      this.onRejectedFns.push(onRejected)
+    }
+  }
+}
+```
+
+简单测试一下：
+
+```js
+const p = new MyPromise((resolve, reject) => {
+  resolve('aaaa')
+  reject('err message')
+})
+
+p.then(res => {
+  console.log('res1:', res)
+}, err => {
+  console.log('err1:', err)
+})
+
+p.then(res => {
+  console.log('res2:', res)
+}, err => {
+  console.log('err1:', err)
+})
+
+setTimeout(() => {
+  p.then(res => {
+    console.log('res3:', res)
+  }, err => {
+    console.log('err1:', err)
+  })
+})
+```
+
+![image-20240925172638823](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240925172638823.png)
+
+**（3）then优化二**
+
+- 通过上一步优化，then方法还存在一个缺陷，就是不能进行链式调用，在前面讲then方法时，then方法执行的返回值是一个promise对象，并且返回的promise状态是由then方法中回调函数的返回值决定的，**then中必定需要返回一个新的Promise**；
+- 上一个then中回调的返回值可以传递到下一个then中成功的回调中，也就是返回的promise执行了resolve方法，那么什么时候可以传递到下一个then中失败的回调中呢？只需要上一个then中抛出异常即可，相当于返回的promise执行了reject方法；
+- 所以，在这里需要拿到then中回调函数返回的结果，并且需要通过`try catch`判断是调用resolve还是reject；
+- 注意：如果是在executor中就抛出了异常，也需要通过`try catch`去执行executor；
+
+```js
+class MyPromise {
+  constructor(executor) {
+    // 初始化Promise的状态为pending
+    this.promiseStatus = PENDING_STATUS
+    // 初始化变量，用于保存resolve和reject传入的参数值
+    this.value = undefined
+    this.reason = undefined
+    // 初始化两个数组，分别用于保存then中对应需要执行的回调
+    this.onFulfilledFns = []
+    this.onRejectedFns = []
+
+    // 1.定义executor需要传入的resolve函数
+    const resolve = (value) => {
+      // 只有当Promise的状态为pending，才能将状态改变fulfilled
+      if (this.promiseStatus === PENDING_STATUS) {
+        // 添加微任务
+        queueMicrotask(() => {
+          // 如果Promise状态不为pending，后面的代码就不再执行了
+          if (this.promiseStatus !== PENDING_STATUS) return
+          this.promiseStatus = FULFILLED_STATUS
+          this.value = value
+          // 状态变成fulfilled就去遍历调用onFulfilled
+          this.onFulfilledFns.forEach(fn => {
+            fn(this.value)
+          })
+        })
+      }
+    }
+
+    // 2.定义executor需要传入的reject函数
+    const reject = (reason) => {
+      // 只有当Promise的状态为pending，才能将状态改变为rejected
+      if (this.promiseStatus === PENDING_STATUS) {
+        // 添加微任务
+        queueMicrotask(() => {
+          // 如果Promise状态不为pending，后面的代码就不再执行了
+          if (this.promiseStatus !== PENDING_STATUS) return
+          this.promiseStatus = REJECTED_STATUS
+          this.reason = reason
+          // 状态变成rejected就去遍历调用onRejected
+          this.onRejectedFns.forEach(fn => {
+            fn(this.reason)
+          })
+        })
+      }
+    }
+
+    // 3.将定义的两个函数传入executor并调用
+    // 如果executor中就抛出了异常，那么直接执行reject即可
+    try {
+      executor(resolve, reject)
+    } catch (err) {
+      reject(err)
+    }
+  }
+
+  then(onFulfilled, onRejected) {
+    return new MyPromise((resolve, reject) => {
+      // 1.如果在调用then时，Promise的状态已经确定了，就直接执行回调
+      if (this.promiseStatus === FULFILLED_STATUS && onFulfilled) {
+        // 通过try catch捕获异常，没有捕获到执行resolve，捕获到执行reject
+        try {
+          const value = onFulfilled(this.value)
+          resolve(value)
+        } catch (err) {
+          reject(err)
+        }
+      }
+      if (this.promiseStatus === REJECTED_STATUS && onRejected) {
+        try {
+          const reason = onRejected(this.reason)
+          resolve(reason)
+        } catch(err) {
+          reject(err)
+        }
+      }
+
+      // 2.如果调用then时，Promise的状态还没确定下来，就放入微任务中执行
+      if (this.promiseStatus === PENDING_STATUS) {
+        // 将then中成功的回调和失败的回调分别存入数组中
+        // 将传入的回调外包裹一层函数，目的是为了这里能够拿到then中回调执行的结果
+        this.onFulfilledFns.push(() => {
+          try {
+            const value = onFulfilled(this.value)
+            resolve(value)
+          } catch(err) {
+            reject(err)
+          }
+        })
+        this.onRejectedFns.push(() => {
+          try {
+            const reason = onRejected(this.reason)
+            resolve(reason)
+          } catch(err) {
+            reject(err)
+          }
+        })
+      }
+    })
+  }
+}
+```
+
+简单测试一下：
+
+```js
+const p = new MyPromise((resolve, reject) => {
+  resolve('aaaa')
+})
+
+p.then(res => {
+  console.log('res1:', res)
+  return 'bbbb'
+}, err => {
+  console.log('err1:', err)
+}).then(res => {
+  console.log('res2:', res)
+  throw new Error('err message')
+}, err => {
+  console.log('err2:', err)
+}).then(res => {
+  console.log('res3:', res)
+}, err => {
+  console.log('err3:', err)
+})
+```
+
+![image-20240925172616938](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240925172616938.png)
+
+#### 7.3.catch方法的实现
+
+- catch方法的功能类似于then方法中的失败回调，所以，实现catch方法只需要调用then，给then传入失败的回调即可；
+- 只给then传入一个回调，意味着根据上面的代码，我们还需要对then的回调进行条件判断，有值才添加到对应数组中；
+- 注意：在then后链式调用catch会有一个问题，调用catch方法的promise是then执行之后返回的新promise，而catch真正需要去调用的是当前then的失败回调，而不是当前then执行后结果promise的失败回调，所以，可以将当前then的失败回调推到下一次的promise中，而抛出异常就可以实现（**因为上一个then抛出异常，可以传递到下一个then的失败回调中**）
+
+```js
+// catch方法实现
+catch(onRejected) {
+  return this.then(undefined, onRejected)
+}
+```
+
+then方法改进：
+
+![image-20240925172552651](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240925172552651.png)
+
+简单测试一下：
+
+```js
+const p = new MyPromise((resolve, reject) => {
+  reject('err message')
+})
+
+p.then(res => {
+  console.log(res)
+}).catch(err => {
+  console.log(err) // err message
+})
+```
+
+#### 7.4.finally方法的实现
+
+- finally方法不管是Promise状态变成fulfilled还是rejected都会被执行；
+- 这里可以巧妙的借助then方法，不管then是执行成功的回调还是失败的回调，都去执行finally中的回调即可；
+- 注意：如果在finally之前使用了catch，因为catch的实现也是去调用then，并且给then的成功回调传递的是undefined，那么执行到catch可能出现断层的现象，导致不会执行到finally，也可以通过在then中添加判断解决；
+
+```js
+finally(onFinally) {
+  this.then(() => {
+    onFinally()
+  }, () => {
+    onFinally()
+  })
+  // 也可直接简写成：
+  // this.then(onFinally, onFinally)
+}
+```
+
+then方法改进：
+
+![image-20240925172515669](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240925172515669.png)
+
+简单测试一下：
+
+```js
+const p = new MyPromise((resolve, reject) => {
+  resolve('aaaa')
+})
+
+p.then(res => {
+  console.log('res:', res) // res: aaaa
+}).catch(err => {
+  console.log('err:', err)
+}).finally(() => {
+  console.log('我是一定会执行的！') // 我是一定会执行的！
+})
+```
+
+#### 7.5.resolve和reject方法的实现
+
+- resolve和reject类方法的实现就是去调用Promise中executor中的resolve和reject；
+- 注意：类方法需要加上`static`关键字；
+
+```js
+static resolve(value) {
+  return new MyPromise((resolve, reject) => resolve(value))
+}
+
+static reject(reasion) {
+  return new MyPromise((resolve, reject) => reject(reasion))
+}
+```
+
+简单测试一下：
+
+```js
+MyPromise.resolve('aaaa').then(res => {
+  console.log(res) // aaaa
+})
+MyPromise.reject('bbbb').then(res => {
+  console.log(res)
+}, err => {
+  console.log(err) // bbbb
+})
+```
+
+#### 7.6.all方法的实现
+
+- all方法可接收一个promise数组，当所有promise状态都变为fulfilled，就返回所有promise成功的回调值（一个数组），当其中有一个promise状态变为了rejected，就返回该promise的状态；
+- all实现的关键：**当所有promise状态变为fulfilled就去调用resolve，当有一个promise状态变为rejected就去调用reject**；
+
+```js
+static all(promises) {
+  return new MyPromise((resolve, reject) => {
+    // 用于存放所有成功的返回值
+    const results = []
+    promises.forEach(promise => {
+      promise.then(res => {
+        results.push(res)
+
+        // 当成功返回值的长度与传入promises的长度相等，就调用resolve
+        if (results.length === promises.length) {
+          resolve(results)
+        }
+      }, err => {
+        // 一旦有一个promise变成了rejected状态，就调用reject
+        reject(err)
+      })
+    })
+  })
+}
+```
+
+简单测试一下：
+
+```js
+const p1 = new MyPromise(resolve => {
+  setTimeout(() => {
+    resolve('aaaa')
+  }, 1000)
+})
+const p2 = new MyPromise(resolve => {
+  setTimeout(() => {
+    resolve('bbbb')
+  }, 2000)
+})
+const p3 = new MyPromise(resolve => {
+  setTimeout(() => {
+    resolve('cccc')
+  }, 3000)
+})
+
+MyPromise.all([p1, p2, p3]).then(res => {
+  console.log(res) // [ 'aaaa', 'bbbb', 'cccc' ]
+}).catch(err => {
+  console.log(err)
+})
+```
+
+#### 7.7.allSettled方法的实现
+
+- allSettled方法会返回所有promise的结果数组，数组中包含每一个promise的状态和值；
+- 不管promise的状态为什么，最终都会调用resolve；
+
+```js
+static allSettled(promises) {
+  return new MyPromise((resolve, reject) => {
+    // 用于存放所有promise的状态和返回值
+    const results = []
+    promises.forEach(promise => {
+      promise.then(res => {
+        results.push({ status: FULFILLED_STATUS, value: res })
+        // 当长度相等，调用resolve
+        if (results.length === promises.length) {
+          resolve(results)
+        }
+      }, err => {
+        results.push({ status: REJECTED_STATUS, value: err })
+        // 当长度相等，调用resolve
+        if (results.length === promises.length) {
+          resolve(results)
+        }
+      })
+    })
+  })
+}
+```
+
+简单测试一下：
+
+```js
+const p1 = new MyPromise(resolve => {
+  setTimeout(() => {
+    resolve('aaaa')
+  }, 1000)
+})
+const p2 = new MyPromise((resolve, reject) => {
+  setTimeout(() => {
+    reject('err message')
+  }, 2000)
+})
+const p3 = new MyPromise(resolve => {
+  setTimeout(() => {
+    resolve('bbbb')
+  }, 3000)
+})
+
+MyPromise.allSettled([p1, p2, p3]).then(res => {
+  console.log(res)
+}).catch(err => {
+  console.log(err)
+})
+```
+
+![image-20240925172428586](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240925172428586.png)
+
+#### 7.8.race方法的实现
+
+- race方法是获取最先改变状态的Promise，并以该Promise的状态作为自己的状态；
+
+```js
+static race(promises) {
+  return new MyPromise((resolve, reject) => {
+    promises.forEach(promise => {
+      // 得到状态最先改变的promise，调用对应的resolve和reject
+      promise.then(res => {
+        resolve(resolve)
+      }, err => {
+        reject(err)
+      })
+    })
+  })
+}
+```
+
+#### 7.9.any方法的实现
+
+- any方法会等到有一个Promise的状态变成fulfilled，最终就是fulfilled状态；
+- 如果传入的所有Promise都为rejected状态，会返回一个`AggregateError`，并且可以在`AggregateError`中的`errors`属性中获取所有错误信息；
+
+```js
+static any(promises) {
+  return new MyPromise((resolve, reject) => {
+    // 用于记录状态为rejected的值
+    const reasons = []
+    promises.forEach(promise => {
+      promise.then(res => {
+        // 当有一个promise变成fulfilled状态就调用resolve
+        resolve(res)
+      }, err => {
+        reasons.push(err)
+        // 当所有promise都是rejected就调用reject，并且传入AggregateError
+        if (reasons.length === promises.length) {
+          reject(new AggregateError(reasons))
+        }
+      })
+    })
+  })
+}
+```
+
+简单测试一下：
+
+```js
+const p1 = new MyPromise((resolve, reject) => {
+  setTimeout(() => {
+    reject('err message1')
+  }, 1000)
+})
+const p2 = new MyPromise((resolve, reject) => {
+  setTimeout(() => {
+    reject('err message2')
+  }, 2000)
+})
+const p3 = new MyPromise((resolve, reject) => {
+  setTimeout(() => {
+    reject('err message3')
+  }, 3000)
+})
+
+MyPromise.any([p1, p2, p3]).then(res => {
+  console.log(res)
+}).catch(err => {
+  console.log('err:', err)
+  console.log(err.errors)
+})
+```
+
+![image-20240925172403767](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240925172403767.png)
+
+#### 7.10.Promise手写完整版整理
+
+> 上面已经对Promise的各个功能进行了实现，下面就来整理一下最终的完整版，可以将一些重复的逻辑抽取出去，比如try catch。
+
+```js
+// 定义Promise的三种状态常量
+const PENDING_STATUS = 'pending'
+const FULFILLED_STATUS = 'fulfilled'
+const REJECTED_STATUS = 'rejected'
+```
+
+```js
+// try catch逻辑抽取
+function tryCatchFn(execFn, value, resolve, reject) {
+  try {
+    const result = execFn(value)
+    resolve(result)
+  } catch (err) {
+    reject(err)
+  }
+}
+```
+
+```js
+class MyPromise {
+  constructor(executor) {
+    // 初始化Promise的状态为pending
+    this.promiseStatus = PENDING_STATUS
+    // 初始化变量，用于保存resolve和reject传入的参数值
+    this.value = undefined
+    this.reason = undefined
+    // 初始化两个数组，分别用于保存then中对应需要执行的回调
+    this.onFulfilledFns = []
+    this.onRejectedFns = []
+
+    // 1.定义executor需要传入的resolve函数
+    const resolve = (value) => {
+      // 只有当Promise的状态为pending，才能将状态改变fulfilled
+      if (this.promiseStatus === PENDING_STATUS) {
+        // 添加微任务
+        queueMicrotask(() => {
+          // 如果Promise状态不为pending，后面的代码就不再执行了
+          if (this.promiseStatus !== PENDING_STATUS) return
+          this.promiseStatus = FULFILLED_STATUS
+          this.value = value
+          // 状态变成fulfilled就去遍历调用onFulfilled
+          this.onFulfilledFns.forEach(fn => {
+            fn(this.value)
+          })
+        })
+      }
+    }
+
+    // 2.定义executor需要传入的reject函数
+    const reject = (reason) => {
+      // 只有当Promise的状态为pending，才能将状态改变为rejected
+      if (this.promiseStatus === PENDING_STATUS) {
+        // 添加微任务
+        queueMicrotask(() => {
+          // 如果Promise状态不为pending，后面的代码就不再执行了
+          if (this.promiseStatus !== PENDING_STATUS) return
+          this.promiseStatus = REJECTED_STATUS
+          this.reason = reason
+          // 状态变成rejected就去遍历调用onRejected
+          this.onRejectedFns.forEach(fn => {
+            fn(this.reason)
+          })
+        })
+      }
+    }
+
+    // 3.将定义的两个函数传入executor并调用
+    // 如果executor中就抛出了异常，那么直接执行reject即可
+    try {
+      executor(resolve, reject)
+    } catch (err) {
+      reject(err)
+    }
+  }
+
+  then(onFulfilled, onRejected) {
+    // 判断onRejected是否有值，没有值的话直接赋值一个抛出异常的方法，用于传递到下一次then中的失败回调，供catch调用
+    onRejected = onRejected || (err => {throw err})
+
+    // 判断onFulfilled是否有值，避免在使用catch时传入的undefined不会执行，出现断层现象
+    onFulfilled = onFulfilled || (value => value)
+
+    return new MyPromise((resolve, reject) => {
+      // 1.如果在调用then时，Promise的状态已经确定了，就直接执行回调
+      if (this.promiseStatus === FULFILLED_STATUS) {
+        // 通过try catch捕获异常，没有捕获到执行resolve，捕获到执行reject
+        tryCatchFn(onFulfilled, this.value, resolve, reject)
+      }
+      if (this.promiseStatus === REJECTED_STATUS) {
+        tryCatchFn(onRejected, this.reason, resolve, reject)
+      }
+
+      // 2.如果调用then时，Promise的状态还没确定下来，就放入微任务中执行
+      if (this.promiseStatus === PENDING_STATUS) {
+        // 将then中成功的回调和失败的回调分别存入数组中
+        // 将传入的回调外包裹一层函数，目的是为了这里能够拿到then中回调执行的结果
+        this.onFulfilledFns.push(() => {
+          tryCatchFn(onFulfilled, this.value, resolve, reject)
+        })
+        this.onRejectedFns.push(() => {
+          tryCatchFn(onRejected, this.reason, resolve, reject)
+        })
+      }
+    })
+  }
+
+  catch(onRejected) {
+    return this.then(undefined, onRejected)
+  }
+
+  finally(onFinally) {
+    this.then(onFinally, onFinally)
+  }
+
+  static resolve(value) {
+    return new MyPromise((resolve, reject) => resolve(value))
+  }
+
+  static reject(reasion) {
+    return new MyPromise((resolve, reject) => reject(reasion))
+  }
+
+  static all(promises) {
+    return new MyPromise((resolve, reject) => {
+      // 用于存放所有成功的返回值
+      const results = []
+      promises.forEach(promise => {
+        promise.then(res => {
+          results.push(res)
+
+          // 当成功返回值的长度与传入promises的长度相等，就调用resolve
+          if (results.length === promises.length) {
+            resolve(results)
+          }
+        }, err => {
+          // 一旦有一个promise变成了rejected状态，就调用reject
+          reject(err)
+        })
+      })
+    })
+  }
+
+  static allSettled(promises) {
+    return new MyPromise((resolve, reject) => {
+      // 用于存放所有promise的状态和返回值
+      const results = []
+      promises.forEach(promise => {
+        promise.then(res => {
+          results.push({ status: FULFILLED_STATUS, value: res })
+          // 当长度相等，调用resolve
+          if (results.length === promises.length) {
+            resolve(results)
+          }
+        }, err => {
+          results.push({ status: REJECTED_STATUS, value: err })
+          // 当长度相等，调用resolve
+          if (results.length === promises.length) {
+            resolve(results)
+          }
+        })
+      })
+    })
+  }
+
+  static race(promises) {
+    return new MyPromise((resolve, reject) => {
+      promises.forEach(promise => {
+        // 得到状态最先改变的promise，调用对应的resolve和reject
+        promise.then(resolve, reject)
+      })
+    })
+  }
+
+  static any(promises) {
+    return new MyPromise((resolve, reject) => {
+      // 用于记录状态为rejected的值
+      const reasons = []
+      promises.forEach(promise => {
+        promise.then(res => {
+          // 当有一个promise变成fulfilled状态就调用resolve
+          resolve(res)
+        }, err => {
+          reasons.push(err)
+          // 当所有promise都是rejected就调用reject，并且传入AggregateError
+          if (reasons.length === promises.length) {
+            reject(new AggregateError(reasons))
+          }
+        })
+      })
+    })
+  }
+}
+```
+
+
+
+
+
+## 十、掌握JavaScript中的迭代器和生成器，顺便了解一下async、await的原理
+
+> 相信很多人对迭代器和生成器都不陌生，当提到async和await的原理时，大部分人可能都知道async、await是Promise+生成器的语法糖，其原理具体是怎么做的呢？下面通过这篇文章带你详细了解一下迭代器和生成器，以及带你从生成器一步步推导到async和await。
+
+### 1.迭代器（Iterator）
+
+#### 1.1.什么是迭代器？
+
+> 迭代器是使用户在**容器对象**（链表或数组）上遍访的对象，使用该接口无需关心对象的内部实现细节。
+
+- 迭代器的定义可能比较抽象，简单来说**迭代器就是一个对象**，可用于帮助我们对**某个数据结构**（链表、数组）进行**遍历**；
+
+- 在JavaScript中，迭代器也是一个具体的对象，并且这个对象必须符合**迭代器协议**（iterator protocol）；
+
+- 什么是迭代器协议？
+
+  - 在JavaScript中就是指这个对象必须实现一个**特定的next方法**，并且next方法有如下要求；
+
+  - next方法可接收0个或者1个参数（在生成器中next可以接收1个参数），并且需返回一个对象，对象包含以下两个属性：
+
+    - **done**：值为Boolean，如果迭代器可以迭代产生下一个值，就为false，如果已经迭代完毕，就为true；
+  - **value**：迭代器返回的值，如果done为true，value一般为undefined；
+  
+- 编写一个最简单的迭代器：
+
+  ```js
+  const iterator = {
+    next: function() {
+      return { done: false, value: 123 }
+    }
+  }
+  ```
+
+#### 1.2.迭代器的基本使用
+
+> 明白了迭代器的基本定义，下面就来实现一下符合迭代器协议的对象吧，并且看看其它的一些基本用法。比如，需要通过迭代器访问一个数组：
+
+**（1）创建一个迭代器对象**
+
+```js
+const names = ['curry', 'kobe', 'klay']
+
+let index = 0 // 通过一个index来记录当前访问的位置
+const iterator = {
+  next() {
+    if (index < names.length) {
+      return { done: false, value: names[index++] }
+    } else {
+      return { done: true, value: undefined }
+    }
+  }
+}
+
+console.log(iterator.next()) // { done: false, value: 'curry' }
+console.log(iterator.next()) // { done: false, value: 'kobe' }
+console.log(iterator.next()) // { done: false, value: 'klay' }
+console.log(iterator.next()) // { done: true, value: undefined }
+```
+
+**（2）实现生成迭代器的函数**
+
+- 如果每次需要去访问一个数组就去编写一个对应的迭代器对象肯定是很麻烦的；
+- 可以封装一个函数，用于生成一个访问数组的迭代器；
+
+```js
+function createIterator(arr) {
+  let index = 0
+  return {
+    next() {
+      if (index < arr.length) {
+        return { done: false, value: arr[index++] }
+      } else {
+        return { done: true, value: undefined }
+      }
+    }
+  }
+}
+```
+
+```js
+const names = ['curry', 'kobe', 'klay']
+// 调用createIterator函数，生成一个访问names数组的迭代器
+const namesIterator = createIterator(names)
+
+console.log(namesIterator.next()) // { done: false, value: 'curry' }
+console.log(namesIterator.next()) // { done: false, value: 'kobe' }
+console.log(namesIterator.next()) // { done: false, value: 'klay' }
+console.log(namesIterator.next()) // { done: true, value: undefined }
+```
+
+#### 1.3.可迭代对象
+
+##### 1.3.1.什么是可迭代对象？
+
+> 上面提到了迭代器是一个对象，并且符合迭代器协议，那么什么是可迭代对象呢？它与迭代器又有什么区别？
+
+- 迭代器是一个符合**迭代器协议（iterator protocol）**的对象，对象内实现了一个特定的next方法；
+- 而可迭代对象是一个符合**可迭代协议（iterable protocol）**的对象，对象内实现了一个`Symbol.iterator`方法，并且该方法返回一个迭代器对象；
+- 所以，可以说可迭代对象包含了迭代器对象，可迭代对象中实现了一个特定方法用于返回迭代器对象；
+
+如下，`iteratorObj`就是一个可迭代对象：
+
+```js
+const iteratorObj = {
+  names: ['curry', 'kobe', 'klay'],
+  [Symbol.iterator]: function() {
+    let index = 0
+    return {
+      // 注意：这里的next需要使用箭头函数，否则this访问不到iteratorObj
+      next: () => {
+        if (index < this.names.length) {
+          return { done: false, value: this.names[index++] }
+        } else {
+          return { done: true, value: undefined }
+        }
+      }
+    }
+  }
+}
+```
+
+```js
+// 调用iteratorObj中的Symbol.iterator得到一个迭代器
+const iterator = iteratorObj[Symbol.iterator]()
+
+console.log(iterator.next()) // { done: false, value: 'curry' }
+console.log(iterator.next()) // { done: false, value: 'kobe' }
+console.log(iterator.next()) // { done: false, value: 'klay' }
+console.log(iterator.next()) // { done: true, value: undefined }
+```
+
+##### 1.3.2.JS内置的可迭代对象
+
+> 上面的可迭代对象都是由自己实现的，其实在JavaScript中为我们提供了很多可迭代对象，如：String、Array、Map、Set、arguments对象、NodeList（DOM集合）等。
+
+```js
+// 1.String
+const str = 'abc'
+
+const strIterator = str[Symbol.iterator]()
+console.log(strIterator.next()) // { value: 'a', done: false }
+console.log(strIterator.next()) // { value: 'b', done: false }
+console.log(strIterator.next()) // { value: 'c', done: false }
+console.log(strIterator.next()) // { value: undefined, done: true }
+
+// 2.Array
+const names = ['curry', 'kobe', 'klay']
+console.log(names[Symbol.iterator])
+
+const namesIterator = names[Symbol.iterator]()
+console.log(namesIterator.next()) // { value: 'curry', done: false }
+console.log(namesIterator.next()) // { value: 'kobe', done: false }
+console.log(namesIterator.next()) // { value: 'klay', done: false }
+console.log(namesIterator.next()) // { value: undefined, done: true }
+
+// 3.Map/Set
+const set = new Set
+set.add(10)
+set.add(20)
+set.add(30)
+
+const setIterator = set[Symbol.iterator]()
+console.log(setIterator.next()) // { value: 10, done: false }
+console.log(setIterator.next()) // { value: 20, done: false }
+console.log(setIterator.next()) // { value: 30, done: false }
+console.log(setIterator.next()) // { value: undefined, done: true }
+```
+
+##### 1.3.3.可迭代对象应用场景
+
+> 可迭代对象在实际应用中特别常见，像一些语法的使用、创建一些对象和方法调用都用到了可迭代对象。
+
+- **JS中的语法**：for...of、展开语法、解构等。
+
+  - for...of可用于遍历一个可迭代对象，其原理就是利用迭代器的next函数，如果done为false，就从返回的对象中拿到value返回给我们，而对象不是一个可迭代对象，所以对象不能使用for...of遍历；
+
+    ```js
+    const num = [1, 2, 3]
+    for (const item of num) {
+      console.log(item) // 1 2 3
+    }
+    // 遍历上面自己定义的可迭代对象iteratorObj也是可以的
+    for (const item of iteratorObj) {
+      console.log(item) // curry kobe klay
+    }
+    ```
+
+    ```js
+    const obj = { name: 'curry', name: 30 }
+    for (const key of obj) {
+      console.log(key)
+    }
+    ```
+
+    ![image-20240926094128631](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240926094128631.png)
+
+  - 为什么数组能使用展开语法，其原理也是用到了迭代器，在使用`...`对数组进行展开时，也是通过迭代器的next去获取数组的每一项值，然后存放到新数组中；
+
+    ```js
+    const names = ['james', 'green']
+    // 将数组和iteratorObj通过扩展进行合并
+    const newNames = [...names, ...iteratorObj]
+    console.log(newNames) // [ 'james', 'green', 'curry', 'kobe', 'klay' ]
+    ```
+
+  - 可迭代对象都是可以使用解构语法的，像数组、字符串为什么可以使用解构，其原因就在这，原理也是通过迭代器一个个取值然后再赋值给对应变量；
+
+    ```js
+    const str = 'abc'
+    const nums = [1, 2, 3]
+    
+    const [str1, str2, str3] = str
+    console.log(str1, str2, str3) // a b c
+    
+    const [num1, num2, num3] = nums
+    console.log(num1, num2, num3) // 1 2 3
+    
+    const [name1, name2, name3] = iteratorObj
+    console.log(name1, name2, name3) // curry kobe klay
+    ```
+
+  - **注意**：在扩展语法和解构语法中，我们知道数组可以使用，但是对象也可以使用呀，为什么没有提到对象呢？因为对象的扩展和解构是在ES9中新增的特性，其原理并不是使用迭代器实现的，只是ECMA提供给我们的一种操作对象的新语法而已；
+
+- **JS创建对象**：new Map([Iterable])、new WeakMap([Iterable])、new Set([Iterable])、new WeakSet([Iterable])等。
+
+  ```js
+  // 1.Set
+  const set = new Set(iteratorObj)
+  console.log(set) // Set(3) { 'curry', 'kobe', 'klay' }
+  
+  // 2.Array.from
+  const names = Array.from(iteratorObj)
+  console.log(names) // [ 'curry', 'kobe', 'klay' ]
+  ```
+
+- **JS方法调用**：Promise.all(Iterable)、Promise.race(Iterable)、Array.from(Iterable)等。
+
+  ```js
+  // 传入的可迭代对象中的每个值，会使用Promise.resolve进行包裹
+  Promise.all(iteratorObj).then(res => {
+    console.log(res) // [ 'curry', 'kobe', 'klay' ]
+  })
+  ```
+
+**扩展**：现在我们都知道了for...of可用于遍历一个可迭代对象，如果在遍历过程中终端了呢？因为使用`break、continue、return、throw`都是可以中断遍历的，既然for...of遍历的原理是基于迭代器的，那么在for...of中进行中断操作，一定是可以被迭代器监听到的，上面说了，在迭代器中有一个next方法，其实还可以**指定一个return方法，如果遍历过程中断了，就会去调用return方法**，注意return方法也要返回和next方法一样的对象。这种情况就称之为**迭代器的中断**。
+
+```js
+const iteratorObj = {
+  names: ['curry', 'kobe', 'klay'],
+  [Symbol.iterator]: function() {
+    let index = 0
+    return {
+      next: () => {
+        if (index < this.names.length) {
+          return { done: false, value: this.names[index++] }
+        } else {
+          return { done: true, value: undefined }
+        }
+      },
+      return() {
+        console.log('哎呀，我被中断了！')
+        return { done: true, value: undefined }
+      }
+    }
+  }
+}
+
+for (const item of iteratorObj) {
+  console.log(item)
+  if (item === 'kobe') break
+}
+```
+
+![image-20240926094105881](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240926094105881.png)
+
+##### 1.3.4.自定义可迭代类
+
+> 上面提到了对象不是一个可迭代对象，所以对象不能使用for...of遍历，如果我们想要实现通过for...of遍历对象呢？那么可以自己实现一个类，这个类的实例化对象是可迭代对象。
+
+- 实现一个Person类，并且Person类中实现了`Symbol.iterator`方法用于返回一个迭代器；
+- Person类的实例化对象`p`中包含一个friends数组，通过for...of遍历`p`对象时，可以将friends数组的每一项遍历出来；
+
+```js
+class Person {
+  constructor(name, age, friends) {
+    this.name = name
+    this.age = age
+    this.friends = friends
+  }
+
+  [Symbol.iterator]() {
+    let index = 0
+    return {
+      next: () => {
+        if (index < this.friends.length) {
+          return { done: false, value: this.friends[index++] }
+        } else {
+          return { done: true, value: undefined }
+        }
+      }
+    }
+  }
+}
+```
+
+简单看一下效果：
+
+```js
+const p = new Person('curry', 30, ['kobe', 'klay', 'green'])
+for (const name of p) {
+  console.log(name) // kobe klay green
+}
+```
+
+### 2.生成器（Generator）
+
+#### 2.1.什么是生成器？
+
+> 生成器是ES6中新增的一种控制函数执行的方案，它可以帮助我们控制函数的暂停和执行。生成器是一种特殊的迭代器，所以生成器也是一个对象，并且可以调用next方法。那么怎么创建一个生成器对象呢？
+
+创建生成器对象需要使用**生成器函数**，生成器函数和普通函数不一样，主要有以下特点：
+
+- 生成器函数的声明需要在function后加上一个符号`*`；
+- 在生成器函数中可以使用`yield`关键字来分割函数体代码，控制函数的执行；
+- 生成器函数调用的返回值就是生成器对象了；
+
+#### 2.2.生成器的基本使用
+
+> 实现一个生成器函数，该函数的执行可以通过返回的生成器对象进行控制。
+
+```js
+function* generatorFn() {
+  console.log('函数开始执行~')
+
+  console.log('函数第一段代码执行...')
+  yield
+  console.log('函数第二段代码执行...')
+  yield
+  console.log('函数第三段代码执行...')
+  yield
+  console.log('函数第四段代码执行...')
+
+  console.log('函数执行结束~')
+}
+
+// 调用generatorFn获取生成器
+const generator = generatorFn()
+
+generator.next()
+console.log('------------------------')
+generator.next()
+console.log('------------------------')
+generator.next()
+console.log('------------------------')
+generator.next()
+```
+
+![image-20240926094021212](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240926094021212.png)
+
+#### 2.3.生成器next方法的返回值
+
+> 上面说到了生成器是一种特殊的迭代器，那么调用next方法肯定也是有返回值的，并且返回值是一个包含done、value属性的对象。
+
+```js
+function* generatorFn() {
+  console.log('函数第一段代码执行...')
+  yield
+  console.log('函数第二段代码执行...')
+  yield
+  console.log('函数第三段代码执行...')
+  yield
+  console.log('函数第四段代码执行...')
+}
+
+// 调用generatorFn获取生成器
+const generator = generatorFn()
+
+console.log(generator.next())
+console.log('------------------------')
+console.log(generator.next())
+console.log('------------------------')
+console.log(generator.next())
+console.log('------------------------')
+console.log(generator.next())
+```
+
+从打印结果可以看出来，next返回的对象中value是没有值的，当执行到最后一段代码后，done的值就为true了：
+
+![image-20240926094036963](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240926094036963.png)
+
+如果需要指定next返回值中的value，那么可以通过在`yield`后面跟上一个值或者表达式，就可以将对应的值传递到next返回对象value中了。
+
+```js
+function* generatorFn() {
+  console.log('函数第一段代码执行...')
+  yield 10
+  console.log('函数第二段代码执行...')
+  yield 20
+  console.log('函数第三段代码执行...')
+  yield 30
+  console.log('函数第四段代码执行...')
+}
+
+// 调用generatorFn获取生成器
+const generator = generatorFn()
+
+console.log(generator.next())
+console.log('------------------------')
+console.log(generator.next())
+console.log('------------------------')
+console.log(generator.next())
+console.log('------------------------')
+console.log(generator.next())
+```
+
+![image-20240926093900250](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240926093900250.png)
+
+观察以上打印结果，在执行完第四段代码后，调用的next返回值为`{ value: undefined, done: true }`，原因是后面已经没有`yield`了，而且当函数没有指定返回值时，最后会默认执行`return undefined`。
+
+#### 2.4.生成器next方法的参数传递
+
+> 在前面介绍迭代器定义时，提到迭代器的next可以传递0个或1个参数，而可以传递1个参数的情况就是生成器的next可以传递一个参数，而给每一段代码传递过去的参数可以通过yield来接收。
+
+```js
+function* generatorFn(value) {
+  console.log('函数第一段代码执行...', value)
+  const value1 = yield 10
+
+  console.log('函数第二段代码执行...', value1)
+  const value2 = yield 20
+
+  console.log('函数第三段代码执行...', value2)
+  const value3 = yield 30
+
+  console.log('函数第四段代码执行...', value3)
+}
+
+// 调用generatorFn获取生成器
+const generator = generatorFn('参数0')
+
+console.log(generator.next())
+console.log('------------------------')
+console.log(generator.next('参数1'))
+console.log('------------------------')
+console.log(generator.next('参数2'))
+console.log('------------------------')
+console.log(generator.next('参数3'))
+```
+
+![image-20240926093844019](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240926093844019.png)
+
+**next参数传递解释**：
+
+- next中传递的参数是会被上一个`yield`接收的，这样可以方便下面代码使用这个参数，所以给next传递参数，需要从第二个next开始传递；
+- 如果第一段代码需要使用参数呢？可以在调用生成器函数时传递参数过去，供第一段代码使用；
+
+![image-20240926093826127](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240926093826127.png)
+
+#### 2.5.生成器的return方法
+
+> return方法也可以给生成器函数传递参数，但是调用return后，生成器函数就会中断，之后再调用next就不会再继续生成值了。
+
+```js
+function* generatorFn() {
+  console.log('函数第一段代码执行...')
+  yield
+
+  console.log('函数第二段代码执行...')
+  yield
+
+  console.log('函数第三段代码执行...')
+  yield
+
+  console.log('函数第四段代码执行...')
+}
+
+// 调用generatorFn获取生成器
+const generator = generatorFn()
+
+console.log(generator.next())
+console.log('------------------------')
+console.log(generator.next())
+console.log('------------------------')
+console.log(generator.return(123))
+console.log('------------------------')
+console.log(generator.next())
+console.log(generator.next())
+console.log(generator.next())
+console.log(generator.next())
+console.log(generator.next())
+```
+
+![image-20240926093800488](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240926093800488.png)
+
+上面的执行return方法，相当于函数内部执行了return：
+
+```js
+function* generatorFn() {
+  console.log('函数第一段代码执行...')
+  yield
+
+  console.log('函数第二段代码执行...')
+  const value = yield
+  return value
+
+  console.log('函数第三段代码执行...')
+  yield
+
+  console.log('函数第四段代码执行...')
+}
+
+// 调用generatorFn获取生成器
+const generator = generatorFn()
+
+console.log(generator.next())
+console.log('------------------------')
+console.log(generator.next())
+console.log('------------------------')
+console.log(generator.next(123))
+console.log('------------------------')
+console.log(generator.next())
+console.log(generator.next())
+console.log(generator.next())
+console.log(generator.next())
+console.log(generator.next())
+```
+
+![image-20240926093735019](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240926093735019.png)
+
+#### 2.6.生成器的throw方法
+
+> throw方法可以给生成器函数内部抛出异常。
+
+- 生成器调用throw方法抛出异常后，可以在生成器函数中进行捕获；
+- 通过`try catch`捕获异常后，后续的代码还是可以正常执行的；
+
+```js
+function* generatorFn() {
+  console.log('函数第一段代码执行...')
+  yield 10
+
+  console.log('函数第二段代码执行...')
+  try {
+    yield 20
+  } catch (err) {
+    console.log(err)
+  }
+
+  console.log('函数第三段代码执行...')
+  yield 30
+
+  console.log('函数第四段代码执行...')
+}
+
+// 调用generatorFn获取生成器
+const generator = generatorFn()
+
+console.log(generator.next())
+console.log('------------------------')
+console.log(generator.next())
+console.log('------------------------')
+console.log(generator.throw('err message'))
+console.log('------------------------')
+console.log(generator.next())
+```
+
+![image-20240926093715994](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240926093715994.png)
+
+#### 2.7.生成器替换迭代器
+
+> 在前面实现了一个生成迭代器的函数，实现过程还需要进行判断，并自己返回对应的对象，下面就用生成器来实现一个生成迭代器的函数。
+
+- 方式一：根据数组元素的个数，执行yield；
+
+  ```js
+  function* createIterator(arr) {
+    let index = 0
+    yield arr[index++]
+    yield arr[index++]
+    yield arr[index++]
+  }
+  ```
+  
+- 方式二：遍历数组，执行yield；
+
+  ```js
+  function* createIterator(arr) {
+    for (const item of arr) {
+      yield item
+    }
+  }
+  ```
+  
+- 方式三：执行`yield*`，后面可以跟上一个可迭代对象，它会依次迭代其中每一个值；
+
+  ```js
+  function* createIterator(arr) {
+    yield* arr
+  }
+  ```
+
+测试一下以上三种方法，执行结果都是一样的：
+
+```js
+const names = ['curry', 'kobe', 'klay']
+const iterator = createIterator(names)
+
+console.log(iterator.next()) // { value: 'curry', done: false }
+console.log(iterator.next()) // { value: 'kobe', done: false }
+console.log(iterator.next()) // { value: 'klay', done: false }
+console.log(iterator.next()) // { value: undefined, done: true }
+```
+
+### 3.异步请求的处理方案
+
+> 在进行异步请求时，如果出现了这样一个需求，下一次的请求需要拿到上一次请求的结果。如下是使用Promise封装的一个request方法。
+
+```js
+function request(url) {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      resolve(url)
+    }, 300)
+  })
+}
+```
+
+实现上面的需求可以怎么做呢？
+
+#### 3.1.方案一：使用Promise的then进行嵌套调用
+
+- 在then中拿到结果后，再去做下一次请求，以此类推；
+- 缺点：形成了回调地狱；
+
+```js
+request('/aaa').then(res => {
+  request(res + '/bbb').then(res => {
+    request(res + '/ccc').then(res => {
+      console.log(res) // /aaa/bbb/ccc
+    })
+  })
+})
+```
+
+#### 3.2.方案二：使用Promise的then的返回值
+
+- 虽然可以解决回调地狱问题，但是阅读性不佳；
+
+```js
+request('/aaa').then(res => {
+  return request(res + '/bbb')
+}).then(res => {
+  return request(res + '/ccc')
+}).then(res => {
+  console.log(res) // /aaa/bbb/ccc
+})
+```
+
+#### 3.3.方案三：使用Promise和Generator处理
+
+```js
+function* getRequestData() {
+  const res1 = yield request('/aaa')
+  const res2 = yield request(res1 + '/bbb')
+  const res3 = yield request(res2 + '/ccc')
+  console.log(res3)
+}
+```
+
+- 手动执行生成器的next方法；
+
+  ```js
+const generator = getRequestData()
+  generator.next().value.then(res => {
+    generator.next(res).value.then(res => {
+      generator.next(res).value.then(res => {
+        generator.next(res) // /aaa/bbb/ccc
+      })
+    })
+  })
+  ```
+  
+  ![image-20240926093654130](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240926093654130.png)
+
+- 自动执行生成器的next方法：如果手动执行嵌套层级过多的话是不方便的，那么可以借助递归的思想实现一个自动执行生成器的函数；
+
+  ```js
+  function autoGenerator(generatorFn) {
+    const generator = generatorFn()
+  
+    function recursion(res) {
+      const result = generator.next(res)
+      // 如果done值为true，说明结束了
+      if (result.done) return result.value
+      // 没有结束，继续调用Promise的then
+      result.value.then(res => {
+        recursion(res)
+      })
+    }
+  
+    recursion()
+  }
+  
+  autoGenerator(getRequestData) // /aaa/bbb/ccc
+  ```
+  
+- 使用第三方库来执行生成器：像自动执行生成器函数，早就已经有第三方库帮助我们实现了，如`co`；
+
+  ```js
+  const co = require('co')
+  co(getRequestData) // /aaa/bbb/ccc
+  ```
+
+#### 3.4.方案四：使用async和await
+
+> async和await是我们解决异步回调的最终解决方案，它可以让我们异步的代码，看上去是同步执行的。
+
+```js
+async function getRequestData() {
+  const res1 = await request('/aaa')
+  const res2 = await request(res1 + '/bbb')
+  const res3 = await request(res2 + '/ccc')
+  console.log(res3)
+}
+
+getRequestData() // /aaa/bbb/ccc
+```
+
+### 4.async和await的原理
+
+> 相信从上面讲述的四个异步请求的处理方案中，就可以看出来async、await和生成器的关系了。
+
+- 将生成器函数的`*`换成`async`；
+- 将生成器函数中的`yield`换成`await`；
+- 两种方案所体现出的效果和代码书写形式几乎差不多；
+
+![image-20240926093623076](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240926093623076.png)
+
+**总结**：
+
+- async和await的原理其实就是**Promise+生成器**实现的；
+- 为什么async、await能够让异步代码看上去是同步执行的，其原因就在于生成器的next方法可以对函数内代码的执行进行控制，当上一次请求拿到结果后，再去执行下一次next；
+- 所以为什么说async和await只是Promise+生成器的语法糖，其原理就在这；
