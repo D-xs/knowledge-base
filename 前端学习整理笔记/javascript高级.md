@@ -295,7 +295,7 @@ obj1.foo() // obj1对象
 - 当解析时遇到css或js文件，就向服务器请求并下载对应的css文件和js文件；
 - 最后，浏览器对页面进行渲染，执行js代码；
 
-![image-20240924112652808](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240924112652808.png)
+![image-20240924112652808](javascript高级.assets/image-20240924112652808.png)
 
 那么在输入服务器地址，敲下回车那一刻会发生什么？
 
@@ -313,7 +313,7 @@ obj1.foo() // obj1对象
 
 - JavaScriptCore**：**解析、执行JavaScript代码；
 
-  ![image-20240924104634504](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240924104634504.png)
+  ![image-20240924104634504](javascript高级.assets/image-20240924104634504.png)
 
 小程序中编写的JavaScript代码就是由JSCore执行的，也就是小程序使用的引擎就是JavaScriptCore：
 
@@ -323,7 +323,7 @@ obj1.foo() // obj1对象
 
 - 以下为小程序的官方架构图：
 
-  ![image-20240924113949615](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240924113949615.png)
+  ![image-20240924113949615](javascript高级.assets/image-20240924113949615.png)
 
 
 
@@ -344,12 +344,12 @@ obj1.foo() // obj1对象
 
 #### 1.2渲染引擎渲染页面的详细流程:
 
-![image-20240923104656092](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240923104656092.png)
+![image-20240923104656092](javascript高级.assets/image-20240923104656092.png)
 
 1. 解析 HTML 文件，构建 DOM 树
    当浏览器接收到 HTML 文件后，渲染引擎首先开始解析 HTML 标记语言。它会根据 HTML 元素构建 **DOM 树**（Document Object Model），这是一个反映 HTML 结构的树形结构。（上图中紫色的DOM三角，是js对DOM的相关操作；）
 
-   ![image-20240923155608981](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240923155608981.png)
+   ![image-20240923155608981](javascript高级.assets/image-20240923155608981.png)
 
 2. 解析 CSS 文件，构建 CSSOM 树
 
@@ -357,7 +357,7 @@ obj1.foo() // obj1对象
 
    渲染引擎会加载与 HTML 相关联的所有样式资源（包括外部的 CSS 文件和嵌入在 HTML 中的样式）。CSS 文件会被解析为 **CSSOM 树**（CSS Object Model Tree），其中每个 CSS 规则与相应的 HTML 元素绑定。
 
-   ![image-20240923155635570](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240923155635570.png)
+   ![image-20240923155635570](javascript高级.assets/image-20240923155635570.png)
 
 3. 生成渲染树（Render Tree）
 
@@ -368,7 +368,7 @@ obj1.foo() // obj1对象
 
    **特点**：不包含不可见的元素（如 `display: none` 的元素）；只包含需要呈现在屏幕上的节点。
 
-   ![image-20240923155704790](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240923155704790.png)
+   ![image-20240923155704790](javascript高级.assets/image-20240923155704790.png)
 
 4. 布局（Layout）
    生成渲染树后，布局是在渲染树（Render Tree）上运行布局（Layout）以计算每个节点的几何体。**渲染引擎会开始进行 **布局计算，也称为 **Reflow**或 **重排**。这个阶段的目标是确定每个渲染对象的确切位置和尺寸（高度、宽度）。
@@ -381,7 +381,7 @@ obj1.foo() // obj1对象
 
    ​	3、布局依赖父元素的尺寸和位置，因此是自上而下的。
 
-   ![image-20240923160714280](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240923160714280.png)
+   ![image-20240923160714280](javascript高级.assets/image-20240923160714280.png)
 
 5. 绘制（Painting）
 
@@ -421,7 +421,7 @@ obj1.foo() // obj1对象
 
    
 
-   ![image-20240923163439903](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240923163439903.png)
+   ![image-20240923163439903](javascript高级.assets/image-20240923163439903.png)
 
 7. 展示（Displaying）
 
@@ -749,7 +749,7 @@ obj1.foo() // obj1对象
 
 选择适当的方式加载 JavaScript，可以显著改善页面的加载性能和用户体验。
 
-![image-20240924113435234](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240924113435234.png)
+![image-20240924113435234](javascript高级.assets/image-20240924113435234.png)
 
 ### 4. **JavaScript 引擎**
 
@@ -784,7 +784,7 @@ obj1.foo() // obj1对象
 
 V8 是 Google 开发的开源 JavaScript 引擎，用于执行 JavaScript 代码。它最初被设计用于 Chrome 浏览器，但后来扩展到了 Node.js 等其他环境中。V8 的核心目标是通过高效地编译和执行 JavaScript 代码来提升性能。以下是 V8 引擎执行 JavaScript 的基本原理：
 
-![image-20240924141100767](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240924141100767.png)
+![image-20240924141100767](javascript高级.assets/image-20240924141100767.png)
 
 1. **解释与编译**
 
@@ -796,7 +796,7 @@ V8 是 Google 开发的开源 JavaScript 引擎，用于执行 JavaScript 代码
 
 2. **执行流程**
 
-![image-20240924110621490](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240924110621490.png)
+![image-20240924110621490](javascript高级.assets/image-20240924110621490.png)
 
 > V8的底层架构主要有三个核心模块（Parse、Ignition和TurboFan），接下来对上面架构图进行详细说明。
 
@@ -828,7 +828,7 @@ V8 是 Google 开发的开源 JavaScript 引擎，用于执行 JavaScript 代码
 
        - 以上即为简单的JS词法分析和语法分析过程介绍，如果想详细查看我们的JavaScript代码在通过Parse转换后的AST，可以使用[AST Explorer](https://astexplorer.net/)工具：
 
-         ![image-20240924114709524](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240924114709524.png)
+         ![image-20240924114709524](javascript高级.assets/image-20240924114709524.png)
 
        - AST在前端应用场景特别多，比如将TypeScript代码转成JavaScript代码、ES6转ES5、还有像vue中的template等，都是先将其转换成对应的AST，然后再生成目标代码；
 
@@ -873,7 +873,7 @@ V8 是 Google 开发的开源 JavaScript 引擎，用于执行 JavaScript 代码
 
 - ⑤生成AST后，会被Ignition转换成字节码，然后转成机器码，最后就是代码的执行过程了；
 
-  ![image-20240924115901693](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240924115901693.png)
+  ![image-20240924115901693](javascript高级.assets/image-20240924115901693.png)
 
 **总结：**
 
@@ -953,7 +953,7 @@ var GlobalObject = {
 
 下面就通过一幅图，来看看GEC被放入ECS后的表现形式：
 
-![image-20240924150438917](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240924150438917.png)
+![image-20240924150438917](javascript高级.assets/image-20240924150438917.png)
 
 
 
@@ -993,15 +993,15 @@ foo()
 
   - 这个开辟的函数存储空间最主要存放了该函数的**父级作用域**和函数的**执行体代码块**；
 
-    ![image-20240924150918154](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240924150918154.png)
+    ![image-20240924150918154](javascript高级.assets/image-20240924150918154.png)
 
 - 2.构建一个全局执行上下文（GEC），代码执行前将VO的内存地址指向GlobalObject（GO）。
 
-  ![image-20240924151031988](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240924151031988.png)
+  ![image-20240924151031988](javascript高级.assets/image-20240924151031988.png)
 
 - 3.将全局执行上下文（GEC）放入执行上下文栈（ECS）中。
 
-  ![image-20240924151124904](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240924151124904.png)
+  ![image-20240924151124904](javascript高级.assets/image-20240924151124904.png)
 
 - 4.从上往下开始执行全局代码，依次对GO对象中的全局变量进行赋值。
 
@@ -1013,7 +1013,7 @@ foo()
 
   - 最后执行到`foo()`，也就是需要去执行foo函数了，这里的操作是比较特殊的，涉及到**函数执行上下文**，下面来详细了解；
 
-    ![image-20240924151744655](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240924151744655.png)
+    ![image-20240924151744655](javascript高级.assets/image-20240924151744655.png)
 
 
 
@@ -1034,7 +1034,7 @@ foo()
 - 根据AO生成函数执行上下文（FEC），并将其放入执行上下文栈（ECS）中；
 - 开始执行foo函数内代码，依次找到AO中的属性并赋值，当执行`console.log(name)`时，就会去foo的VO（对应的就是foo函数的AO）中找到name属性值并打印；
 
-![image-20240924151857646](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240924151857646.png)
+![image-20240924151857646](javascript高级.assets/image-20240924151857646.png)
 
 ##### 5.变量环境和记录
 
@@ -1078,19 +1078,19 @@ foo(30)
 
   - foo函数存储空间中指定的父级作用域为全局对象；
 
-    ![image-20240924152054916](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240924152054916.png)
+    ![image-20240924152054916](javascript高级.assets/image-20240924152054916.png)
 
 - 开始执行全局代码，从上往下依次给全局属性赋值：
 
   - 给message属性赋值为global；
 
-    ![image-20240924152200279](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240924152200279.png)
+    ![image-20240924152200279](javascript高级.assets/image-20240924152200279.png)
 
 - 执行到foo函数调用，准备执行foo函数前，创建foo函数的AO：
 
   - bar函数存储空间中指定父级作用域为foo函数的AO；
 
-    ![image-20240924152304455](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240924152304455.png)
+    ![image-20240924152304455](javascript高级.assets/image-20240924152304455.png)
 
 - 创建foo函数的FEC，并加入到ECS中，然后开始执行foo函数体内的代码：
 
@@ -1098,13 +1098,13 @@ foo(30)
 
   - 所以，m打印结果为30；
 
-    ![image-20240924152346504](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240924152346504.png)
+    ![image-20240924152346504](javascript高级.assets/image-20240924152346504.png)
 
 - 执行到bar函数调用，准备执行bar函数前，创建bar函数的AO：
 
   - bar函数中没有定义属性和声明函数，以空对象表示；
 
-    ![image-20240924152723115](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240924152723115.png)
+    ![image-20240924152723115](javascript高级.assets/image-20240924152723115.png)
 
 - 创建bar函数的FEC，并加入到ECS中，然后开始执行bar函数体内的代码：
 
@@ -1112,7 +1112,7 @@ foo(30)
 
   - 这里bar函数的父级作用域为foo函数，所以找到foo函数VO中的message为foo，**打印结果为foo**；
 
-    ![image-20240924153120011](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240924153120011.png)
+    ![image-20240924153120011](javascript高级.assets/image-20240924153120011.png)
 
 - 全局中所有代码执行完成，bar函数执行上下文出栈，bar函数AO对象失去了引用，进行销毁。
 
@@ -1179,7 +1179,7 @@ const info = {
 }
 ```
 
-![image-20240924154724340](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240924154724340.png)
+![image-20240924154724340](javascript高级.assets/image-20240924154724340.png)
 
 **3.JavaScript的垃圾回收机制**
 
@@ -1223,7 +1223,7 @@ let person3 = {
 
 内存表现：
 
-![image-20240924155426511](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240924155426511.png)
+![image-20240924155426511](javascript高级.assets/image-20240924155426511.png)
 
 如果接着执行`person3 = null`，那么person3的引用指向次数就会减1，变为0，从而销毁。而person3销毁后person1也会失去person3的指向，引用指向次数也会减1，变为2。
 
@@ -1249,7 +1249,7 @@ let person2 = {
 
 - 所以引用计数就无法很好的处理这种情况了；
 
-  ![image-20240924155705967](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240924155705967.png)
+  ![image-20240924155705967](javascript高级.assets/image-20240924155705967.png)
 
 4.2.标记清除
 
@@ -1265,7 +1265,7 @@ let person2 = {
 
 - 目前的JS引擎的GC核心采用的比较多的算法就是标记清除，类似于V8引擎不单单只是用了标记清除，同时也结合了一些其它的算法来应对更多的情况；
 
-  ![image-20240924155823963](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240924155823963.png)
+  ![image-20240924155823963](javascript高级.assets/image-20240924155823963.png)
 
 4.3 分代垃圾回收
 
@@ -1309,7 +1309,7 @@ let person2 = {
 
 4.7 V8引擎详细的内存图
 
-![image-20240924161552688](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240924161552688.png)
+![image-20240924161552688](javascript高级.assets/image-20240924161552688.png)
 
 
 
@@ -1413,21 +1413,21 @@ fn()
 
 - 首先，在执行全局代码之前，会在内存中创建一个全局对象（GO），将全局执行上下文压入栈中，这时的fn还未被赋值；
 
-  ![image-20240924175301985](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240924175301985.png)
+  ![image-20240924175301985](javascript高级.assets/image-20240924175301985.png)
 
 - 当执行到`var fn = foo()`时，在调用foo之前创建foo的活动对象（AO），创建foo函数执行上下文，并将其压入栈中，接着执行foo函数，执行完成后fn指向bar函数内存地址；
 
-  ![image-20240924175519985](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240924175519985.png)
+  ![image-20240924175519985](javascript高级.assets/image-20240924175519985.png)
 
 - foo函数执行完成后，foo函数执行上下文会弹出栈，而按道理foo的活动对象（AO）是需要被销毁的，那到底有没有销毁，我们接着看；
 
 - 接着执行`fn()`，因为fn是指向bar函数的，执行之前会先创建bar的活动对象（AO），然后执行`console.log(name)`，而name会先去自己的AO中查找，发现没有找到就会去到上层作用域（父级作用域）中查找，最终找到`foo`并打印，这里bar函数的上层作用域就是foo函数的作用域对应foo的活动对象（AO）；
 
-  ![image-20240924175454920](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240924175454920.png)
+  ![image-20240924175454920](javascript高级.assets/image-20240924175454920.png)
 
 - bar函数执行完成后，bar函数的执行上下文弹出栈，对应bar的活跃对象（AO）被销毁，而foo的活跃对象（AO）还一直存留在内存中；
 
-  ![image-20240924175558835](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240924175558835.png)
+  ![image-20240924175558835](javascript高级.assets/image-20240924175558835.png)
 
 - 但是bar函数的父级作用域是在什么时候确定的呢？
 
@@ -1439,7 +1439,7 @@ fn()
 
 - 在维基百科中定义的“闭包在实现上是一个结构体，它存储了一个函数和一个关联的环境（相当于一个符号查找表）”，以及MDN中定义的“一个函数和对其周围状态（lexical environment，词法环境）的引用捆绑在一起（或者说函数被引用包围），这样的组合就是闭包（closure）”，其函数和关联的环境、函数和对其周围状态的引用，对应的就是上面的bar函数和上层作用域中的name；
 
-  ![image-20240924175636910](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240924175636910.png)
+  ![image-20240924175636910](javascript高级.assets/image-20240924175636910.png)
 
 - 而对于维基百科中提到的“闭包跟函数最大的区别在于，当捕捉闭包的时候，它的**自由变量**会在捕捉时被确定，这样即使脱离了捕捉时的上下文，它也能照常运行”，也就是在捕捉bar函数时，同时捕捉到对name这个自由变量的引用，执行完foo函数后，将bar函数赋值给fn，最后执行fn时，也是能正常访问到name的；
 
@@ -1486,7 +1486,7 @@ fn()
 
 - 具体age和message有没有被销毁，可以在代码中打上断点，在Chrome浏览器查看对应的闭包；
 
-  ![image-20240924175733589](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240924175733589.png)
+  ![image-20240924175733589](javascript高级.assets/image-20240924175733589.png)
 
 - 观察上面的结果是没有age和message属性的，这个就涉及到JS引擎的实现了，像V8引擎就对其进行了优化，对于闭包内层函数没有使用到的自由变量，是不会被保存的，这样就大大提升了内存的使用率；
 
@@ -2375,7 +2375,7 @@ console.log(obj.__proto__)
 console.log(Object.getPrototypeOf(obj))
 ```
 
-![image-20240925160215971](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240925160215971.png)
+![image-20240925160215971](javascript高级.assets/image-20240925160215971.png)
 
 **（2）函数的原型**
 
@@ -2401,7 +2401,7 @@ console.log(p2.__proto__ === Person.prototype) // true
 - p1和p2的原型都指向Person函数的prototype原型；
 - 其中还有一个constructor属性，默认原型上都会有这个属性，并且指向当前的函数对象；
 
-![image-20240925160253372](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240925160253372.png)
+![image-20240925160253372](javascript高级.assets/image-20240925160253372.png)
 
 **（3）结合对象和函数的原型，创建对象**
 
@@ -2457,7 +2457,7 @@ console.log(obj.height) // 1.83
 
 对应的内存中的查找过程：
 
-![image-20240925160837609](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240925160837609.png)
+![image-20240925160837609](javascript高级.assets/image-20240925160837609.png)
 
 当通过原型链查找某个属性时，一直找不到的话会一直查找下去么？肯定是不会的，JavaScript的原型链也是有尽头的，这个尽头就是Object的原型。
 
@@ -2473,11 +2473,11 @@ console.log(Object.prototype)
 
 - 在node环境中：
 
-![image-20240925160940559](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240925160940559.png)
+![image-20240925160940559](javascript高级.assets/image-20240925160940559.png)
 
 - 在浏览器中：
 
-![image-20240925161025696](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240925161025696.png)
+![image-20240925161025696](javascript高级.assets/image-20240925161025696.png)
 
 **（2）Object原型的特殊之处**
 
@@ -2506,7 +2506,7 @@ console.log(Object.prototype)
 
 - 内存表现：
 
-  ![image-20240925161111036](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240925161111036.png)
+  ![image-20240925161111036](javascript高级.assets/image-20240925161111036.png)
 
 **（4）总结**
 
@@ -2558,7 +2558,7 @@ stu.studying() // curry studying
 
 内存表现：
 
-![image-20240925161147176](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240925161147176.png)
+![image-20240925161147176](javascript高级.assets/image-20240925161147176.png)
 
 **缺点**：
 
@@ -2607,7 +2607,7 @@ console.log(stu2) // Person { name: 'kobe', age: 24, sno: 101112 }
 
 内存表现：
 
-![image-20240925161235266](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240925161235266.png)
+![image-20240925161235266](javascript高级.assets/image-20240925161235266.png)
 
 缺点：
 
@@ -2721,7 +2721,7 @@ console.log(stu2) // Student { name: 'kobe', age: 24, sno: 101112 }
 
 内存表现：
 
-![image-20240925161352287](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240925161352287.png)
+![image-20240925161352287](javascript高级.assets/image-20240925161352287.png)
 
 总结：
 
@@ -2787,7 +2787,7 @@ const Person = class {} // 类表达式
   }
   ```
 
-  ![image-20240925162930137](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240925162930137.png)
+  ![image-20240925162930137](javascript高级.assets/image-20240925162930137.png)
 
 - 当通过new操作符来操作类时，就会去调用这个类的`constructor`方法，并返回一个对象（具体new操作符调用函数时的默认操作步骤在上一篇中有说明）；
 
@@ -2986,7 +2986,7 @@ stu.studying() // curry is studying.
   }
   ```
 
-  ![image-20240925163122334](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240925163122334.png)
+  ![image-20240925163122334](javascript高级.assets/image-20240925163122334.png)
 
 - **静态方法中**：用法就和实例方法的方式一样了；
 
@@ -3024,7 +3024,7 @@ stu.studying() // curry is studying.
   Student.parentMethod()
   ```
 
-  ![image-20240925163154437](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240925163154437.png)
+  ![image-20240925163154437](javascript高级.assets/image-20240925163154437.png)
 
 #### 6.3.继承内置类
 
@@ -3096,7 +3096,7 @@ stu.studying() // studying...
 - 判断方法类型：如果是实例方法就添加到Person原型上，是类方法直接添加到Person上；
 - 所以class定义类的本质还是通过构造函数+原型链，class就是一种语法糖；
 
-![image-20240925163315349](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240925163315349.png)
+![image-20240925163315349](javascript高级.assets/image-20240925163315349.png)
 
 这里可以提出一个小问题：定义在`constructor`外的属性最终会被添加到哪里呢？还是会被添加到类的实例化对象上，因为ES6对这样定义的属性进行了单独的处理。
 
@@ -3122,7 +3122,7 @@ const p = new Person('curry', 30)
 console.log(p) // Person { message: 'hello world', name: 'curry', age: 30 }
 ```
 
-![image-20240925163349924](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240925163349924.png)
+![image-20240925163349924](javascript高级.assets/image-20240925163349924.png)
 
 **扩展**：在上图中通过通过babel转换后的代码中，定义的Person函数前有一个`/*#__PURE__*/`，那么这个有什么作用呢？
 
@@ -3292,7 +3292,7 @@ const age = 30
 console.log(`My name is ${name}\nMy age is ${age}`)
 ```
 
-![image-20240925165613188](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240925165613188.png)
+![image-20240925165613188](javascript高级.assets/image-20240925165613188.png)
 
 **标签模板字符串**：模板字符串另外一种用法，可以用来调用函数，如果使用标签模板字符串，并且在调用的时候插入其他的变量。
 
@@ -3313,7 +3313,7 @@ fn`sojfo${name}hghaooa${age}jgoajg` // [ 'sojfo', 'hghaooa', 'jgoajg' ] curry 30
 
 应用：在react中编写css就有这么一个库叫`styled-components`，其原理就是使用的标签模块字符串。
 
-![image-20240925165516066](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240925165516066.png)
+![image-20240925165516066](javascript高级.assets/image-20240925165516066.png)
 
 #### 1.5.函数的默认参数
 
@@ -3652,7 +3652,7 @@ console.log(obj) // { '[object Object]': 'aaaa' }
   console.log(map2)
   ```
 
-  ![image-20240925165414238](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240925165414238.png)
+  ![image-20240925165414238](javascript高级.assets/image-20240925165414238.png)
 
 - Map常见的属性：
 
@@ -3715,7 +3715,7 @@ console.log(obj) // { '[object Object]': 'aaaa' }
   }
   ```
 
-  ![image-20240925165338838](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240925165338838.png)
+  ![image-20240925165338838](javascript高级.assets/image-20240925165338838.png)
 
 **（2）WeakMap**：也是以键值对的形式存在。
 
@@ -3751,7 +3751,7 @@ console.log(names.includes(NaN)) // true
 
 注意：includes方法是可以判断NaN是否存在的，因为includes的内部实现对NaN采用isNaN方法进行判断。
 
-![image-20240925165306908](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240925165306908.png)
+![image-20240925165306908](javascript高级.assets/image-20240925165306908.png)
 
 #### 2.2.指数运算符
 
@@ -3865,7 +3865,7 @@ Object.defineProperties(obj, {
 console.log(Object.getOwnPropertyDescriptors(obj))
 ```
 
-![image-20240925165216342](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240925165216342.png)
+![image-20240925165216342](javascript高级.assets/image-20240925165216342.png)
 
 ### 4.ES9相关知识点
 
@@ -4085,11 +4085,11 @@ console.log(globalThis)
 
 浏览器中：
 
-![image-20240925165129080](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240925165129080.png)
+![image-20240925165129080](javascript高级.assets/image-20240925165129080.png)
 
 node中：
 
-[![img](https://img2022.cnblogs.com/blog/2506425/202203/2506425-20220324003342620-843748149.png)](https://img2022.cnblogs.com/blog/2506425/202203/2506425-20220324003342620-843748149.png)
+[![img](javascript高级.assets/2506425-20220324003342620-843748149.png)](https://img2022.cnblogs.com/blog/2506425/202203/2506425-20220324003342620-843748149.png)
 
 ### 7.ES12相关知识点
 
@@ -4120,7 +4120,7 @@ obj2 = null
 
 需要借助浏览器的GC来进行测试，当两个对象被真正回收了，就会调用清理回调，打印对应内容：
 
-![image-20240925165045476](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240925165045476.png)
+![image-20240925165045476](javascript高级.assets/image-20240925165045476.png)
 
 #### 7.2.WeakRef
 
@@ -4158,7 +4158,7 @@ setTimeout(() => {
 }, 10000)
 ```
 
-![image-20240925165014209](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240925165014209.png)
+![image-20240925165014209](javascript高级.assets/image-20240925165014209.png)
 
 #### 7.3.逻辑赋值运算
 
@@ -4327,21 +4327,21 @@ p.then(res => {
 
 - resolve和reject都没执行：
 
-  ![image-20240925174539055](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240925174539055.png)
+  ![image-20240925174539055](javascript高级.assets/image-20240925174539055.png)
 
 - 执行resolve，请求成功：
 
-  ![image-20240925174508222](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240925174508222.png)
+  ![image-20240925174508222](javascript高级.assets/image-20240925174508222.png)
 
 - 执行reject，请求失败：
 
-  ![image-20240925174445486](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240925174445486.png)
+  ![image-20240925174445486](javascript高级.assets/image-20240925174445486.png)
 
 注意：在后续的对Promise的讲述过程中，都需要带着Promise的状态去理解。
 
 ### 3.executor
 
-> executor是在创建Promise是需要传入的一个回调函数，这个回调函数会被立即执行，并且传入两个参数，分别就是resolve和reject。
+> executor是在创建Promise时需要传入的一个回调函数，这个回调函数会被立即执行，并且传入两个参数，分别就是resolve和reject。
 
 ```js
 new Promise((resolve, reject) => {
@@ -4631,7 +4631,7 @@ p.catch(err => {
 
 **（3）catch的作用**
 
-- catch主要是用于捕获异常的，当executor抛出异常是，可以通过catch进行处理；
+- catch主要是用于捕获异常的，当executor抛出异常时，可以通过catch进行处理；
 
 - **注意**：当Promise的executor执行reject或者抛出异常，后续必须要有捕获异常的处理，如下代码，虽然都调用了then方法，接着后续又调用了catch方法，但是then和catch是两次独立的调用，两次调用并没有联系，所以就被认定为没有处理异常。
 
@@ -4649,7 +4649,7 @@ p.catch(err => {
   })
   ```
 
-  ![image-20240925173056672](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240925173056672.png)
+  ![image-20240925173056672](javascript高级.assets/image-20240925173056672.png)
 
 - 正确处理的方法为：
 
@@ -4713,7 +4713,7 @@ resolve传入的参数类型：
   console.log(p)
   ```
 
-  ![image-20240925173026102](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240925173026102.png)
+  ![image-20240925173026102](javascript高级.assets/image-20240925173026102.png)
 
 - 参数为一个实现了then方法的对象；
 
@@ -4736,7 +4736,7 @@ resolve传入的参数类型：
   console.log(p)
   ```
 
-  ![image-20240925173001465](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240925173001465.png)
+  ![image-20240925173001465](javascript高级.assets/image-20240925173001465.png)
 
 - 参数为一个Promise；
 
@@ -4755,7 +4755,7 @@ resolve传入的参数类型：
   console.log(p)
   ```
 
-  ![image-20240925172943586](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240925172943586.png)
+  ![image-20240925172943586](javascript高级.assets/image-20240925172943586.png)
 
 #### 6.2.reject方法
 
@@ -4880,13 +4880,13 @@ Promise.allSettled([p1, p2, p3]).then(res => {
 })
 ```
 
-![image-20240925172811302](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240925172811302.png)
+![image-20240925172811302](javascript高级.assets/image-20240925172811302.png)
 
 #### 6.5.race方法
 
 > race翻译为竞争，顾名思义哪一个Promise对象最先返回结果，就使用最先返回结果的Promise状态。
 
-一下代码是`p1`最先有结果的，`p1`中执行的是resolve，所以返回的状态为fulfilled：
+以下代码是`p1`最先有结果的，`p1`中执行的是resolve，所以返回的状态为fulfilled：
 
 ```js
 const p1 = new Promise((resolve, reject) => {
@@ -4943,7 +4943,7 @@ Promise.any([p1, p2, p3]).then(res => {
 })
 ```
 
-![image-20240925172729787](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240925172729787.png)
+![image-20240925172729787](javascript高级.assets/image-20240925172729787.png)
 
 **注意**：any方法是ES12新增的，node版本过低的话是会报错找不到any方法的，可以在浏览器中测试。
 
@@ -5014,7 +5014,7 @@ new MyPromise((resolve, reject) => {
 })
 ```
 
-![image-20240925172709189](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240925172709189.png)
+![image-20240925172709189](javascript高级.assets/image-20240925172709189.png)
 
 #### 7.2.then方法的实现
 
@@ -5211,7 +5211,7 @@ setTimeout(() => {
 })
 ```
 
-![image-20240925172638823](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240925172638823.png)
+![image-20240925172638823](javascript高级.assets/image-20240925172638823.png)
 
 **（3）then优化二**
 
@@ -5348,7 +5348,7 @@ p.then(res => {
 })
 ```
 
-![image-20240925172616938](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240925172616938.png)
+![image-20240925172616938](javascript高级.assets/image-20240925172616938.png)
 
 #### 7.3.catch方法的实现
 
@@ -5365,7 +5365,7 @@ catch(onRejected) {
 
 then方法改进：
 
-![image-20240925172552651](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240925172552651.png)
+![image-20240925172552651](javascript高级.assets/image-20240925172552651.png)
 
 简单测试一下：
 
@@ -5401,7 +5401,7 @@ finally(onFinally) {
 
 then方法改进：
 
-![image-20240925172515669](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240925172515669.png)
+![image-20240925172515669](javascript高级.assets/image-20240925172515669.png)
 
 简单测试一下：
 
@@ -5555,7 +5555,7 @@ MyPromise.allSettled([p1, p2, p3]).then(res => {
 })
 ```
 
-![image-20240925172428586](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240925172428586.png)
+![image-20240925172428586](javascript高级.assets/image-20240925172428586.png)
 
 #### 7.8.race方法的实现
 
@@ -5629,7 +5629,7 @@ MyPromise.any([p1, p2, p3]).then(res => {
 })
 ```
 
-![image-20240925172403767](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240925172403767.png)
+![image-20240925172403767](javascript高级.assets/image-20240925172403767.png)
 
 #### 7.10.Promise手写完整版整理
 
@@ -6028,7 +6028,7 @@ console.log(setIterator.next()) // { value: undefined, done: true }
     }
     ```
 
-    ![image-20240926094128631](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240926094128631.png)
+    ![image-20240926094128631](javascript高级.assets/image-20240926094128631.png)
 
   - 为什么数组能使用展开语法，其原理也是用到了迭代器，在使用`...`对数组进行展开时，也是通过迭代器的next去获取数组的每一项值，然后存放到新数组中；
 
@@ -6107,7 +6107,7 @@ for (const item of iteratorObj) {
 }
 ```
 
-![image-20240926094105881](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240926094105881.png)
+![image-20240926094105881](javascript高级.assets/image-20240926094105881.png)
 
 ##### 1.3.4.自定义可迭代类
 
@@ -6191,7 +6191,7 @@ console.log('------------------------')
 generator.next()
 ```
 
-![image-20240926094021212](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240926094021212.png)
+![image-20240926094021212](javascript高级.assets/image-20240926094021212.png)
 
 #### 2.3.生成器next方法的返回值
 
@@ -6222,7 +6222,7 @@ console.log(generator.next())
 
 从打印结果可以看出来，next返回的对象中value是没有值的，当执行到最后一段代码后，done的值就为true了：
 
-![image-20240926094036963](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240926094036963.png)
+![image-20240926094036963](javascript高级.assets/image-20240926094036963.png)
 
 如果需要指定next返回值中的value，那么可以通过在`yield`后面跟上一个值或者表达式，就可以将对应的值传递到next返回对象value中了。
 
@@ -6249,7 +6249,7 @@ console.log('------------------------')
 console.log(generator.next())
 ```
 
-![image-20240926093900250](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240926093900250.png)
+![image-20240926093900250](javascript高级.assets/image-20240926093900250.png)
 
 观察以上打印结果，在执行完第四段代码后，调用的next返回值为`{ value: undefined, done: true }`，原因是后面已经没有`yield`了，而且当函数没有指定返回值时，最后会默认执行`return undefined`。
 
@@ -6283,14 +6283,14 @@ console.log('------------------------')
 console.log(generator.next('参数3'))
 ```
 
-![image-20240926093844019](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240926093844019.png)
+![image-20240926093844019](javascript高级.assets/image-20240926093844019.png)
 
 **next参数传递解释**：
 
 - next中传递的参数是会被上一个`yield`接收的，这样可以方便下面代码使用这个参数，所以给next传递参数，需要从第二个next开始传递；
 - 如果第一段代码需要使用参数呢？可以在调用生成器函数时传递参数过去，供第一段代码使用；
 
-![image-20240926093826127](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240926093826127.png)
+![image-20240926093826127](javascript高级.assets/image-20240926093826127.png)
 
 #### 2.5.生成器的return方法
 
@@ -6326,7 +6326,7 @@ console.log(generator.next())
 console.log(generator.next())
 ```
 
-![image-20240926093800488](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240926093800488.png)
+![image-20240926093800488](javascript高级.assets/image-20240926093800488.png)
 
 上面的执行return方法，相当于函数内部执行了return：
 
@@ -6361,7 +6361,7 @@ console.log(generator.next())
 console.log(generator.next())
 ```
 
-![image-20240926093735019](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240926093735019.png)
+![image-20240926093735019](javascript高级.assets/image-20240926093735019.png)
 
 #### 2.6.生成器的throw方法
 
@@ -6400,7 +6400,7 @@ console.log('------------------------')
 console.log(generator.next())
 ```
 
-![image-20240926093715994](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240926093715994.png)
+![image-20240926093715994](javascript高级.assets/image-20240926093715994.png)
 
 #### 2.7.生成器替换迭代器
 
@@ -6516,7 +6516,7 @@ const generator = getRequestData()
   })
   ```
   
-  ![image-20240926093654130](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240926093654130.png)
+  ![image-20240926093654130](javascript高级.assets/image-20240926093654130.png)
 
 - 自动执行生成器的next方法：如果手动执行嵌套层级过多的话是不方便的，那么可以借助递归的思想实现一个自动执行生成器的函数；
 
@@ -6570,10 +6570,234 @@ getRequestData() // /aaa/bbb/ccc
 - 将生成器函数中的`yield`换成`await`；
 - 两种方案所体现出的效果和代码书写形式几乎差不多；
 
-![image-20240926093623076](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240926093623076.png)
+![image-20240926093623076](javascript高级.assets/image-20240926093623076.png)
 
 **总结**：
 
 - async和await的原理其实就是**Promise+生成器**实现的；
 - 为什么async、await能够让异步代码看上去是同步执行的，其原因就在于生成器的next方法可以对函数内代码的执行进行控制，当上一次请求拿到结果后，再去执行下一次next；
 - 所以为什么说async和await只是Promise+生成器的语法糖，其原理就在这；
+
+
+
+### 5. async和await的详细用法
+
+> `async` 和 `await` 是用于处理异步操作的关键字。`async` 函数总是返回一个 Promise，即使你返回的是一个普通值，它也会被自动包装为 Promise。`await` 用于等待一个 Promise 被解决，只有在 `async` 函数内使用。
+
+#### 1. 基本用法：
+
+```javascript
+async function fetchData() {
+    let response = await fetch('https://api.example.com/data');
+    let data = await response.json();
+    return data;
+}
+```
+
+#### 2. 组合情况：
+
+1. **多个 `await`**：按顺序执行，每个 `await` 会等待前一个 Promise 解决。
+   ```javascript
+   async function loadData() {
+       const user = await getUser();
+       const orders = await getOrders(user.id);
+       return { user, orders };
+   }
+   ```
+
+2. **并行 `await`**：如果想要并行执行多个 Promise，可以使用 `Promise.all()`。
+   
+   ```javascript
+   async function loadData() {
+       const [user, orders] = await Promise.all([getUser(), getOrders()]);
+       return { user, orders };
+   }
+   ```
+   
+3. **错误处理**：使用 `try...catch` 来捕获异步操作中的错误。
+   ```javascript
+   async function fetchData() {
+       try {
+           const data = await fetch('https://api.example.com/data');
+           return data;
+       } catch (error) {
+           console.error('Error fetching data:', error);
+       }
+   }
+   ```
+
+4. **不在 `async` 函数中使用 `await`**：会导致语法错误。
+   ```javascript
+   const data = await fetch('https://api.example.com/data'); // 错误
+   ```
+
+通过这些组合，可以实现高效且可读的异步代码，确保每个操作按需等待或并行执行。想了解更多细节吗？
+
+
+
+### 6. async和await的背后工作原理
+
+> `async` 和 `await` 背后的工作原理与 JavaScript 的 **Promise** 和 **事件循环** 密切相关。它们为开发者提供了更简洁的语法来处理异步代码，本质上是对 **Promise** 的语法糖，但不会改变 JavaScript 的异步执行机制。下面我们深入分析它们的工作原理。
+
+`async` 和 `await` 背后的工作原理与 JavaScript 的 **Promise** 和 **事件循环** 密切相关。它们为开发者提供了更简洁的语法来处理异步代码，本质上是对 **Promise** 的语法糖，但不会改变 JavaScript 的异步执行机制。下面我们深入分析它们的工作原理。
+
+#### 1. **`async` 函数的工作原理**
+
+- 当你在函数前添加 `async` 关键字时，该函数会隐式地返回一个 Promise，无论函数内部返回的是普通值还是 Promise。
+- 如果函数显式返回一个值，那么这个值将会被包装成一个已解决的 Promise。
+- 如果函数内部抛出异常，则该异常会被封装成一个被拒绝的 Promise。
+
+```javascript
+async function example() {
+    return 42; // 返回值会被包装成 Promise.resolve(42)
+}
+
+example().then(result => console.log(result)); // 输出 42
+```
+
+工作原理：
+- **普通返回值** → 被封装为 `Promise.resolve(返回值)`。
+- **抛出异常** → 被封装为 `Promise.reject(异常)`。
+
+#### 2. **`await` 的工作原理**
+
+- `await` 关键字会暂停 `async` 函数的执行，直到所等待的 Promise 被解决（resolve）或被拒绝（reject）。
+- 在此期间，JavaScript 引擎可以继续处理其他任务（非阻塞）。
+- 当 Promise 被解决时，`await` 将返回其解决的值；如果被拒绝，则抛出错误，类似于调用 `.then()` 和 `.catch()`。
+
+```javascript
+async function example() {
+    const result = await Promise.resolve(42);
+    console.log(result); // 输出 42
+}
+```
+
+工作原理：
+- **`await` 等待 Promise**：在遇到 `await` 时，JavaScript 将该 `async` 函数的执行挂起，将控制权交回事件循环。
+- **事件循环与微任务队列**：`await` 后面的 Promise 被解决后，结果会被放入微任务队列中，JavaScript 引擎会在当前任务完成后优先处理微任务队列中的内容。
+  
+
+#### 3. **Promise 链与异步流程**
+
+当 `await` 遇到一个 Promise 时，异步执行的大致流程如下：
+1. **暂停执行**：`async` 函数会暂时挂起，并将 `await` 的 Promise 加入微任务队列。
+2. **事件循环**：JavaScript 会继续执行其他代码，直到微任务队列中的 Promise 被解决。
+3. **恢复执行**：Promise 被解决后，函数恢复执行，`await` 返回结果，或者抛出错误。
+
+#### 4. **异步模型的改进**
+
+与回调函数或直接使用 Promise 的 `.then()` 方法相比，`async/await` 提供了更清晰的代码结构。它让异步代码看起来更像是同步执行的，消除了 "回调地狱" 或过度嵌套的 `.then()` 链。
+
+例如，传统 Promise 使用如下：
+```javascript
+getData()
+  .then(data => processData(data))
+  .then(result => console.log(result))
+  .catch(error => console.error(error));
+```
+
+使用 `async/await`，可以这样写：
+```javascript
+async function handleData() {
+    try {
+        const data = await getData();
+        const result = await processData(data);
+        console.log(result);
+    } catch (error) {
+        console.error(error);
+    }
+}
+```
+
+#### 5. **异步代码的执行顺序**
+
+JavaScript 的单线程执行模型通过 **事件循环** 来管理异步操作。`await` 的出现不会阻塞整个程序的执行，而是将函数的控制权暂时交还给事件循环。当 Promise 被解决时，事件循环会调度 `async` 函数继续执行。对于 `await` 后面的代码，其执行顺序如下：
+- `await` 之后的代码不会立即执行，而是加入微任务队列。
+- 事件循环会先执行同步代码，然后执行微任务队列中的任务。
+
+#### 总结
+
+- **`async`**：让函数返回一个 Promise，使得该函数具备异步行为。
+- **`await`**：暂停函数的执行，等待一个 Promise 完成，并返回其结果。
+- **Promise 和事件循环**：`async/await` 的异步处理基于 Promise，依赖 JavaScript 的事件循环模型。
+
+
+
+
+
+## 十一、js的事件循环
+
+### 1. 线程和进程是操作系统中的两个概念
+
+- **进程**：操作系统中资源分配的基本单位，每个进程有自己的内存空间和系统资源。多个进程之间是相互独立的。通俗一点的来讲，每启动**一个应用程序**，就会默认**启动一个进程**（也可能是多个进程）
+- **线程**：进程中的执行单元，多个线程共享进程的内存和资源。线程的创建和切换相对轻量，效率更高。每一个**进程**中，都会启动**至少一个线程**用来执行程序中的代码，这个线程被称为**主线程**
+- 所以我们也可以说进程是线程的容器；
+- 用大白话来比喻一下，**操作系统**类似于一个**大工厂**，每个**进程**相当于工厂里面的一个个**车间**，而**线程**就相当于车间里面工作的**工人**，工人之间互相协作完成工作。
+
+![image-20240927165259260](javascript高级.assets/image-20240927165259260.png)
+
+
+
+### 2. 操作系统的工作方式
+
+操作系统是如何做到同时让多个进程（边听歌、边写代码、边查阅资料）同时工作呢？
+
+- 因为**CPU**的**运算速度非常快**，它可以**快速**的在多个**进程**之间迅速的**切换**；
+- 当进程中的线程获取到**时间片**时，CPU就可以快速执行我们编写的代码；
+- 对于**用户**来说是**感受不到这种快速的切换的**；
+
+以下是windows资源管理器中的进程
+
+![image-20240927165840304](javascript高级.assets/image-20240927165840304.png)
+
+
+
+### 3. 浏览器中的javaScript线程
+
+- 我们经常会说**JavaScript是单线程（可以开启workers）**的，但是**JavaScript的线程应该有自己的容器进程**：<span style="color: red">浏览器或者Node。</span>
+
+- 目前大多数浏览器是**多进程**的
+
+  - 当我们打开一个tab页面时就会开启一个新的进程，这是为了防止一个页面卡死而造成所有页面无法响应，整个浏览器需要强制退出；
+  - 每个进程中又有很多的线程，其中包括执行JavaScript代码的线程；
+
+-  **JavaScript的代码执行是在一个单独的线程中执行的：**
+
+  - 这就意味着JavaScript的代码，在**同一个时刻只能做一件事；**
+  - 如果**这件事是非常耗时**的，就意味着当前的线程就会被**阻塞**；
+- **所以真正耗时的操作，实际上并不是由JavaScript线程在执行的：**
+  - 浏览器的每个进程是多线程的，那么**其他线程可以来完成这个耗时的操作**；
+  - 比如**网络请求、定时器**，我们只需要在特性的时候执行应该有的回调即可；
+
+
+
+
+### 4. 浏览器的事件循环
+
+> JavaScript 是单线程的，这意味着同一时间只能执行一个任务。事件循环是实现异步编程的机制，它的工作原理如下：
+>
+> js中的事件循环就是浏览器中渲染主线程的工作方式，因为js是在渲染主线程中执行的，为什么需要事件循环呢？因为渲染主线程不单单只会执行js，它还会有其他的工作任务，比如构建dom、绘制页面等等，当执行的js特别耗时的时候，会造成浏览器界面卡顿的现象，所以可以通过事件循环来让渲染主线程高效工作，当渲染主线程执行js的时候，会优先执行全局代码，当遇到网络请求、用户交互等，其他线程会帮助计时，当时间到了之后会将回调函数包装成任务放入到消息队列当中，用户交互也是同理。根据w3c官方给出的规范，浏览器中的不同任务是有不同类型的，相同类型的任务必须在同一个任务队列中，多个不同类型的任务可以在同一个任务队列中，但是浏览器中必须要有一个微任务队列（promise、mutationObserver），任务是没有优先级的，但是任务队列是有优先级的。微任务队列 > 交互队列 > 延时队列，当一次事件循环发生时，首先会从微任务队列中拿任务执行，当微任务队列为空时，才会去交互队列中取任务，以此类推，每一次新的事件循环发生时，都会重复上述步骤。
+
+
+
+![img](javascript高级.assets/c5479c365cf84f26b886cee9c0292edb.png)
+
+- **执行栈（Call Stack）**：存放正在执行的函数和代码。
+- **（宏）任务队列（Task Queue）**：存放待处理的任务（如事件处理、定时器、ajax、UI Rendering等）。
+- **微任务队列（Microtask Queue）**：存放 Promise 的 `.then()` 和 `catch()` 回调，以及 `MutationObserver` 的回调、queueMicrotask()等。
+
+
+
+#### 事件循环中两个队列的优先级
+
+1. main script中的代码优先执行（编写的顶层script代码）；
+2. 在执行任何一个宏任务之前（不是队列，是一个宏任务），都会先查看微任务队列中是否有任务需要执行
+   - 也就是（宏）任务执行之前，必须保证微任务队列是空的；
+   - 如果不为空，那么就优先执行微任务队列中的任务（回调）；
+
+#### 执行流程
+
+1. 执行全局代码
+2. 全局代码执行完后，查看微任务队列是否有任务，如果有，则执行微任务队列里面的第一个任务，以此类推；
+3. 当微任务队列的任务清空时，查看（宏）任务队列里面是否有任务，如果有，则执行（宏）任务队列里面的第一个任务，当第一个任务执行完毕后，查看微任务队列里面是否有任务，如果有，必须清空微任务队列里面的所有任务，再执行（宏）任务队列里面的下一个任务。反复执行这个流程
+

@@ -3108,7 +3108,7 @@ ps：
 >
 > 对象是存在堆内存中的，对象中的非引用属性，存在该对象的内存空间中，如果是引用类型的属性，其值是存在堆内存中的另外一块单独的内存中。依次类推
 
-![image-20240711152424328](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240711152424328.png)
+![image-20240711152424328](javascript基础.assets/image-20240711152424328.png)
 
 
 
@@ -4530,7 +4530,7 @@ console.log(time1)
 
 ### 1. DOM类型继承图
 
-![image-20240910105029028](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240910105029028.png)
+![image-20240910105029028](javascript基础.assets/image-20240910105029028.png)
 
 ### 2. document对象
 
@@ -4561,7 +4561,7 @@ console.log(time1)
   - 第一个子节点：`firstChild`
   - 最后一个子节点：`lastChild`
 
-  ![image-20240910111935289](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240910111935289.png)
+  ![image-20240910111935289](javascript基础.assets/image-20240910111935289.png)
 
 ### 4. 元素之间的导航
 
@@ -4576,7 +4576,7 @@ console.log(time1)
   - 第一个元素子节点：`firstElementChild`
   - 最后一个元素子节点：`lastElementChild`
 
-  ![image-20240910112532561](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240910112532561.png)
+  ![image-20240910112532561](javascript基础.assets/image-20240910112532561.png)
 
 
 
@@ -4681,7 +4681,7 @@ console.log(time1)
 
 - 我们知道，一个元素除了有**开始标签、结束标签、内容**之外，还有很多的**属性（attribute）**
 
-  - ![image-20240911170727060](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240911170727060.png)
+  - ![image-20240911170727060](javascript基础.assets/image-20240911170727060.png)
 
 - 浏览器在解析HTML元素时，会将**对应的attribute**也创建出来放到**对应的元素对象**上
 
@@ -4879,7 +4879,7 @@ console.log(time1)
   - **node.after(...nodes or strings)** —— 在 node 后面 插入节点或字符串，
   - **node.replaceWith(...nodes or strings)** —— 将 node 替换为给定的节点或字符串。
 
-![image-20240912104004885](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240912104004885.png)
+![image-20240912104004885](javascript基础.assets/image-20240912104004885.png)
 
 ### 13. 移除和克隆元素
 
@@ -4937,7 +4937,7 @@ console.log(time1)
 
 - scrollTop：滚动部分的高度
 
-  ![image-20240912105929498](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240912105929498.png)
+  ![image-20240912105929498](javascript基础.assets/image-20240912105929498.png)
 
 
 
@@ -5099,7 +5099,7 @@ console.log(time1)
   - eventPhase
 - 开发中通常会使用**事件冒泡**，所以事件捕获了解即可
 
-![image-20240912154525362](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240912154525362.png)
+![image-20240912154525362](javascript基础.assets/image-20240912154525362.png)
 
 
 
@@ -5163,7 +5163,7 @@ console.log(time1)
 ### 24. EventTarget类
 
 - **我们会发现，所有的节点、元素都继承自EventTarget**
-  - 事实上Window也继承自EventTarget；![image-20240913135928646](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240913135928646.png)
+  - 事实上Window也继承自EventTarget；![image-20240913135928646](javascript基础.assets/image-20240913135928646.png)
 - **那么这个EventTarget是什么呢？**
   - EventTarget是一个**DOM接口**，主要用于**添加、删除、派发Event事件**；
 - **EventTarget常见的方法**
@@ -5360,7 +5360,7 @@ console.log(time1)
 >
 > 比如navigator、location、history等对象；
 
-![image-20240914145819838](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240914145819838.png)
+![image-20240914145819838](javascript基础.assets/image-20240914145819838.png)
 
 - JavaScript有一个非常重要的运行环境就是浏览器
   - 而且浏览器本身又作为一个应用程序需要对其本身进行操作；
@@ -5790,7 +5790,7 @@ console.log(time1)
 
 >`location` 对象是 JavaScript 中的全局对象，代表当前文档的 URL，并提供了处理和修改 URL 的方法和属性。`location` 对象常用于重定向、导航和获取 URL 相关信息。location其实是URL的一个抽象实现；以下是 `location` 对象常见的属性和方法：
 
-![image-20240918101634907](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240918101634907.png)
+![image-20240918101634907](javascript基础.assets/image-20240918101634907.png)
 
 #### 一、常见属性
 
@@ -6185,7 +6185,7 @@ URI
 
 > `navigator` 对象表示用户代理（通常是浏览器）的状态和身份，并提供与浏览器环境相关的信息。通过 `navigator` 对象，开发者可以获取设备信息、检测网络状态、访问用户的地理位置等。
 
-![image-20240918111924257](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20240918111924257.png)
+![image-20240918111924257](javascript基础.assets/image-20240918111924257.png)
 
 #### 一、常见属性：
 
