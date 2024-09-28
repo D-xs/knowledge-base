@@ -364,8 +364,19 @@ xhr.onreadystatechange = function () {
 
 ### 7. **常用属性**
 - **readyState**：表示请求的状态（0-4）。
+
+  这个状态并非是HTTP的相应状态，而是记录的XMLHttpRequest对象的状态变化。
+
+  ![image-20240928211909905](javascript网络编程.assets/image-20240928211909905.png)
+
 - **status**：HTTP 响应状态码（如 200、404）。
+
+- **statusText：** HTTP响应状态描述
+
+  ![image-20240928211943586](javascript网络编程.assets/image-20240928211943586.png)
+
 - **responseText**：返回的响应文本。
+
 - **responseXML**：如果响应为 XML 格式，返回解析后的 XML 文档。
 
 ### 8. **常用方法**
@@ -376,8 +387,22 @@ xhr.onreadystatechange = function () {
 ### 9. **事件处理**
 除了 `onreadystatechange`，还可以使用其他事件：
 - **onload**：请求完成并成功时触发。
-- **onerror**：请求失败时触发。
-- **ontimeout**：请求超时时触发。
+- **onerror**：发生连接错误，例如，域错误。不会发生诸如 404 这类的 HTTP 错误。。
+- **ontimeout**：请求超时时触发（仅发生在设置了 timeout 的情况下）。
+- **onprogress：** 一个响应数据包到达，此时整个 response body 都在 response 中。
+- **onabort：**调用 xhr.abort() 取消了请求。
+- **onloadend：**在 load，error，timeout 或 abort 之后触发。
+- **onloadstart：**请求开始。
+
+我们也可以使用load来获取数据：
+
+```js
+xhr.onload = function() {
+  console.log(xhr.response)
+}
+```
+
+
 
 ### 10. **进度事件**
 可以监控请求进度（适用于上传和下载）：
@@ -390,11 +415,78 @@ xhr.upload.onprogress = function (event) {
 };
 ```
 
-### 11. **跨域请求**
+
+
+### 11. 响应数据和响应类型
+
+**发送了请求后，我们需要获取对应的结果：response属性**
+
+- XMLHttpRequest **response 属性**返回响应的正文内容；
+  - 默认情况下也是字符串，但可以是 `ArrayBuffer`、`Blob`、`Document`、`JSON` 等类型。
+- 返回的类型取决于**responseType的属性**设置；
+  - 例如，设置 `responseType = 'json'` 后，`response` 会自动解析为 JavaScript 对象，而不是字符串形式的 JSON。
+  - 如果**将 responseType 的值设置为空字符串**，则会使用 **text** 作为默认值。
+
+
+
+**和responseText、responseXML的区别：**
+
+- 早期通常服务器返回的数据是**普通的文本和XML**，所以我们通常会通过responseText、 responseXML来获取响应结果；
+- 之后将它们转化成JavaScript对象形式；
+- 目前服务器基本返回的都是**json数**据，直接设置为json即可；
+
+
+
+### 12. GET/POST请求传递参数
+
+- **在开发中，我们使用最多的是GET和POST请求，在发送请求的过程中，我们也可以传递给服务器数据。**
+
+- **常见的传递给服务器数据的方式有如下几种：**
+
+  - 方式一：GET请求的query参数
+
+    ```js
+    // 1.传递参数方式一: get -> query
+    xhr.open("get", "http://123.207.32.32:1888/02_param/get?name=why&age=18&address=广州市")
+    ```
+
+  - 方式二：POST请求 x-www-form-urlencoded 格式
+
+    ```js
+    // 2.传递参数方式二: post -> urlencoded
+    xhr.open("post", "http://123.207.32.32:1888/02_param/posturl")
+    // 发送请求(请求体body)
+    xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded")
+    xhr.send("name=why&age=18&address=广州市")
+    ```
+
+  - 方式三：POST请求 FormData 格式
+
+    ```js
+    // 3.传递参数方式三: post -> formdata
+    xhr.open("post", "http://123.207.32.32:1888/02_param/postform")
+    // formElement对象转成FormData对象
+    const formData = new FormData(formEl)
+    xhr.send(formData)
+    ```
+
+  - 方式四：POST请求 JSON 格式
+
+    ```js
+    // 4.传递参数方式四: post -> json
+    xhr.open("post", "http://123.207.32.32:1888/02_param/postjson")
+    xhr.setRequestHeader("Content-type", "application/json")
+    xhr.send(JSON.stringify({name: "why", age: 18, height: 1.88}))
+    ```
+
+    
+
+### 13. **跨域请求**
+
 进行跨域请求时需要注意 CORS：
 - 服务器需在响应头中设置 `Access-Control-Allow-Origin` 来允许特定源的请求。
 
-### 12. **JSON 处理**
+### 14. **JSON 处理**
 发送和接收 JSON 数据时，常见模式如下：
 ```javascript
 // 发送 JSON
@@ -412,7 +504,7 @@ xhr.onreadystatechange = function () {
 };
 ```
 
-### 13. **完整示例**
+### 15. **完整示例**
 以下是一个完整的示例，展示如何使用 `XMLHttpRequest` 进行 GET 和 POST 请求：
 ```javascript
 // GET 请求示例
