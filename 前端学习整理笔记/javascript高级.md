@@ -6597,6 +6597,7 @@ async function fetchData() {
 #### 2. 组合情况：
 
 1. **多个 `await`**：按顺序执行，每个 `await` 会等待前一个 Promise 解决。
+   
    ```javascript
    async function loadData() {
        const user = await getUser();
@@ -6604,7 +6605,7 @@ async function fetchData() {
        return { user, orders };
    }
    ```
-
+   
 2. **并行 `await`**：如果想要并行执行多个 Promise，可以使用 `Promise.all()`。
    
    ```javascript
@@ -6615,6 +6616,7 @@ async function fetchData() {
    ```
    
 3. **错误处理**：使用 `try...catch` 来捕获异步操作中的错误。
+   
    ```javascript
    async function fetchData() {
        try {
@@ -6625,7 +6627,7 @@ async function fetchData() {
        }
    }
    ```
-
+   
 4. **不在 `async` 函数中使用 `await`**：会导致语法错误。
    ```javascript
    const data = await fetch('https://api.example.com/data'); // 错误
@@ -6675,7 +6677,6 @@ async function example() {
 工作原理：
 - **`await` 等待 Promise**：在遇到 `await` 时，JavaScript 将该 `async` 函数的执行挂起，将控制权交回事件循环。
 - **事件循环与微任务队列**：`await` 后面的 Promise 被解决后，结果会被放入微任务队列中，JavaScript 引擎会在当前任务完成后优先处理微任务队列中的内容。
-  
 
 #### 3. **Promise 链与异步流程**
 
@@ -6761,8 +6762,7 @@ JavaScript 的单线程执行模型通过 **事件循环** 来管理异步操作
   - 当我们打开一个tab页面时就会开启一个新的进程，这是为了防止一个页面卡死而造成所有页面无法响应，整个浏览器需要强制退出；
   - 每个进程中又有很多的线程，其中包括执行JavaScript代码的线程；
 
--  **JavaScript的代码执行是在一个单独的线程中执行的：**
-
+-  **JavaScript的代码执行是在一个单独的线程（渲染主线程）中执行的：**
   - 这就意味着JavaScript的代码，在**同一个时刻只能做一件事；**
   - 如果**这件事是非常耗时**的，就意味着当前的线程就会被**阻塞**；
 - **所以真正耗时的操作，实际上并不是由JavaScript线程在执行的：**
@@ -6801,3 +6801,465 @@ JavaScript 的单线程执行模型通过 **事件循环** 来管理异步操作
 2. 全局代码执行完后，查看微任务队列是否有任务，如果有，则执行微任务队列里面的第一个任务，以此类推；
 3. 当微任务队列的任务清空时，查看（宏）任务队列里面是否有任务，如果有，则执行（宏）任务队列里面的第一个任务，当第一个任务执行完毕后，查看微任务队列里面是否有任务，如果有，必须清空微任务队列里面的所有任务，再执行（宏）任务队列里面的下一个任务。反复执行这个流程
 
+
+
+## 十二、WebStorage
+
+> Web Storage 是 HTML5 引入的一个 API，用于在浏览器中存储数据。它有两个主要类型：**localStorage** 和 **sessionStorage**。这两种存储方式允许你以键值对的形式保存数据。
+
+### 1. **localStorage**
+- **持久性**：数据会一直保留，直到被手动删除，即使页面关闭或浏览器重新启动，数据仍然存在。
+- **作用域**：数据在**同源**的所有页面中共享。
+- **用法**：
+  
+  ```javascript
+  // 设置数据
+  localStorage.setItem('key', 'value');
+  
+  // 获取数据
+  let value = localStorage.getItem('key');
+  
+  // 删除单个数据
+  localStorage.removeItem('key');
+  
+  // 清空所有数据
+  localStorage.clear();
+  ```
+
+### 2. **sessionStorage**
+- **持久性**：数据只在当前会话（session）中存在，页面关闭后数据会自动清除。
+- **作用域**：数据只在**当前页面会话中**可用，刷新页面时数据仍存在，但关闭页面或浏览器时会被清除。
+- **用法**：
+  ```javascript
+  // 设置数据
+  sessionStorage.setItem('key', 'value');
+  
+  // 获取数据
+  let value = sessionStorage.getItem('key');
+  
+  // 删除单个数据
+  sessionStorage.removeItem('key');
+  
+  // 清空所有数据
+  sessionStorage.clear();
+  ```
+
+### 3. **与 Cookies 的区别**
+- **大小限制**：localStorage 和 sessionStorage 的大小通常为 5MB，而 Cookies 通常为 4KB。
+- **生命周期**：localStorage 持久化存储，sessionStorage 随会话结束而清除，Cookies 可以设置过期时间。
+- **存取方式**：Web Storage API 更加简单和直观，而 Cookies 需要处理复杂的字符串。
+
+### 4. **使用场景**
+- **localStorage**：适用于存储用户设置、主题偏好、购物车数据等需要长期保存的数据。
+- **sessionStorage**：适用于存储一次性会话数据，如表单暂存等。
+
+如果你对某一部分想深入了解，或者有具体的案例需求，我们可以进一步讨论！
+
+
+
+### 5. Cache类的封装
+
+> 你可以使用 JavaScript 的 `class` 来封装一个 `Cache` 类，这个类可以利用 `localStorage` 或 `sessionStorage` 来管理缓存的数据。以下是一个简单的 `Cache` 类的实现，它提供了存储、读取和删除缓存数据的功能。
+
+#### 1. 基础 Cache 类实现（使用 localStorage）
+
+```javascript
+class Cache {
+  constructor(isLocalStorage = true) {
+    // 判断使用 localStorage 还是 sessionStorage
+    this.storage = isLocalStorage ? localStorage : sessionStorage;
+  }
+
+  // 存储数据，支持 JSON 格式数据
+  set(key, value) {
+    const data = JSON.stringify(value);  // 将数据转换为字符串
+    this.storage.setItem(key, data);
+  }
+
+  // 获取数据，并解析为 JSON 格式
+  get(key) {
+    const data = this.storage.getItem(key);
+    return data ? JSON.parse(data) : null;  // 如果存在，解析为对象
+  }
+
+  // 移除指定 key 的数据
+  remove(key) {
+    this.storage.removeItem(key);
+  }
+
+  // 清空所有数据
+  clear() {
+    this.storage.clear();
+  }
+
+  // 判断某个 key 是否存在
+  has(key) {
+    return this.storage.getItem(key) !== null;
+  }
+}
+```
+
+#### 2. 示例用法
+
+```javascript
+// 创建 Cache 实例，默认使用 localStorage
+const cache = new Cache();
+
+// 存储数据
+cache.set('user', { name: 'Alice', age: 25 });
+
+// 获取数据
+const user = cache.get('user');
+console.log(user);  // { name: 'Alice', age: 25 }
+
+// 检查 key 是否存在
+console.log(cache.has('user'));  // true
+
+// 移除数据
+cache.remove('user');
+
+// 清空所有缓存
+cache.clear();
+```
+
+#### 3. 可扩展功能：支持过期时间
+
+如果你想让缓存的数据有一个过期时间，可以进一步封装，记录存储时间和有效期：
+
+```javascript
+class CacheWithExpiry {
+  constructor(isLocalStorage = true) {
+    this.storage = isLocalStorage ? localStorage : sessionStorage;
+  }
+
+  // 存储数据，支持过期时间（单位：秒）
+  set(key, value, expiryInSeconds = null) {
+    const now = new Date().getTime();
+    const data = {
+      value: value,
+      expiry: expiryInSeconds ? now + expiryInSeconds * 1000 : null
+    };
+    this.storage.setItem(key, JSON.stringify(data));
+  }
+
+  // 获取数据，处理过期逻辑
+  get(key) {
+    const data = this.storage.getItem(key);
+    if (!data) return null;
+
+    const parsedData = JSON.parse(data);
+    const now = new Date().getTime();
+
+    // 如果有过期时间并且已经过期
+    if (parsedData.expiry && now > parsedData.expiry) {
+      this.storage.removeItem(key);  // 移除已过期的数据
+      return null;
+    }
+
+    return parsedData.value;
+  }
+
+  remove(key) {
+    this.storage.removeItem(key);
+  }
+
+  clear() {
+    this.storage.clear();
+  }
+
+  has(key) {
+    return this.get(key) !== null;
+  }
+}
+```
+
+#### 4. 带过期时间的用法
+
+```javascript
+// 创建实例，使用 sessionStorage 并设置过期时间为 10 秒
+const cache = new CacheWithExpiry('sessionStorage');
+
+// 存储数据，并设置过期时间为 10 秒
+cache.set('sessionData', { id: 1, name: 'Bob' }, 10);
+
+// 立即获取数据
+console.log(cache.get('sessionData'));  // { id: 1, name: 'Bob' }
+
+// 10秒后再获取数据，数据将已过期，返回 null
+setTimeout(() => {
+  console.log(cache.get('sessionData'));  // null
+}, 11000);
+```
+
+#### 总结：
+
+- 这个 `Cache` 类封装了 `localStorage` 和 `sessionStorage`，并且支持基本的增删查改操作。
+- 通过 `CacheWithExpiry` 类，你可以轻松管理带有过期时间的数据缓存。
+
+你可以根据需要进一步扩展这个类，比如添加命名空间或数据压缩功能等。
+
+
+
+
+
+
+
+
+
+## 十三、正则表达式
+
+> 在 JavaScript 中，正则表达式（RegExp）是一种用于模式匹配的强大工具，可以用于查找、替换和验证字符串内容。以下是对 JavaScript 中正则表达式的详细解释，包括基本语法、常用方法及应用示例。
+
+### 1. **正则表达式的创建**
+可以通过两种方式创建正则表达式：
+
+- **字面量方式**：
+  ```javascript
+  const regex = /pattern/;
+  ```
+
+- **构造函数方式**：
+  ```javascript
+  const regex = new RegExp('pattern');
+  ```
+
+### 2. **基本语法**
+- **元字符**：
+  - `.`：匹配任何单个字符（除换行符外）。
+  - `^`：匹配字符串的开头。
+  - `$`：匹配字符串的结尾。
+  - `\`：转义字符。
+
+- **字符类**：
+  - `[abc]`：匹配 `a`、`b` 或 `c`。
+  - `[^abc]`：匹配除了 `a`、`b` 和 `c` 之外的任何字符。
+  - `[a-z]`：匹配小写字母。
+
+- **量词**：
+  - `*`：匹配前一个元素 0 次或多次。
+  - `+`：匹配前一个元素 1 次或多次。
+  - `?`：匹配前一个元素 0 次或 1 次。
+  - `{n}`：匹配前一个元素恰好 n 次。
+  - `{n,}`：匹配前一个元素至少 n 次。
+  - `{n,m}`：匹配前一个元素至少 n 次，至多 m 次。
+
+### 3. **分组与捕获**
+- **分组**：使用括号 `(...)` 来创建分组，捕获子表达式。
+- **非捕获分组**：使用 `(?:...)` 来创建不捕获的分组。
+
+### 4. **特殊字符**
+- `\d`：匹配任何数字（等价于 `[0-9]`）。
+- `\D`：匹配任何非数字字符。
+- `\w`：匹配任何字母、数字和下划线（等价于 `[a-zA-Z0-9_]`）。
+- `\W`：匹配任何非字母、数字和下划线。
+- `\s`：匹配任何空白字符（如空格、制表符等）。
+- `\S`：匹配任何非空白字符。
+
+### 5. **常用方法**
+在 JavaScript 中，正则表达式对象提供了一些常用方法：
+
+- **test()**：检测字符串中是否存在匹配。
+  ```javascript
+  const regex = /hello/;
+  console.log(regex.test("hello world"));  // true
+  ```
+
+- **exec()**：在字符串中执行匹配，返回匹配结果。
+  ```javascript
+  const result = regex.exec("hello world");
+  console.log(result);  // ["hello"]
+  ```
+
+- **String.prototype.match()**：返回匹配的数组。
+  ```javascript
+  const str = "hello world";
+  const matches = str.match(regex);
+  console.log(matches);  // ["hello"]
+  ```
+
+- **String.prototype.replace()**：替换匹配的内容。
+  ```javascript
+  const newStr = str.replace(/hello/, "hi");
+  console.log(newStr);  // "hi world"
+  ```
+
+- **String.prototype.search()**：返回匹配的第一个索引位置。
+  ```javascript
+  const index = str.search(/world/);
+  console.log(index);  // 6
+  ```
+
+- **String.prototype.split()**：使用正则表达式分割字符串。
+  ```javascript
+  const parts = "a,b,c".split(/,/);
+  console.log(parts);  // ["a", "b", "c"]
+  ```
+
+### 6. **标志（Flags）**
+正则表达式可以使用不同的标志来改变其行为：
+
+- `g`：全局匹配（不返回第一次匹配后就停止）。
+- `i`：不区分大小写。
+- `m`：多行匹配，`^` 和 `$` 会匹配每一行的开头和结尾。
+
+
+
+### 7. 匹配策略
+
+> 贪婪模式和惰性模式是正则表达式中的两种匹配策略，它们决定了匹配字符串时如何处理量词。
+
+#### 1. 贪婪模式
+
+贪婪模式会尽可能多地匹配字符，直到不再满足模式为止。它会尝试匹配所有可能的字符，尽可能长的匹配。
+
+**示例**：
+```javascript
+const regex = /a.*b/;
+const str = "a1b2b3b";
+const result = str.match(regex);
+console.log(result);  // ["a1b2b"]
+```
+在这个例子中，`.*` 会匹配尽可能多的字符，导致它匹配到最后一个 `b`。
+
+#### 2. 惰性模式
+
+惰性模式（或非贪婪模式）会尽可能少地匹配字符，它会在找到第一个满足模式的结果时停止。
+
+**示例**：
+
+```javascript
+const regex = /a.*?b/;
+const str = "a1b2b3b";
+const result = str.match(regex);
+console.log(result);  // ["a1b"]
+```
+在这个例子中，`.*?` 会匹配尽可能少的字符，导致它只匹配到第一个 `b`。
+
+#### 3. 如何使用
+
+在正则表达式中，可以通过在量词后加上问号 `?` 来启用惰性模式。
+
+- 贪婪模式：`*`、`+`、`?`（默认）
+- 惰性模式：`*?`、`+?`、`??`
+
+#### 4. 总结
+
+- **贪婪模式**：匹配尽可能多的字符，直到模式不再匹配。
+- **惰性模式**：匹配尽可能少的字符，尽早停止匹配。
+
+理解这两种模式的区别可以帮助你更好地控制正则表达式的行为，确保获得你期望的匹配结果。
+
+### 8. **示例应用**
+- **邮箱验证**：
+  ```javascript
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  console.log(emailRegex.test("test@example.com"));  // true
+  ```
+
+- **电话号码格式**：
+  ```javascript
+  const phoneRegex = /^\d{3}-\d{3}-\d{4}$/;
+  console.log(phoneRegex.test("123-456-7890"));  // true
+  ```
+
+- **提取数字**：
+  ```javascript
+  const str = "There are 42 apples.";
+  const numberRegex = /\d+/g;
+  console.log(str.match(numberRegex));  // ["42"]
+  ```
+
+### 9. **注意事项**
+- **性能**：复杂的正则表达式可能会导致性能问题，尤其在大字符串上匹配时。
+- **逃逸字符**：在使用特殊字符时，确保使用转义字符 `\` 以避免语法错误。
+
+### 10. **调试工具**
+使用在线工具（如 [regex101](https://regex101.com/) 或 [RegExr](https://regexr.com/)）来测试和调试正则表达式，提供详细的解释和示例。
+
+### 结论
+JavaScript 中的正则表达式是一种强大的工具，能够在字符串操作中提供灵活性和效率。掌握正则表达式可以帮助你更好地处理数据验证、提取和替换等任务。如果有特定的用例或疑问，请随时问我！
+
+
+
+
+
+## 十四、防抖（debounce）与节流（throttle）
+
+> **防抖**（Debouncing）和**节流**（Throttling）是优化事件处理的两种常见技术，尤其在处理高频率事件（如滚动、窗口调整大小、输入事件等）时，能有效提升性能。
+
+### 1. **防抖（Debouncing）**
+防抖是指当事件被频繁触发时，**只在最后一次事件触发后的指定时间间隔内没有新事件发生时，才执行事件处理函数**。防抖的主要作用是减少不必要的频繁操作，例如用户在输入框中连续输入字符时，只在输入停止后再处理一次。
+
+#### 工作原理
+假设设定一个时间间隔 `delay`，如果在 `delay` 之内再次触发事件，则重新计时。只有在 `delay` 结束后，没有新的事件发生，才会执行事件处理逻辑。
+
+#### 示例代码
+```javascript
+function debounce(func, delay) {
+  let timer;
+  return function(...args) {
+    clearTimeout(timer);  // 如果已有计时器，取消它
+    timer = setTimeout(() => {
+      func.apply(this, args);  // 在 delay 时间后执行函数
+    }, delay);
+  };
+}
+
+// 使用示例
+const debouncedFunction = debounce(() => {
+  console.log('Function executed after debouncing');
+}, 300);
+
+// 频繁触发事件
+window.addEventListener('resize', debouncedFunction);
+```
+#### 应用场景
+- 用户输入时的自动保存功能，只在用户停止输入时才保存数据。
+- 搜索框的自动联想功能，只有在用户停止输入时才发起搜索请求。
+- 窗口大小变化（`resize`）事件中，避免频繁触发重新布局。
+
+### 2. **节流（Throttling）**
+节流是指在指定的时间间隔内，**无论事件触发多少次，都只允许执行一次事件处理函数**。它确保在规定的时间段内最多只执行一次操作。
+
+#### 工作原理
+节流机制通过设定一个时间间隔 `interval`，在 `interval` 期间内如果事件频繁触发，只执行一次事件处理函数，之后的触发将被忽略，直到下一个时间间隔。
+
+#### 示例代码
+```javascript
+function throttle(func, interval) {
+  let lastExecutionTime = 0;
+  return function(...args) {
+    const now = Date.now();
+    if (now - lastExecutionTime >= interval) {
+      lastExecutionTime = now;
+      func.apply(this, args);
+    }
+  };
+}
+
+// 使用示例
+const throttledFunction = throttle(() => {
+  console.log('Function executed after throttling');
+}, 500);
+
+// 频繁触发事件
+window.addEventListener('scroll', throttledFunction);
+```
+
+#### 应用场景
+- 滚动页面时，每隔一段时间执行一次操作（例如计算滚动位置，加载更多内容）。
+- 按钮点击防止重复提交：按钮短时间内只能点击一次，防止用户重复点击。
+- API 请求：在高频率操作时限制请求的频率。
+
+### 3. **防抖与节流的区别**
+- **防抖**：等到事件完全停止后再执行处理函数。
+  - 场景：用户停止输入后才发送搜索请求。
+  
+- **节流**：无论事件触发频率多高，都在指定时间间隔内执行一次处理函数。
+  - 场景：在用户不断滚动页面时，每隔一段时间计算一次位置，而不是每次滚动都计算。
+
+### 4. **总结**
+- **防抖（Debounce）**：适合处理那些频繁触发但希望只在停止触发后处理的场景，例如输入框的输入提示。
+- **节流（Throttle）**：适合处理那些频繁触发但需要限制执行次数的场景，例如滚动条位置的计算、按钮点击等。
+
+理解防抖和节流的核心区别以及它们的使用场景，能帮助你选择合适的优化方案来提升性能。
