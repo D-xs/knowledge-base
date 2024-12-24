@@ -694,3 +694,73 @@ fetchData();
 Fetch API 是一种现代、简洁的方式来进行网络请求，支持 Promise 语法和异步操作，使得处理异步请求更为方便。尽管它相比于 `XMLHttpRequest` 具有更好的可读性和可维护性，但在使用时仍需关注错误处理和跨域问题。
 
 如果你有特定的使用场景或问题，欢迎随时问我！
+
+
+
+
+
+## 6. 同源策略、跨域
+
+### 1. 什么是同源策略？
+
+**同源策略**（Same-Origin Policy, SOP）是浏览器的一项安全机制，旨在防止来自不同来源的恶意脚本相互访问资源。它规定**同源的网页**才能彼此之间进行资源的读写操作，包括Cookie、LocalStorage、DOM等。
+
+"同源"指的是三个部分完全相同：
+- **协议**（如 `http://` 或 `https://`）
+- **域名**（如 `example.com`）
+- **端口**（如 `:80` 或 `:443`）
+
+例如：
+- `http://www.example.com/page1.html` 和 `http://www.example.com/page2.html` 同源。
+- `http://www.example.com` 和 `https://www.example.com` 不同源（因为协议不同）。
+- `http://www.example.com` 和 `http://api.example.com` 不同源（因为域名不同）。
+
+### 2. 什么是跨域？
+
+**跨域**（Cross-Origin）指的是当一个网页请求资源（如AJAX、图片、脚本、字体等）时，这些资源的URL与当前网页的来源不一致，违反了同源策略。
+
+例如：
+- 当前页面在 `http://www.example.com`，但通过AJAX请求 `http://api.example.com`，这就属于跨域请求。
+
+跨域问题通常出现在前端请求后端API或访问其他网站资源时。
+
+**ps：当发生跨域的时候，该次请求已经发出，并且浏览器已经接收到响应了，只是浏览器发现该请求违背了同源策略给我们拦截了。**
+
+### 3. 如何解决跨域？
+
+解决跨域问题的方式有多种，常见的方案包括以下几种：
+
+#### 1. **CORS（跨域资源共享）**
+   - **CORS**（Cross-Origin Resource Sharing）是服务器端的一种机制。通过设置特定的HTTP头部，服务器允许来自不同源的请求。浏览器在发起跨域请求时，会进行预检（preflight）请求，确保服务器允许该请求。
+   - 服务器需设置以下头部：
+     - `Access-Control-Allow-Origin`: 指定允许哪些源访问，通常设置为请求的源或 `*` 表示允许所有来源。
+     - `Access-Control-Allow-Methods`: 允许哪些HTTP方法（如 `GET`, `POST`）。
+     - `Access-Control-Allow-Headers`: 允许哪些自定义请求头。
+
+#### 2. **JSONP（JSON with Padding）**
+   - 只适用于 `GET` 请求。利用 `<script>` 标签没有跨域限制的特性，通过动态生成 `script` 标签并将其插入页面来实现跨域请求。服务器将返回的JSON数据包包装在一个函数调用中，前端执行该函数即可获得数据。
+   - 例子：
+     ```html
+     <script src="http://example.com/api?callback=myCallback"></script>
+     <script>
+       function myCallback(data) {
+         console.log(data);
+       }
+     </script>
+     ```
+
+#### 3. **代理服务器**
+   - 在同源的服务器上设置一个代理，通过后端服务器发起跨域请求，前端只与后端服务器交互，避免跨域问题。前端请求本地服务器，服务器再去请求目标资源，最后将结果返回前端。
+   - 常见的代理工具有 **Nginx** 或 **Node.js** 中间件（如 `http-proxy-middleware`）。
+
+#### 4. **iframe + postMessage**
+   - 通过 `iframe` 实现跨域嵌入，使用 `postMessage` 在两个窗口之间安全地传递消息。
+   - 父窗口和子窗口可以通过 `window.postMessage()` 发送消息，接收端使用 `window.addEventListener('message')` 来处理消息。
+
+#### 5. **使用 document.domain**
+   - 当跨域的两个页面属于同一个主域（例如 `a.example.com` 和 `b.example.com`），可以通过设置 `document.domain` 为相同的主域来解决跨域问题。比如都设置为 `example.com`，这样它们就可以共享 Cookie 和一些数据。
+
+#### 6. **跨域资源嵌入**
+   - 某些资源如图片、脚本、样式表可以直接通过 `<img>`、`<script>`、`<link>` 等标签加载，不受同源策略限制。这些资源的加载是不会触发跨域限制的，但如果涉及数据操作（如AJAX），则仍需用其他跨域方案。
+
+这些是常见的跨域问题解决方案，你可以根据实际项目需求选择合适的方式。
