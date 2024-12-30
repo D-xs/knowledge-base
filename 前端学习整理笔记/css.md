@@ -833,6 +833,67 @@
 
 
 
+#### 结构伪类
+
+- **:nth-child**
+  - **:nth-child(1)**
+    - 是父元素中的**第1个子元素**
+  - **:nth-child(2n)**
+    - n代表任意**正整数和0**
+    - 是父元素中的第偶数个子元素（第2、4、6、8......个）
+    - 跟:nth-child(even)同义
+  - **:nth-child(2n + 1)**
+    - n代表任意**正整数和0**
+    - 是父元素中的第奇数个子元素（第1、3、5、7......个）
+    - 跟:nth-child(odd)同义
+  - **nth-child(-n + 2)**
+    - 代表**前2个子元素**
+
+
+
+- **:nth-last-child**
+  - **:nth-last-child()的语法跟:nth-child()类似，不同点是:nth-last-child()从最后一个子元素开始往前计数**
+    - :**nth-last-child**(1)，代表倒数第一个子元素
+    - :**nth-last-child**(-n + 2)，代表最后2个子元素
+  - :**nth-of-type()用法跟:nth-child()类似**
+    - 不同点是:**nth-of-type**()计数时只计算同种类型的元素
+  - **:nth-last-of-type()用法跟:nth-of-type()类似**
+    - 不同点是:**nth-last-of-type**()从最后一个这种类型的子元素开始往前计数
+
+
+
+
+
+- **其他常见的伪类(了解):**
+  - :first-child，等同于:nth-child(1)
+  - :last-child，等同于:nth-last-child(1)
+  - :first-of-type，等同于:nth-of-type(1)
+  - :last-of-type，等同于:nth-last-of-type(1)
+  - :only-child，是父元素中唯一的子元素
+  - :only-of-type，是父元素中唯一的这种类型的子元素
+
+
+
+- **下面的伪类偶尔会使用:**
+  - :root，根元素，就是HTML元素
+  - :empty代表里面完全空白的元素
+
+
+
+
+
+#### **否定伪类**
+
+- **:not()的格式是:not(x)**
+  - x是一个简单选择器
+  - 元素选择器、通用选择器、属性选择器、类选择器、id选择器、伪类（除否定伪类）
+
+- :not(x)表示**除x以外的元素**
+
+
+
+---
+
 
 
 ### **伪元素**

@@ -1003,3 +1003,300 @@ SEO 即 Search Engine Optimization，中文译为搜索引擎优化，是一种�
   - **比如下面的表格**
 
     ![image-20241229171803813](html.assets/image-20241229171803813.png)
+  
+  - 这个时候我们就要使用**单元格合并**来完成;
+
+
+
+
+
+- **单元格合并分成两种情况:**
+
+  - **跨列合并**: 使用**colspan**
+
+    - 在最左边的单元格写上**colspan属性**, 并且省略掉合并的td;
+
+  - **跨行合并**: 使用**rowspan**
+
+    - 在最上面的单元格写上**rowspan属性**, 并且省略掉后面tr中的td;
+
+    ![image-20241230093636865](html.assets/image-20241230093636865.png)
+
+    ![image-20241230093650383](html.assets/image-20241230093650383.png)
+
+
+
+
+
+- **单元格合并练习**
+
+  ![image-20241230093741224](html.assets/image-20241230093741224.png)
+
+  ![image-20241230104519971](html.assets/image-20241230104519971.png)
+
+
+
+
+
+### 表单元素
+
+- **认识表单**
+
+  - HTML表单元素是和**用户交互的重要方式**之一, 在**很多网站都需要使用表单**:
+
+    ![image-20241230104923530](html.assets/image-20241230104923530.png)
+
+
+
+- **常见的表单元素**
+  - **form**
+    - **表单**, 一般情况下，其他表单相关元素都是它的后代元素
+  - **input**
+    - 单行**文本输入框、单选框、复选框、按钮**等元素
+  - **textarea**
+    - **多行文本框**
+  - **select、option**
+    - **下拉选择框**
+  - **button**
+    - **按钮**
+  - **label**
+    - **表单元素的标题**
+
+
+
+
+
+- **input元素的使用**
+  - 表单元素使用最多的是**input元素**
+  - **input元素有如下常见的属性:**
+    - **type**：input的类型
+      - **text**：文本输入框（明文输入）
+      - **password**：文本输入框（密文输入）
+      - **radio**：单选框
+      - **checkbox**：复选框
+      - **button**：按钮
+      - **reset**：重置
+      - **submit**：提交表单数据给服务器
+      - **file**：文件上传
+      - **readonly**：只读
+      - **disabled**：禁用
+      - **checked**：默认被选中
+        - 只有当type为radio或checkbox时可用
+      - **autofocus**：当页面加载时，自动聚焦
+      - **name**：名字
+        - 在提交数据给服务器时，可用于区分数据类型
+      - **value**：取值
+      - **type类型的其他取值和input的其他属性, 查看文档:**
+        - https://developer.mozilla.org/zhCN/docs/Web/HTML/Element/Input
+
+
+
+
+
+- **布尔属性（boolean attributes）**
+
+  - 常见的布尔属性有**disabled、checked、readonly、multiple、autofocus、selected**
+
+  - 布尔属性可以没有属性值，**写上属性名就代表使用这个属性**
+
+    - 如果要给布尔属性设值，值就是属性名本身
+
+      ![image-20241230110612789](html.assets/image-20241230110612789.png)
+
+
+
+
+
+
+
+- **表单按钮**
+
+  - **表单可以实现按钮效果:**
+
+    - 普通按钮（type=button）：使用value属性设置按钮文字
+
+    - 重置按钮（type=reset）：重置它所属form的所有表单元素（包括input、textarea、select）
+
+    - 提交按钮（type=submit）：提交它所属form的表单数据给服务器（包括input、textarea、select）
+
+      ![image-20241230110715622](html.assets/image-20241230110715622.png)
+
+  - **我们也可以通过按钮来实现:**
+
+    ![image-20241230110748922](html.assets/image-20241230110748922.png)
+
+
+
+
+
+
+
+
+
+- **input和label的关系**
+
+  - **label元素一般跟input配合使用，用来表示input的标题**
+
+  - labe可以跟**某个input绑定**，**点击label**就可以**激活对应的input**变成选中
+
+    ![image-20241230111731297](html.assets/image-20241230111731297.png)
+
+
+
+
+
+
+
+- **radio的使用**
+
+  - **我们可以将type类型设置为radio变成单选框:**
+
+    - name值相同的radio才具备单选功能
+
+      ![image-20241230111817200](html.assets/image-20241230111817200.png)
+
+
+
+
+
+
+
+- **checkbox的使用**
+
+  - **我们可以将type类型设置为checkbox变成多选框:**
+
+    - 属于同一种类型的checkbox，name值要保持一致
+
+      ![image-20241230111855748](html.assets/image-20241230111855748.png)
+
+
+
+
+
+- **textarea的使用**
+
+  - **textarea的常用属性:**
+    - cols：列数
+    - rows：行数
+
+  
+
+  - **缩放的CSS设置**
+    - **禁止**缩放：resize: none;
+    - **水平**缩放：resize: horizontal;
+    - **垂直**缩放：resize: vertical;
+    - **水平垂直**缩放：resize: both;
+
+
+
+
+
+
+
+
+
+- **select和option的使用**
+  - **option是select的子元素，一个option代表一个选项**
+  - **select常用属性**
+    - multiple：可以多选
+    - size：显示多少项
+  - **option常用属性**
+    - selected：默认被选中
+
+
+
+
+
+
+
+- **form常见的属性**
+  - **form通常作为表单元素的父元素:**
+    - form可以将整个表单作为一个**整体来进行操作**;
+    - 比如对整个表单**进行重置**;
+    - 比如对整个表单的数据**进行提交**;
+  - **form常见的属性如下:**
+    - action
+      - 用于提交表单数据的请求URL
+    - method
+      - 请求方法（get和post），默认是get
+    - target
+      - 在什么地方打开URL（参考a元素的target）
+
+
+
+
+
+
+
+- 请求方式的对比
+
+  ![image-20241230112354166](html.assets/image-20241230112354166.png)
+
+  
+
+
+
+
+
+## Emmet语法
+
+Emmet (前身为Zen Coding) 是一个能大幅度**提高前端开发效率**的一个工具.
+
+- 在前端开发的过程中，一大部分的工作是**写 HTML、CSS 代码**, 如果手动来编写效果会非常低.
+- VsCode内置了**Emmet语法**,在后缀为.html/.css中输入缩写后按Tab/Enter键即会**自动生成相应代码**
+
+
+
+
+
+- **!和html:5可以快速生成完整结构的html5代码**
+
+![image-20241230164346449](html.assets/image-20241230164346449.png)
+
+
+
+
+
+
+
+- **>（子代）和+（兄弟）**
+
+  ![image-20241230164452421](html.assets/image-20241230164452421.png)
+
+
+
+- ***（多个）和^（上一级）**
+
+  ![image-20241230164555483](html.assets/image-20241230164555483.png)
+
+- **()（分组）**
+
+  ![image-20241230165413271](html.assets/image-20241230165413271.png)
+
+
+
+
+
+- **属性(id属性、class属性、普通属性) {}（内容）**
+
+  ![image-20241230165505626](html.assets/image-20241230165505626.png)
+
+
+
+- **$（数字）**
+
+  ![image-20241230165525980](html.assets/image-20241230165525980.png)
+
+- **隐式标签**
+
+  ![image-20241230165559634](html.assets/image-20241230165559634.png)
+
+
+
+
+
+
+
+## **CSS Emmet**
+
+![image-20241230165639514](html.assets/image-20241230165639514.png)
