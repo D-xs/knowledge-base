@@ -1300,3 +1300,148 @@ Emmet (前身为Zen Coding) 是一个能大幅度**提高前端开发效率**的
 ## **CSS Emmet**
 
 ![image-20241230165639514](html.assets/image-20241230165639514.png)
+
+
+
+
+
+## HTML5新增元素
+
+- **在HMTL5之前，我们的网站分布层级通常包括哪些部分呢？**
+  - header、nav、main、footer
+- **但是这样做有一个弊端：**
+  - 我们往往过多的使用div, 通过id或class来区分元素；
+  - 对于浏览器来说这些**元素不够语义化**；
+  - 对于搜索引擎来说, **不利于SEO的优化**；
+- **HTML5新增了语义化的元素：**
+  - header：头部元素
+  - nav：导航元素
+  - section：定义文档某个区域的元素
+  - article：内容元素
+  - aside：侧边栏元素
+  - footer：尾部元素
+
+![image-20250106102714584](html.assets/image-20250106102714584.png)
+
+
+
+### 其他元素
+
+- Web端事实上一直希望可以**更好的嵌入音频和视频**, 特别是21世纪以来, 用户带宽的不断提高, 浏览器因为和视频变得非常容易.
+  - 在HTML5之前是通过flash或者其他插件实现的, 但是会有很多问题;
+  - 比如**无法很好的支持HTML/CSS特性, 兼容性问题**等等;
+
+
+
+- **HTML5增加了对媒体类型的支持：**
+  - 音频：audio
+  - 视频：video
+
+
+
+- Video和Audio使用方式有两个：
+  - 一方面我们可以直接通过元素使用video和autio；
+  - 另一方面我们可以通过JavaScript的API对其进行控制；
+
+
+
+
+
+### video
+
+- **HTML ```<video>``` 元素 用于在HTML或者XHTML文档中嵌入媒体播放器，用于支持文档内的视频播放。**
+
+  ![image-20250106102933222](html.assets/image-20250106102933222.png)
+
+- **video常见的属性:**
+
+  ![image-20250106102951814](html.assets/image-20250106102951814.png)
+
+
+
+- **每个视频都会有自己的格式, 浏览器的video并非支持所有的视频格式**
+
+  ![image-20250106103034810](html.assets/image-20250106103034810.png)
+
+
+
+
+
+- **在```<video>```元素中间的内容，是针对浏览器不支持此元素时候的降级处理。**
+
+  - 内容一：通过```<source>```元素指定更多视频格式的源;
+
+  - 内容二：通过**p/div等元素**指定在浏览器不支持video元素的情况, 显示的内容;
+
+    ![image-20250106103226501](html.assets/image-20250106103226501.png)
+
+
+
+
+
+
+
+### **audio**
+
+- **HTML ```<audio>``` 元素用于在文档中嵌入音频内容, 和video的用法非常类似**
+
+  ![image-20250106103338449](html.assets/image-20250106103338449.png)
+
+- **常见属性:**
+
+  ![image-20250106103357876](html.assets/image-20250106103357876.png)
+
+
+
+
+
+- **每个音频都会有自己的格式, 浏览器的audio并非支持所有的视频格式**
+
+- **具体的支持的格式可以通过下面的链接查看:**
+
+  - https://developer.mozilla.org/en-US/docs/Web/Media/Formats/Audio_codecs
+
+    ![image-20250106103438428](html.assets/image-20250106103438428.png)
+
+- **在```<audio>```元素中间的内容，是针对浏览器不支持此元素时候的降级处理。**
+
+  ![image-20250106103513971](html.assets/image-20250106103513971.png)
+
+
+
+
+
+
+
+### **input元素的扩展内容**
+
+- HTML5对**input元素**也进行了扩展，在之前我们已经学习过的其中几个属性也是HTML5的特性：
+  - placeholder：输入框的占位文字
+  - multiple：多个值
+  - autofocus：页面加载完成后自动聚焦
+- **另外对于input的type值也有很多扩展：**
+  - date
+  - time
+  - number
+  - tel
+  - color
+  - email
+  - 等等...
+- **查看MDN文档:**
+  - https://developer.mozilla.org/zh-CN/docs/Web/HTML/Element/Input
+
+
+
+
+
+### **新增全局属性 data-\***
+
+- **在HTML5中, 新增一种全局属性的格式 data-\*, 用于自定义数据属性:**
+  - data设置的属性可以在JavaScript的DOM操作中通过**dataset**轻松获取到；
+  - 通常**用于HTML和JavaScript数据之间的传递**；
+
+![image-20250106110134201](html.assets/image-20250106110134201.png)
+
+
+
+- 在小程序中, 就是**通过data-来传递数据**的, 所以该全局属性必须要掌握.
